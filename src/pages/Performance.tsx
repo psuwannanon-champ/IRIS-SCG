@@ -1,6 +1,9 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate, useSearch } from '@tanstack/react-router'
 import { useActor } from '@/app/actor'
+import { useAction } from '@/app/data'
+import { requestGuidance, buildPerformanceContext, type PerformanceOutput } from '@/features/guidance/api'
+import { fmtDate } from '@/lib/format'
 import { METRICS, computeMetrics, companyUnit, myUnit, unitsOf, rankOf, type Unit, type UnitKind, type UnitMetrics, type MetricDef } from '@/features/performance/metrics'
 import { PageHeader, Section, LoadingBlock, ErrorBlock, Pill, Button, Notice, type Tone } from '@/components/ui'
 import { fmtThb } from '@/lib/format'
@@ -8,12 +11,62 @@ import { Icon } from '@/icons/Icon'
 
 const fmt = (v: number | null, unit: MetricDef['unit']) => v == null ? '—' : unit === '%' ? `${v}%` : unit === 'thb' ? fmtThb(v, true) : unit === 'days' ? `${v} d` : String(v)
 const KIND_LABEL: Record<UnitKind, string> = { manager: 'Manager teams', bu: 'Business units', coach: 'Coach groups', cohort: 'Cohorts' }
+const UNIT_WORD: Record<UnitKind, string> = { manager: 'manager team', bu: 'business unit', coach: 'coach group', cohort: 'cohort' }
+
+interface ScorecardData { unit: Unit; teamM: UnitMetrics; companyM: UnitMetrics; kind: UnitKind; rows: { u: Unit; m: UnitMetrics }[] }
+/** Only the rounded numbers already on screen go to the model, and the platform (not the model) picks
+ *  the strength, weakness and the two focus measures, so the same screen always produces the same answer. */
+function buildScorecard(d: ScorecardData, view: 'team' | 'company') {
+  const list = METRICS.filter((m) => m.key !== 'healthScore')
+  const cmp = (higher: boolean, a: number | null, b: number | null) => a == null || b == null ? 'no data' : (higher ? a >= b : a <= b) ? 'ahead' : 'behind'
+  const rows = [
+    { key: 'healthScore' as const, label: 'Program health score', unit: '%', higher: true, explain: 'Average of readiness, learning, labs, contracts and verified uplift.' },
+    ...list.map((m) => ({ key: m.key, label: m.label, unit: m.unit === 'thb' ? 'THB' : m.unit === 'days' ? 'days (lower is better)' : m.unit === '%' ? '%' : 'count', higher: m.higherIsBetter, explain: m.explain })),
+  ].map((r) => {
+    const team = d.teamM[r.key] as number | null, company = d.companyM[r.key] as number | null
+    const rel = team == null || company == null ? null : Math.round(((r.higher ? team - company : company - team) / Math.max(Math.abs(company), 1)) * 1000) / 1000
+    return { measure: r.label, unit: r.unit, team, company, result: cmp(r.higher, team, company) as 'ahead' | 'behind' | 'no data', meaning: r.explain, rel }
+  })
+  const scored = rows.filter((r) => r.rel != null && r.measure !== 'Program health score' && r.unit !== 'THB')
+  const byRel = [...scored].sort((a, b) => a.rel! - b.rel! || a.measure.localeCompare(b.measure))
+  const weakness = byRel[0] ?? null
+  const strength = byRel[byRel.length - 1] ?? null
+  const focus = byRel.slice(0, 2).map((r) => r.measure)
+  const rank = rankOf(d.rows.map((r) => ({ id: r.u.id, value: r.m.healthScore })), d.unit.id, true)
+  const board = [...d.rows].sort((a, b) => (b.m.healthScore ?? -1) - (a.m.healthScore ?? -1)).map((r) => ({ name: r.u.name, healthScore: r.m.healthScore, isYou: r.u.id === d.unit.id }))
+  const comparable = rows.filter((r) => r.measure !== 'Program health score' && r.result !== 'no data')
+
+  if (view === 'company') {
+    // The subject is SCG as a whole: report company values, and name the leading and trailing units.
+    const scoredBoard = board.filter((b) => b.healthScore != null)
+    const best = scoredBoard[0] ?? null, worst = scoredBoard[scoredBoard.length - 1] ?? null
+    const companyRows = rows.filter((r) => r.measure !== 'Program health score').map((r) => ({ measure: r.measure, unit: r.unit, companyValue: r.company, meaning: r.meaning }))
+    const weakest = rows.filter((r) => r.company != null && r.unit === '%' && r.measure !== 'Program health score').sort((a, b) => (a.company as number) - (b.company as number))
+    const companyFocus = weakest.slice(0, 2).map((r) => `${r.measure} (company ${r.company}%)`)
+    const ctx = buildPerformanceContext({
+      view, unitName: 'SCG (all business units)', unitKind: UNIT_WORD[d.kind], learners: d.companyM.learners, companyLearners: d.companyM.learners,
+      rank: null, measures: companyRows, healthScore: d.companyM.healthScore, aheadOfCompany: null,
+      highlight: { strength: best ? `${best.name} leads at ${best.healthScore}%` : null, weakness: worst && worst !== best ? `${worst.name} trails at ${worst.healthScore}%` : null },
+      focus: companyFocus.length ? companyFocus : [`${KIND_LABEL[d.kind]} spread`, 'Validated impact'],
+      leaderboard: board,
+    })
+    return { contextId: `company:${d.kind}`, context: ctx, fingerprint: JSON.stringify(['company', d.kind, rows.map((r) => r.company), board.map((b) => b.healthScore)]) }
+  }
+
+  const context = buildPerformanceContext({ view, unitName: d.unit.name, unitKind: UNIT_WORD[d.kind], learners: d.teamM.learners, companyLearners: d.companyM.learners, rank, measures: rows.map(({ rel: _rel, ...m }) => m), healthScore: d.teamM.healthScore, aheadOfCompany: { count: comparable.filter((r) => r.result === 'ahead').length, of: comparable.length }, highlight: { strength: strength?.measure ?? null, weakness: weakness?.measure ?? null }, focus, leaderboard: undefined })
+  const fingerprint = JSON.stringify([view, d.unit.id, rows.map((r) => [r.team, r.company]), rank])
+  return { contextId: `${view}:${d.unit.id}`, context, fingerprint }
+}
 
 export function PerformancePage() {
   const { snap, actor, status, error, refetch } = useActor()
   const search = useSearch({ strict: false }) as { view?: string; unit?: string; kind?: string }
   const nav = useNavigate()
   const [tableView, setTableView] = useState(false)
+  const [aiBusy, setAiBusy] = useState(false)
+  const [aiError, setAiError] = useState<string | null>(null)
+  const asked = useRef<Set<string>>(new Set())
+  const saveSummary = useAction((ds, contextId: string, content: unknown, model: string) => ds.saveGuidance(actor!.id, actor!.id, 'performance', contextId, content, model))
   const data = useMemo(() => {
     if (!snap || !actor) return null
     const mine = myUnit(snap, actor)
@@ -25,9 +78,27 @@ export function PerformancePage() {
     const rows = peers.map((u) => ({ u, m: computeMetrics(snap, u.personaIds) }))
     return { mine, canPick, kind, peers, unit, company, rows, teamM: unit ? computeMetrics(snap, unit.personaIds) : null, companyM: computeMetrics(snap, company.personaIds) }
   }, [snap, actor, search.kind, search.unit])
+  const view: 'team' | 'company' = search.view === 'company' ? 'company' : 'team'
+  const scorecard = data?.unit && data.teamM ? buildScorecard({ unit: data.unit, teamM: data.teamM, companyM: data.companyM, kind: data.kind, rows: data.rows }, view) : null
+  const savedNote = snap && scorecard ? snap.guidanceNotes.filter((n) => n.kind === 'performance' && n.contextId === scorecard.contextId).sort((a, b) => b.createdAt.localeCompare(a.createdAt))[0] ?? null : null
+
+  const runSummary = async () => {
+    if (!scorecard || !actor) return
+    setAiBusy(true); setAiError(null)
+    try {
+      const r = await requestGuidance<PerformanceOutput>({ kind: 'performance', context: scorecard.context })
+      await saveSummary.mutateAsync([scorecard.contextId, { ...r.output, fingerprint: scorecard.fingerprint }, r.model])
+    } catch (e) { setAiError((e as Error).message) } finally { setAiBusy(false) }
+  }
+  useEffect(() => {
+    if (!scorecard || savedNote || aiBusy || asked.current.has(scorecard.contextId)) return
+    asked.current.add(scorecard.contextId)
+    void runSummary()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [scorecard?.contextId, savedNote])
+
   if (status === 'loading') return <LoadingBlock />
   if (status === 'error' || !snap || !actor || !data) return <ErrorBlock message={error ?? ''} onRetry={refetch} />
-  const view = search.view === 'company' ? 'company' : 'team'
   const setS = (patch: Record<string, unknown>) => nav({ to: '/performance', search: { view, unit: data.unit?.id ?? '', kind: data.kind, ...patch } as never })
   const { unit, teamM, companyM, rows } = data
   const visible = METRICS.filter((m) => m.key !== 'healthScore')
@@ -48,6 +119,28 @@ export function PerformancePage() {
           <label className="text-[13px] text-(--color-muted)" htmlFor="unit">Team</label>
           <select id="unit" className="field-input max-w-[260px]" value={unit?.id ?? ''} onChange={(e) => setS({ unit: e.target.value })}>{data.peers.map((u) => <option key={u.id} value={u.id}>{u.name}</option>)}</select>
         </div>
+      )}
+
+      {unit && teamM && scorecard && (
+        <Section className="mb-4" title="AI summary" icon="stars-02" description={`Where ${view === 'company' ? 'SCG' : unit.name} stands right now and what to look at next. Generated from the numbers on this page.`} tour="perf-ai"
+          actions={<Button size="sm" icon="refresh-cw-01" busy={aiBusy} onClick={runSummary}>{savedNote ? 'Refresh' : 'Generate'}</Button>}>
+          {aiError && <div className="mb-2"><Notice tone="error" icon="alert-circle">{aiError}</Notice></div>}
+          {aiBusy && !savedNote && <p className="text-[13px] text-(--color-muted)">Reading the scorecard…</p>}
+          {!aiBusy && !savedNote && !aiError && <p className="text-[13px] text-(--color-muted)">No summary yet. Generate one to get two lines on performance and two things to do next.</p>}
+          {savedNote && (() => { const c = savedNote.content as PerformanceOutput & { fingerprint?: string }; const stale = c.fingerprint !== scorecard.fingerprint; return (
+            <div className="space-y-2.5">
+              <p className="text-[15px] leading-relaxed">{c.summary}</p>
+              <div>
+                <div className="text-xs font-semibold uppercase tracking-wide text-(--color-faint)">What to do next or investigate</div>
+                <ul className="mt-1 space-y-1">{c.nextSteps?.map((n, i) => <li key={i} className="flex items-start gap-2 text-[13px]"><span className="mt-0.5 shrink-0 text-(--color-primary)"><Icon name="arrow-right" size={14} /></span>{n}</li>)}</ul>
+              </div>
+              <div className="flex flex-wrap items-center gap-2 text-[12px] text-(--color-faint)">
+                <Pill tone="accent" icon="stars-02">Claude {savedNote.model.includes('sonnet') ? 'Sonnet' : savedNote.model}</Pill>
+                <span>{fmtDate(savedNote.createdAt, true)}</span>
+                {stale && <Pill tone="warning" icon="alert-triangle">Numbers changed since this summary</Pill>}
+              </div>
+            </div>) })()}
+        </Section>
       )}
 
       {!unit || !teamM ? <Notice tone="warning" icon="alert-triangle">No team is linked to your persona yet. Managers see direct reports, sponsors their BU, coaches their learners.</Notice> : view === 'team' ? (

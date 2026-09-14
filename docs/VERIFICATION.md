@@ -88,6 +88,9 @@ Date: 14 September 2026 · Environment: local Vite dev server, macOS, Chromium (
 | Company view leaderboard | Ranked; viewer's row highlighted; office can switch unit kind (BU leaderboard: SCGC, CBM, CAFI) |
 | Integrations: HR core sync and payroll export runs | Runs logged with payloads (9 badges; 5 employees in merit export); passport shows "last synced" |
 | Chart palette validator | `#C8102E` + `#3B7DDD` pass all six checks (light mode) |
+| Dashboard AI summary, 3 runs on one scorecard | Identical measures, numbers and order every run; wording varies only |
+| Dashboard AI summary, team view | "6 of 10" matches the "Better than company on" tile exactly |
+| Dashboard AI summary, company view | Reports company health score, leading and trailing unit, two weakest company measures; stable across two refreshes |
 | Expert Guidance reply format | "Where you are / Next step / three bullets" under 120 words, module cited |
 
 ## Not verified / remaining limitations

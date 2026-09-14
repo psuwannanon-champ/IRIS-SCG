@@ -7,6 +7,7 @@ import { skillsForProgram, personaName } from '@/domain/selectors'
 export interface DiagnosticOutput { summary: string; items: { skillCode: string; currentLevel: number; targetLevel: number; priorityRank: number | null; evidenceSource: 'self_declared' | 'ai_inferred' | 'knowledge_test' | 'manager_input'; rationale: string }[]; plan: { moduleCode: string; reason: string }[]; skipped: { moduleCode: string; reason: string }[]; coachingPoints: string[] }
 export interface AdviceOutput { headline: string; priorities: { title: string; why: string; action: string }[]; coachingPoints: string[]; applicationToRole: string[]; applicationToProject: string[]; risks: string[] }
 export interface CoachOutput { reply: string; citedModuleCode: string | null; flagForHumanCoach: string | null }
+export interface PerformanceOutput { summary: string; nextSteps: string[] }
 export interface BriefingOutput { headline: string; learners: { personaName: string; status: string; focus: string; suggestedQuestion: string }[]; agenda: string[] }
 
 export class GuidanceUnavailable extends Error {}
@@ -97,4 +98,37 @@ export function buildClinicContext(s: Snapshot, clinic: CoachingClinic) {
   const cohort = s.cohorts.find((c) => c.id === clinic.cohortId)!
   const learners = s.enrollments.filter((e) => e.cohortId === clinic.cohortId && e.coachId === clinic.coachId).map((e) => { const p = s.personas.find((x) => x.id === e.personaId)!; return journeyBundle(s, p, e) })
   return { clinic: { number: clinic.clinicNo, date: clinic.scheduledAt.slice(0, 10), topics: clinic.topics, cohort: cohort.name }, learners: learners.map((l) => ({ learner: l.learner, enrollmentStatus: l.enrollmentStatus, diagnosticItems: l.diagnosticItems.filter((i) => i.priorityRank), learningPlan: l.learningPlan, impactContract: l.impactContract, evidence: l.evidence, coachingNotes: l.coachingNotes })) }
+}
+
+/** Compact, deterministic scorecard for the dashboard summary: only rounded numbers the page already shows. */
+export function buildPerformanceContext(input: {
+  view: 'team' | 'company'
+  unitName: string
+  unitKind: string
+  learners: number
+  companyLearners: number
+  rank: { rank: number; of: number } | null
+  measures: { measure: string; unit: string; meaning: string; team?: number | null; company?: number | null; companyValue?: number | null; result?: 'ahead' | 'behind' | 'no data' }[]
+  healthScore?: number | null
+  aheadOfCompany: { count: number; of: number } | null
+  highlight: { strength: string | null; weakness: string | null }
+  focus: string[]
+  leaderboard?: { name: string; healthScore: number | null; isYou: boolean }[]
+}) {
+  return {
+    programme: 'Modernize SCG Capability Development 2027 (ABC and BCD accelerators)',
+    view: input.view,
+    /** Who the summary is about: one unit (team view) or the whole company (company view). */
+    subject: input.view === 'company' ? { name: input.unitName, scope: 'whole company', healthScore: input.healthScore == null ? null : `${input.healthScore}%`, learnersInPrograms: input.learners, unitsCompared: input.leaderboard?.length ?? 0 } : { name: input.unitName, scope: `one ${input.unitKind}`, healthScore: input.healthScore == null ? null : `${input.healthScore}%`, learnersInPrograms: input.learners, companyLearners: input.companyLearners },
+    rankByHealthScore: input.rank,
+    measures: input.measures,
+    /** Counted by the platform: sentence 1 must use exactly this count. */
+    aheadOfCompany: input.aheadOfCompany,
+    /** Chosen by the platform, not by the model: sentence 2 must name these two measures. */
+    highlight: input.highlight,
+    /** The two measures the next steps must cover, in this order. */
+    focus: input.focus,
+    leaderboard: input.leaderboard ?? null,
+    note: 'Percentages are shares of the unit\'s own learners, so they compare fairly. THB figures are absolute totals, so a small unit is naturally below the company total; never call that a weakness. Decision time is in days and lower is better.',
+  }
 }

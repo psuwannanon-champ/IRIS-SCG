@@ -555,7 +555,7 @@ export interface Assessment {
   responses: AssessmentResponses
   submittedAt: string
 }
-export type GuidanceKind = 'diagnostic' | 'journey' | 'contract' | 'coach' | 'clinic_briefing'
+export type GuidanceKind = 'diagnostic' | 'journey' | 'contract' | 'coach' | 'clinic_briefing' | 'performance'
 export interface GuidanceNote {
   id: string
   personaId: string

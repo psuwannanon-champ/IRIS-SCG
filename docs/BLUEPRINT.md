@@ -115,6 +115,7 @@ Server-side enforcement in the prototype: every write is a Postgres function tha
 | R30 | p12 | Marketplace allocates key talent by verified skills | Owner postings with skill requirements; shortlist / decline with notification | Implemented |
 | R31 | p5 01 action 3, p5 05 | Capability OKRs on leader scorecards; quarterly review; dashboard tracks uplift, ledger, mobility | Performance dashboard: team vs company on twelve measures, health score, rank, leaderboard | Implemented |
 | R32 | p5 04, p12 | Integrated with HR core; rewards linked to impact; notifications; P&L actuals; Start the Dot | Integrations page with five simulated connectors, run log and payloads; sync indicators on passport and ledger | Simulated |
+| R34 | p5 05, p12 | Dashboard read by leaders quarterly | AI summary on the performance dashboard (Claude Sonnet, deterministic inputs, 2 lines + 2 next steps) | Implemented |
 | R33 | p6, p10 | Modular micro-learning aligned to SCG business, split by BU variant | Authored module content per module (Claude-generated at build time) with quick check | Implemented (content illustrative) |
 
 ## 6. Integration register
