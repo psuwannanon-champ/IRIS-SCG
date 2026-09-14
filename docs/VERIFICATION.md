@@ -126,6 +126,13 @@ owned, and the Assessment page turned a non-enrolled employee away. The deck sel
 | Program office view | Population covered 85%, 11 of 13; the two employees outside a cohort are listed with their baseline state |
 | Guard | One baseline per person, enforced by a partial unique index and by the page |
 
+### Second re-audit findings (deck p6 and p10)
+
+| Finding | Fix | Verified |
+| --- | --- | --- |
+| The passport showed role KPIs labelled "engine input", but no prompt received them. Verified passport levels and live projects were likewise missing, so the diagnostic re-inferred levels blind to badges already minted | The shared learner card now carries role KPIs, every passport entry with level and tier, and the person's live impact contracts and concepts | Intercepted the guidance request on My journey: the payload carries all six named inputs, including nine passport entries and the active impact contract |
+| Peer pods were invisible to learners. The cohort page is not in the learner navigation, so a learner saw their pod once in a notification and never again | My journey shows the pod with its named peers and coach, and the next coaching clinic with topics and briefing state | Nara's journey shows "Pod A · CBM turnaround, with Boonchu Rakdee, Tanawat Srisuk · coach Anong Thepsiri" and clinic 2 on 16 Oct |
+
 ### Bugs found and fixed during this sweep
 
 | Bug | Fix |

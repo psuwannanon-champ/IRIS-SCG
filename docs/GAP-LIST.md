@@ -3,7 +3,7 @@
 Source: *People Strategic Plan Formulation for MTP 2027 — Modernize SCG Capability Development* (IRIS, 2 Aug 2026, 14 pages).
 Status set 14 Sep 2026, re-checked in the browser against the live Supabase backend. `[x]` = implemented and verified end to end.
 
-**24 of 25 closed.** Item 20 stays open: it needs promotion events from the HR core, which the demo dataset does not contain. Item 25 was found in a second full read of the deck after the first sweep, and is now closed.
+**26 of 27 closed.** Item 20 stays open: it needs promotion events from the HR core, which the demo dataset does not contain. Items 25 to 27 were found in two further full reads of the deck after the first sweep, and are now closed.
 
 ## Tier 1 · Features the deck sells that the platform could not show
 
@@ -54,3 +54,5 @@ Status set 14 Sep 2026, re-checked in the browser against the live Supabase back
 | # | Deck claim (page) | Status |
 | --- | --- | --- |
 | 25 | "Launchable SCG org-wide: mass assessment and personalized learning for every employee"; "Baseline the organization in waves; Passport from day one" (p4, p5, p10) | [x] Assessment and the passport were cohort-only: every diagnostic hung off an enrolment, so a non-enrolled employee had no passport and could not be read by the marketplace or a talent review. Migration `0015_org_wide_baseline.sql` makes the diagnostic belong to the person; any employee can baseline themselves and mint AI-inferred levels. The program office sees population coverage on the Assessments page. |
+| 26 | "Role & level, KPIs, verified skills & gaps, interests, focused initiatives and live projects, career aspiration, BU context" as engine inputs (p10, Input 01) | [x] The passport labelled role KPIs as an engine input, but the prompts only ever received name, job title, level, function, BU and aspiration. `learnerCard` now also carries role KPIs, every passport entry with its level and verification tier, and the person's live impact contracts and concepts. Every personalisation context shares it, so the diagnostic, the weekly journey guidance, contract review and the coach all see the same inputs. |
+| 27 | "Supported by peer pods, an AI coach and coaching clinics" (p6, Phase 2) | [x] Pods existed but were invisible to the learner: the cohort page is not in the learner navigation, so a learner saw their pod once in a notification and never again. My journey now shows the pod with its named peers and coach, and the next coaching clinic with its coach, topics and whether the briefing is ready. |

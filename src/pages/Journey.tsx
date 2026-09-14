@@ -5,7 +5,7 @@ import { useActor } from '@/app/actor'
 import { useAction } from '@/app/data'
 import { personaName } from '@/domain/selectors'
 import { PageHeader, Section, LoadingBlock, ErrorBlock, EmptyState, Pill, Button, Notice, DL } from '@/components/ui'
-import { fmtDate } from '@/lib/format'
+import { fmtDate, demoToday } from '@/lib/format'
 import { ENROLLMENT_LABEL, enrollmentTone, contractTone } from '@/domain/status'
 import { CONTRACT_STATUS_LABEL } from '@/domain/types'
 import { Icon } from '@/icons/Icon'
@@ -48,6 +48,31 @@ function JourneyBlock({ snap, e, actorId }: { snap: Snapshot; e: Enrollment; act
             </li>) })}
         </ol>
         <div className="mt-3"><DL cols={3} items={[{ label: 'Coach', value: personaName(snap, e.coachId) }, { label: 'Sponsor', value: personaName(snap, e.sponsorId) }, { label: 'Line manager', value: personaName(snap, e.managerId) }]} /></div>
+        {(() => {
+          // Deck p6: the sprint is supported by peer pods, an AI coach and coaching clinics.
+          const pod = e.podId ? snap.pods.find((x) => x.id === e.podId) ?? null : null
+          const peers = pod ? snap.enrollments.filter((x) => x.podId === pod.id && x.personaId !== e.personaId).map((x) => personaName(snap, x.personaId)) : []
+          const clinics = snap.coachingClinics.filter((c) => c.cohortId === e.cohortId).sort((a, b) => a.scheduledAt.localeCompare(b.scheduledAt))
+          const today = demoToday().toISOString().slice(0, 10)
+          const nextClinic = clinics.find((c) => c.scheduledAt.slice(0, 10) >= today) ?? clinics[clinics.length - 1] ?? null
+          if (!pod && !nextClinic) return null
+          return (
+            <div className="mt-3 grid gap-2 sm:grid-cols-2">
+              {pod && <div className="surface rounded-lg px-3 py-2.5">
+                <div className="text-[11px] font-semibold uppercase tracking-wide text-(--color-faint)">Your peer pod</div>
+                <div className="text-[13px] font-medium">{pod.name}</div>
+                <div className="text-[12px] text-(--color-muted)">{peers.length > 0 ? `With ${peers.join(', ')}` : 'You are the first member'}{pod.coachId ? ` · coach ${personaName(snap, pod.coachId)}` : ''}</div>
+                <div className="mt-1 text-[12px] text-(--color-muted)">Pods review each other's weekly evidence before the clinic.</div>
+              </div>}
+              {nextClinic && <div className="surface rounded-lg px-3 py-2.5">
+                <div className="text-[11px] font-semibold uppercase tracking-wide text-(--color-faint)">{nextClinic.scheduledAt.slice(0, 10) >= today ? 'Next coaching clinic' : 'Last coaching clinic'}</div>
+                <div className="text-[13px] font-medium">Clinic {nextClinic.clinicNo} · {fmtDate(nextClinic.scheduledAt)}</div>
+                <div className="text-[12px] text-(--color-muted)">{personaName(snap, nextClinic.coachId)} · {nextClinic.topics}</div>
+                {nextClinic.briefingReady && <div className="mt-1"><Pill tone="success" icon="check-circle">Your coach has the briefing</Pill></div>}
+              </div>}
+            </div>
+          )
+        })()}
         {(e.topDecile || e.fastTrackBcd || e.impactRating) && <div className="mt-3 flex flex-wrap gap-1.5">{e.impactRating && <Pill tone="success">Impact rating: {e.impactRating.replace('_', ' ')}</Pill>}{e.topDecile && <Pill tone="primary">Top ~10%</Pill>}{e.fastTrackBcd && <Pill tone="accent">BCD fast-track</Pill>}</div>}
       </Section>
 

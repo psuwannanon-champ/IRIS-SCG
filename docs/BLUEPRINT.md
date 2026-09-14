@@ -133,6 +133,8 @@ Server-side enforcement in the prototype: every write is a Postgres function tha
 | R48 | p3 | Milestones Q1–Q4 with owners and status | Plan milestones on the strategy roadmap with an editable status | Implemented |
 | R49 | adoption risk | Thai interface for learner-facing surfaces | Thai / English switch in the shell; navigation and the learner journey translated, governance screens English by design | Implemented (partial by design) |
 | R50 | p3 KPI 1.4 | % promotions citing verified skills | Not computable: the demo dataset has no promotion events; the simulated HR core connector carries the field | Not implemented |
+| R52 | p10 Input 01 | Role and level, KPIs, verified skills and gaps, live projects, career aspiration and BU context feed the engine | All six inputs carried by the shared learner card into every personalisation context (diagnostic, baseline, weekly journey, contract review, coach, practice) | Implemented |
+| R53 | p6 Phase 2 | The sprint is supported by peer pods, an AI coach and coaching clinics | My journey shows the learner's pod with named peers and coach, and the next clinic with topics and briefing state | Implemented |
 | R51 | p4, p5, p10 | Launchable SCG org-wide: mass assessment for every employee, passport from day one, baseline the organisation in waves | Org-wide baseline: the diagnostic belongs to the person, not an enrolment. Any employee can run it, AI-inferred levels reach the passport, and the program office tracks population coverage | Implemented |
 
 ## 6. Integration register

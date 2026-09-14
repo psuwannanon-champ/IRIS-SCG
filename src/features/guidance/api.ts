@@ -24,7 +24,21 @@ export async function requestGuidance<T>(req: { kind: GuidanceKind; context: unk
   return { model: json.model ?? 'claude', output: json.output }
 }
 
-const learnerCard = (s: Snapshot, p: Persona) => ({ name: p.fullName, jobTitle: p.jobTitle, level: p.level, functionType: p.functionType, businessUnit: s.businessUnits.find((b) => b.id === p.buId)?.name, careerAspiration: p.careerAspiration })
+/** The engine inputs the deck names on p10: role and level, KPIs, verified skills already held,
+ * live projects, career aspiration and BU context. Shared by every personalisation context. */
+const learnerCard = (s: Snapshot, p: Persona) => ({
+  name: p.fullName, jobTitle: p.jobTitle, level: p.level, functionType: p.functionType,
+  businessUnit: s.businessUnits.find((b) => b.id === p.buId)?.name, careerAspiration: p.careerAspiration,
+  roleKpis: p.kpis ?? null,
+  verifiedSkills: s.passportEntries.filter((e) => e.personaId === p.id)
+    .map((e) => ({ skillCode: s.skills.find((k) => k.id === e.skillId)?.code, level: e.level, tier: e.tier }))
+    .filter((e) => e.skillCode)
+    .sort((a, b) => (a.skillCode ?? '').localeCompare(b.skillCode ?? '')),
+  liveProjects: [
+    ...s.impactContracts.filter((c) => c.learnerId === p.id && !['draft', 'impact_validated'].includes(c.status)).map((c) => `Impact contract: ${c.title} (${c.status})`),
+    ...s.teams.filter((t) => s.enrollments.some((e) => e.personaId === p.id && e.teamId === t.id)).flatMap((t) => s.concepts.filter((c) => c.teamId === t.id).map((c) => `Concept: ${c.title} (${c.stage})`)),
+  ],
+})
 const catalogue = (s: Snapshot, program: 'ABC' | 'BCD') => {
   const skills = skillsForProgram(s, program)
   return {
