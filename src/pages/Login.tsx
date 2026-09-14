@@ -31,7 +31,7 @@ export function LoginPage() {
           </ul>
           <div className="mt-6 flex flex-wrap items-center gap-2">
             <Link to="/tour" search={{ step: 0 }} className="btn btn-primary" data-tour="intro-button"><Icon name="presentation-chart-01" size={16} style={{ ['--icon-accent' as string]: '#fff' }} />Introduction to platform</Link>
-            <Pill tone={backend === 'supabase' ? 'success' : 'warning'} icon="database-01">{backend === 'supabase' ? 'Connected to Supabase' : 'Local demo fixtures'}</Pill>
+            {backend === 'local' && <Pill tone="warning" icon="database-01">Local demo fixtures</Pill>}
           </div>
           <p className="mt-6 text-[12px] text-(--color-faint)">Prototype environment. All people, business units, numbers and outcomes are fictional. Persona switching replaces sign-in; no passwords are stored in the browser.</p>
         </div>

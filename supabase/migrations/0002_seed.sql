@@ -411,11 +411,22 @@ begin
     ('rev-23', 'ledger_entry', 'lg-arisa', 'per-prasert', 'validate', 'pending_validation', 'validated', null, '2026-07-31T09:00:00+07:00'),
     ('rev-24', 'ledger_entry', 'lg-solar', 'per-supattra', 'audit', 'validated', 'audited', 'Annual sample audit June 2026.', '2026-06-20T09:00:00+07:00');
 
+  insert into public.capability_gaps (id, bu_id, value_pool, critical_role, skill_id, future_skill_note, supply_fte, demand_fte, thb_value_at_risk, decision, funded, decided_by_id, decided_at) values
+    ('gap-cbm-1', 'bu-cbm', 'Dealer share of wallet (THB 1.2B margin pool)', 'Regional sales lead', 'sk-b2bsales', 'AI-assisted segmentation and offer design across 400 dealers', 6, 18, 180000000, 'build', true, 'per-supattra', '2026-08-28T09:00:00+07:00'),
+    ('gap-cbm-2', 'bu-cbm', 'Kiln fuel cost (THB 900M/yr)', 'Plant operations supervisor', 'sk-opex', 'Data-driven OpEx routines on downtime and fuel substitution', 9, 22, 140000000, 'build', true, 'per-supattra', '2026-08-28T09:00:00+07:00'),
+    ('gap-cbm-3', 'bu-cbm', 'Low-carbon export premium', 'Green materials category lead', 'sk-green', 'CBAM exposure modelling and green option pricing', 2, 8, 80000000, 'borrow', false, 'per-supattra', '2026-08-28T09:00:00+07:00'),
+    ('gap-cbm-4', 'bu-cbm', 'Dealer logistics cost-to-serve', 'Logistics planner', 'sk-decision', 'Route and backhaul decisions on shared data', 4, 10, 35000000, 'undecided', false, null, null),
+    ('gap-cafi-1', 'bu-cafi', 'Transactional finance productivity', 'AP / AR team lead', 'sk-genai', 'GenAI exception handling and supplier self-service', 5, 30, 60000000, 'bot', true, 'per-supattra', '2026-08-28T09:00:00+07:00'),
+    ('gap-cafi-2', 'bu-cafi', 'Service level excellence', 'Service desk lead', 'sk-custneeds', 'Internal customer needs discovery and SLA design', 3, 12, 25000000, 'build', false, 'per-supattra', '2026-08-28T09:00:00+07:00'),
+    ('gap-cafi-3', 'bu-cafi', 'Month-end close', 'Finance systems analyst', 'sk-datastory', 'Close analytics and exception narratives', 4, 9, 12000000, 'undecided', false, null, null),
+    ('gap-scgp-1', 'bu-scgp', 'Recyclable packaging growth', 'B2B2C proposition lead', 'sk-greendesign', 'Green proposition design validated with brands', 2, 6, 60000000, 'buy', false, 'per-supattra', '2026-08-28T09:00:00+07:00'),
+    ('gap-scgc-1', 'bu-scgc', 'Clean energy ventures', 'Incubation lead', 'sk-bizbuild', 'Business building from concept to Gate 3', 3, 6, 100000000, 'build', true, 'per-supattra', '2026-08-28T09:00:00+07:00');
+
 end $seed$;
 
 create or replace function public.reset_demo() returns void language plpgsql security definer set search_path = public as $$
 begin
-  truncate table public.business_units, public.personas, public.skill_domains, public.skills, public.learning_modules, public.cohorts, public.enrollments, public.diagnostics, public.diagnostic_items, public.learning_plan_items, public.impact_contracts, public.sprint_evidence, public.challenge_themes, public.challenge_briefs, public.teams, public.concepts, public.gate_reviews, public.coaching_clinics, public.coaching_notes, public.coach_scorecards, public.passport_entries, public.ledger_entries, public.marketplace_roles, public.marketplace_interests, public.notifications, public.coach_messages, public.record_events restart identity cascade;
+  truncate table public.business_units, public.personas, public.skill_domains, public.skills, public.learning_modules, public.cohorts, public.enrollments, public.diagnostics, public.diagnostic_items, public.learning_plan_items, public.impact_contracts, public.sprint_evidence, public.challenge_themes, public.challenge_briefs, public.teams, public.concepts, public.gate_reviews, public.coaching_clinics, public.coaching_notes, public.coach_scorecards, public.passport_entries, public.ledger_entries, public.marketplace_roles, public.marketplace_interests, public.notifications, public.coach_messages, public.record_events, public.capability_gaps, public.assessments, public.guidance_notes restart identity cascade;
   perform public.seed_demo();
 end $$;
 

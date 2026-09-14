@@ -41,7 +41,7 @@ export function selectTasks(s: Snapshot, actor: Persona): Task[] {
     const cohort = s.cohorts.find((c) => c.id === e.cohortId)
     const dx = s.diagnostics.find((d) => d.enrollmentId === e.id)
     if (dx && dx.status === 'pending') {
-      push({ key: `dx-${e.id}`, recordType: 'diagnostic', recordId: e.id, title: `Complete your AI skill diagnostic · ${cohort?.code ?? ''}`, nextAction: 'Run diagnostic', responsibleRole: 'learner', status: 'Pending', dueDate: cohortDate(s, e.cohortId, 'Applied capability labs'), link: '/journey' })
+      push({ key: `dx-${e.id}`, recordType: 'diagnostic', recordId: e.id, title: `Complete your AI skill diagnostic · ${cohort?.code ?? ''}`, nextAction: 'Start assessment', responsibleRole: 'learner', status: 'Pending', dueDate: cohortDate(s, e.cohortId, 'Applied capability labs'), link: '/assessment' })
     }
     const planOpen = s.learningPlanItems.filter((i) => i.enrollmentId === e.id && ['planned', 'in_progress'].includes(i.status))
     if (planOpen.length && cohort?.program === 'ABC' && cohort.status !== 'completed') {

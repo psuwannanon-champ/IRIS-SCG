@@ -47,7 +47,7 @@ export function LedgerPage() {
             <ul className="divide-y divide-(--color-border)">
               {pg.slice.map((l) => (
                 <li key={l.id} className="table-grid grid-cols-[minmax(0,1fr)_auto] px-3 py-2.5 xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_120px_120px_180px_110px]">
-                  <div className="min-w-0"><div className="truncate font-medium">{l.title}</div><div className="truncate text-[12px] text-(--color-muted)">{l.objectiveType ? OBJECTIVE_LABEL[l.objectiveType] : 'Concept value'} · {snap.businessUnits.find((b) => b.id === l.buId)?.code} · tracked until {fmtDate(l.trackingUntil)}</div></div>
+                  <div className="min-w-0"><button type="button" className="block max-w-full truncate text-left font-medium text-(--color-accent) hover:text-(--color-primary)" onClick={() => { setOpen({ entry: l, mode: 'view' }); setValue(String(l.claimedValueThb)); setNote(''); setErr(null) }}>{l.title}</button><div className="truncate text-[12px] text-(--color-muted)">{l.objectiveType ? OBJECTIVE_LABEL[l.objectiveType] : 'Concept value'} · {snap.businessUnits.find((b) => b.id === l.buId)?.code} · tracked until {fmtDate(l.trackingUntil)}</div></div>
                   <div className="hidden truncate text-[13px] xl:block">{personaName(snap, l.personaId)}<div className="text-[12px] text-(--color-muted)">Sponsor {personaName(snap, l.sponsorId)}</div></div>
                   <div className="hidden text-[13px] xl:block">{fmtThb(l.claimedValueThb, true)}</div>
                   <div className="hidden text-[13px] xl:block">{l.validatedValueThb != null ? fmtThb(l.validatedValueThb, true) : '—'}</div>

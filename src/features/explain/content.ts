@@ -268,6 +268,14 @@ export const EXPLAINERS: Record<string, PageExplainer> = {
       limitations: ['Percentages are computed from the small demo dataset and are illustrative only.'],
     }],
   },
+  strategy: {
+    title: 'Strategy roadmap',
+    functions: [{ id: 'strategy', name: 'People strategic plan for MTP 2027', purpose: 'The four sub-plans with key actions, KPIs, expected outcomes, milestones and owners; the five core components with their three actions each; the CBM and CAFI applications; and the enabler timeline.', benefit: 'Everyone presenting the platform can trace each screen back to the strategy it serves; KPIs are live where the platform tracks them.', users: 'Program office, committee, sponsors.', roles: [{ role: 'Program office', does: 'Uses it as the master checklist for deployment.' }], stages: [{ icon: 'data', title: 'Data enters', body: 'Plan content from the strategy deck (static); KPI values calculated from ledger, passports, gates and BU flags.' }, { icon: 'arrow-right', title: 'What comes next', body: 'Quarterly review by the People Committee; BU targets on leader scorecards.' }], limitations: ['"% promotions citing verified skills" is not tracked in the prototype (no HR core integration).'] }],
+  },
+  agenda: {
+    title: 'Capability agenda',
+    functions: [{ id: 'agenda', name: 'Value-to-skills cascade and gap funding', purpose: 'Value pools, critical roles and future skills per BU with three-year supply versus demand, THB value at stake and the build / buy / borrow / bot decision.', benefit: 'Capability spend goes to the biggest value-at-risk gaps first, governed like capex.', users: 'Program office and committee decide; sponsors read their BU.', roles: [{ role: 'BU head (via sponsor)', does: 'Runs the cascade with CHR annually.' }, { role: 'Program office / committee', does: 'Records the decision and funding flag.' }], stages: [{ icon: 'data', title: 'Data enters', body: 'Cascade rows are configured with the BU head (fixtures in the prototype); decisions are entered here.' }, { icon: 'scales-01', title: 'Decision', body: 'Build feeds cohort seats and assessment waves; bot points to automation; buy and borrow go to acquisition and partners.' }, { icon: 'arrow-right', title: 'What comes next', body: 'Funded gaps appear on quarterly leader scorecards; the taxonomy and cohorts are refreshed accordingly.' }] }],
+  },
   taxonomy: {
     title: 'Skills taxonomy',
     functions: [{
@@ -277,17 +285,33 @@ export const EXPLAINERS: Record<string, PageExplainer> = {
       stages: [{ icon: 'layers-three-01', title: 'Data enters', body: 'Configured by the program office and validated by function experts (read-only in the prototype; ~100 skills in the target state, 18 shown).' }],
     }],
   },
-  'ai-coach': {
-    title: 'AI coach',
+  assessment: {
+    title: 'Assessment',
     functions: [{
-      id: 'coach', name: 'Always-on AI coach (simulated)', purpose: 'Answers program questions in Thai and English, grounded in the approved content universe, citing the source module.',
+      id: 'assessment', name: 'AI skill diagnostic', purpose: 'The Phase 0 assessment: self-rating on the critical skills, a knowledge check per domain and the learner\'s role context. Expert Guidance turns the answers into a gap map, priority ranking and personal micro-learning path.',
+      benefit: 'Start from the learner\'s real gaps and the BU priority, not a fixed course list; class time is freed for practice.',
+      users: 'Learners with a pending diagnostic. Coaches and managers see the result on the journey and in their workspaces.',
+      roles: [{ role: 'Learner', does: 'Completes the three steps, reviews the draft gap map and accepts it.' }, { role: 'Expert Guidance (Claude)', does: 'Infers current levels from self-rating and knowledge answers, ranks priority gaps by skill gap × role relevance × project need, selects modules and BU variants, and pushes coaching points to the human coach.' }],
+      stages: [
+        { icon: 'data', title: 'Data enters', body: 'Self-ratings, knowledge answers and role context entered here; talent profile and BU themes from the platform; skills and module catalogue from the taxonomy.' },
+        { icon: 'stars-02', title: 'Work happens', body: 'Answers are saved, then Expert Guidance produces the draft. The learner reviews before anything is written.' },
+        { icon: 'award-01', title: 'Connected records', body: 'Accepting writes diagnostic items, AI-inferred (or self-declared) passport levels and the learning plan; the guidance note is kept.' },
+        { icon: 'arrow-right', title: 'What comes next', body: 'The learner starts the micro-learning path before the labs; the coach receives the coaching points before clinic 1.' },
+      ],
+      limitations: ['Knowledge questions are illustrative (one per domain). Levels are inferred, not certified; outcome-verified badges come only from validated results.'],
+    }],
+  },
+  'ai-coach': {
+    title: 'Expert Guidance',
+    functions: [{
+      id: 'coach', name: 'Always-on coach', purpose: 'Answers program questions in Thai and English, grounded in the approved content universe and the learner\'s own records, citing the source module. Also produces weekly guidance on the journey, sprint reviews on contracts and clinic briefings for coaches.',
       benefit: 'Learning continues after every program; the coach nudges before deadlines and briefs the human coach.',
       users: 'Learners; coaches can view.', roles: [{ role: 'Learner', does: 'Asks about schedule, activities, deliverables and practice.' }],
       stages: [
         { icon: 'stars-02', title: 'Work happens', body: 'Messages and replies are saved to the person\'s history. Replies cite the module they are grounded in.' },
         { icon: 'shield-tick', title: 'Guardrails', body: 'Retrieval-grounded answers only, PDPA-compliant, human in the loop for career decisions.' },
       ],
-      limitations: ['Replies in this prototype come from a fixed, program-grounded script. No live AI service is connected.'],
+      limitations: ['Powered by Claude through a server-side key. If the service is unavailable a scripted answer is used and labelled. Guidance is advisory; decisions stay with people.'],
     }],
   },
   notifications: {

@@ -14,6 +14,8 @@ import { History, Money } from '@/components/records'
 import { fmtDate, fmtNum, fmtThb, orNotProvided } from '@/lib/format'
 import { Icon } from '@/icons/Icon'
 import type { ContractAction, ContractActionPayload } from '@/data/datasource'
+import { GuidancePanel } from '@/features/guidance/GuidancePanel'
+import { buildContractContext } from '@/features/guidance/api'
 
 const STATUSES = Object.keys(CONTRACT_STATUS_LABEL) as ContractStatus[]
 
@@ -193,6 +195,7 @@ export function ContractDetailPage() {
             {c.validatedValueThb != null && <div className="mt-3"><DL cols={2} items={[{ label: 'Validated value', value: <Money v={c.validatedValueThb} /> }, { label: 'Validated on', value: fmtDate(c.validatedAt) }]} /></div>}
           </Section>
 
+          <GuidancePanel personaId={c.learnerId} kind="contract" contextId={c.id} title="Expert Guidance on this sprint" description="Evidence quality, baseline credibility, trend against target and what must be true before the next gate or showcase." buildContext={() => buildContractContext(snap, c)} canRequest={[c.learnerId, c.managerId, c.sponsorId].includes(actor.id) || actor.role === 'coach'} />
           <Section title={`Sprint evidence · week ${Math.min(Math.max(week, 0), 12)} of 12`} icon="activity" description="Weekly micro-applications of the new skills, tracked continuously. Latest first."
             actions={canLog && <Button size="sm" variant="primary" icon="plus" onClick={() => setDialog('evidence')} data-tour="log-evidence">Log evidence</Button>} tour="contract-evidence">
             {evidence.length === 0 ? <EmptyState icon="activity" title="No evidence logged yet" body={c.status === 'active' ? 'Log what you applied this week and the current measured value.' : 'Evidence is logged once the sprint is active.'} /> : (

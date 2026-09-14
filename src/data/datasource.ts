@@ -1,5 +1,5 @@
 import type { FixtureBundle } from '@/data/fixtures'
-import type { ChallengeBriefInput, ImpactContractInput, GateDecision } from '@/domain/types'
+import type { ChallengeBriefInput, ImpactContractInput, GateDecision, AssessmentResponses, DiagnosticResult, GuidanceKind, GapDecision } from '@/domain/types'
 
 export type Snapshot = FixtureBundle
 
@@ -65,6 +65,14 @@ export interface DataSource {
   expressInterest(actorId: string, roleId: string): Promise<void>
   markNotificationRead(actorId: string, notificationId: string): Promise<void>
   sendCoachMessage(actorId: string, content: string, lang: 'th' | 'en'): Promise<void>
+  /** Stores a learner question and the Expert Guidance reply that was generated server-side. */
+  appendCoachExchange(actorId: string, content: string, lang: 'th' | 'en', reply: string, citedModuleId: string | null): Promise<void>
+
+  submitAssessment(actorId: string, enrollmentId: string, responses: AssessmentResponses): Promise<string>
+  completeDiagnostic(actorId: string, enrollmentId: string, result: DiagnosticResult): Promise<void>
+  saveGuidance(actorId: string, personaId: string, kind: GuidanceKind, contextId: string | null, content: unknown, model: string): Promise<string>
+
+  setGapDecision(actorId: string, gapId: string, decision: GapDecision, funded: boolean): Promise<void>
 
   resetDemo(): Promise<void>
 }

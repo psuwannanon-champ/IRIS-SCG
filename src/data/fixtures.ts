@@ -1,6 +1,7 @@
 // FICTIONAL DEMO DATA for the SCG Capability Suite prototype.
 // Names, numbers and outcomes are invented for walkthrough purposes.
 import type {
+  Assessment, GuidanceNote, CapabilityGap,
   BusinessUnit, Persona, SkillDomain, Skill, Cohort, Enrollment, Diagnostic, DiagnosticItem,
   LearningModule, LearningPlanItem, ImpactContract, SprintEvidence, RecordEvent, ChallengeTheme,
   ChallengeBrief, Team, Concept, GateReview, CoachingClinic, CoachingNote, CoachScorecard,
@@ -552,10 +553,26 @@ export const recordEvents: RecordEvent[] = [
   { id: 'rev-24', recordType: 'ledger_entry', recordId: 'lg-solar', actorId: 'per-supattra', action: 'audit', fromStatus: 'validated', toStatus: 'audited', note: 'Annual sample audit June 2026.', createdAt: d('2026-06-20') },
 ]
 
+const G = (id: string, buId: string, valuePool: string, criticalRole: string, skillId: string, futureSkillNote: string, supplyFte: number, demandFte: number, thbValueAtRisk: number, decision: CapabilityGap['decision'] = 'undecided', funded = false): CapabilityGap => ({ id, buId, valuePool, criticalRole, skillId, futureSkillNote, supplyFte, demandFte, thbValueAtRisk, decision, funded, decidedById: decision === 'undecided' ? null : 'per-supattra', decidedAt: decision === 'undecided' ? null : d('2026-08-28') })
+export const capabilityGaps: CapabilityGap[] = [
+  G('gap-cbm-1', 'bu-cbm', 'Dealer share of wallet (THB 1.2B margin pool)', 'Regional sales lead', 'sk-b2bsales', 'AI-assisted segmentation and offer design across 400 dealers', 6, 18, 180_000_000, 'build', true),
+  G('gap-cbm-2', 'bu-cbm', 'Kiln fuel cost (THB 900M/yr)', 'Plant operations supervisor', 'sk-opex', 'Data-driven OpEx routines on downtime and fuel substitution', 9, 22, 140_000_000, 'build', true),
+  G('gap-cbm-3', 'bu-cbm', 'Low-carbon export premium', 'Green materials category lead', 'sk-green', 'CBAM exposure modelling and green option pricing', 2, 8, 80_000_000, 'borrow'),
+  G('gap-cbm-4', 'bu-cbm', 'Dealer logistics cost-to-serve', 'Logistics planner', 'sk-decision', 'Route and backhaul decisions on shared data', 4, 10, 35_000_000),
+  G('gap-cafi-1', 'bu-cafi', 'Transactional finance productivity', 'AP / AR team lead', 'sk-genai', 'GenAI exception handling and supplier self-service', 5, 30, 60_000_000, 'bot', true),
+  G('gap-cafi-2', 'bu-cafi', 'Service level excellence', 'Service desk lead', 'sk-custneeds', 'Internal customer needs discovery and SLA design', 3, 12, 25_000_000, 'build'),
+  G('gap-cafi-3', 'bu-cafi', 'Month-end close', 'Finance systems analyst', 'sk-datastory', 'Close analytics and exception narratives', 4, 9, 12_000_000),
+  G('gap-scgp-1', 'bu-scgp', 'Recyclable packaging growth', 'B2B2C proposition lead', 'sk-greendesign', 'Green proposition design validated with brands', 2, 6, 60_000_000, 'buy'),
+  G('gap-scgc-1', 'bu-scgc', 'Clean energy ventures', 'Incubation lead', 'sk-bizbuild', 'Business building from concept to Gate 3', 3, 6, 100_000_000, 'build', true),
+]
+
+export const assessments: Assessment[] = []
+export const guidanceNotes: GuidanceNote[] = []
+
 export const fixtureBundle = {
   businessUnits, personas, skillDomains, skills, learningModules, cohorts, enrollments, diagnostics, diagnosticItems,
   learningPlanItems, impactContracts, sprintEvidence, challengeThemes, challengeBriefs, teams, concepts, gateReviews,
   coachingClinics, coachingNotes, coachScorecards, passportEntries, ledgerEntries, marketplaceRoles, marketplaceInterests,
-  notifications, coachMessages, recordEvents,
+  notifications, coachMessages, recordEvents, assessments, guidanceNotes, capabilityGaps,
 }
 export type FixtureBundle = typeof fixtureBundle

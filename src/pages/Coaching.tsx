@@ -5,6 +5,8 @@ import { useAction } from '@/app/data'
 import { personaName } from '@/domain/selectors'
 import { PageHeader, Section, LoadingBlock, ErrorBlock, EmptyState, Pill, Button, Dialog, Field, Notice, DL } from '@/components/ui'
 import { fmtDate } from '@/lib/format'
+import { requestGuidance, buildClinicContext, type BriefingOutput } from '@/features/guidance/api'
+import type { CoachingClinic } from '@/domain/types'
 import { CONTRACT_STATUS_LABEL } from '@/domain/types'
 import { contractTone, ENROLLMENT_LABEL, enrollmentTone } from '@/domain/status'
 
@@ -15,6 +17,10 @@ export function CoachingPage() {
   const [clinicId, setClinicId] = useState('')
   const [err, setErr] = useState<string | null>(null)
   const ready = useAction((ds, id: string) => ds.markClinicBriefingReady(actor!.id, id), 'Clinic briefing marked ready.')
+  const [briefingFor, setBriefingFor] = useState<CoachingClinic | null>(null)
+  const [briefBusy, setBriefBusy] = useState(false)
+  const [briefErr, setBriefErr] = useState<string | null>(null)
+  const saveGuidance = useAction((ds, kind: 'clinic_briefing', contextId: string, content: unknown, model: string) => ds.saveGuidance(actor!.id, actor!.id, kind, contextId, content, model), 'Clinic briefing saved.')
   const addNote = useAction((ds, enrollmentId: string, n: string, cl: string | null) => ds.addCoachingNote(actor!.id, enrollmentId, n, cl), 'Coaching note saved and shared with the learner.')
   if (status === 'loading') return <LoadingBlock />
   if (status === 'error' || !snap || !actor) return <ErrorBlock message={error ?? ''} onRetry={refetch} />
@@ -35,7 +41,7 @@ export function CoachingPage() {
                   <div className="min-w-0"><div className="font-medium">Clinic {c.clinicNo} · {snap.cohorts.find((k) => k.id === c.cohortId)?.code}</div><div className="truncate text-[12px] text-(--color-muted)">{c.topics}</div></div>
                   <div className="text-[13px]">{fmtDate(c.scheduledAt)}</div>
                   <div>{c.briefingReady ? <Pill tone="success">Briefing ready</Pill> : c.scheduledAt < todayIso ? <Pill>Held</Pill> : <Pill tone="warning">Briefing not ready</Pill>}</div>
-                  <div className="flex justify-end">{!c.briefingReady && c.scheduledAt >= todayIso && <Button size="sm" variant="primary" busy={ready.isPending} onClick={() => ready.mutate([c.id])}>Mark briefing ready</Button>}</div>
+                  <div className="flex flex-wrap justify-end gap-1"><Button size="sm" icon="stars-02" onClick={() => { setBriefErr(null); setBriefingFor(c) }}>{snap.guidanceNotes.some((n) => n.kind === 'clinic_briefing' && n.contextId === c.id) ? 'View briefing' : 'Prepare briefing'}</Button>{!c.briefingReady && c.scheduledAt >= todayIso && <Button size="sm" variant="primary" busy={ready.isPending} onClick={() => ready.mutate([c.id])}>Mark briefing ready</Button>}</div>
                 </li>
               ))}
             </ul>
@@ -45,7 +51,7 @@ export function CoachingPage() {
               <ul className="divide-y divide-(--color-border)">
                 {learners.map((e) => { const p = snap.personas.find((x) => x.id === e.personaId)!; const ic = snap.impactContracts.find((x) => x.enrollmentId === e.id && x.status !== 'withdrawn'); const lastNote = snap.coachingNotes.filter((n) => n.enrollmentId === e.id).sort((a, b) => b.createdAt.localeCompare(a.createdAt))[0]; return (
                   <li key={e.id} className="table-grid grid-cols-[minmax(0,1fr)_auto] py-2.5 sm:grid-cols-[minmax(0,1.5fr)_minmax(0,1.6fr)_110px_110px]">
-                    <div className="min-w-0"><div className="truncate font-medium">{p.fullName}</div><div className="truncate text-[12px] text-(--color-muted)">{snap.cohorts.find((k) => k.id === e.cohortId)?.code} · <Pill tone={enrollmentTone[e.status]}>{ENROLLMENT_LABEL[e.status]}</Pill></div></div>
+                    <div className="min-w-0"><Link to="/passport" search={{ persona: p.id } as never} className="block truncate font-medium">{p.fullName}</Link><div className="truncate text-[12px] text-(--color-muted)">{snap.cohorts.find((k) => k.id === e.cohortId)?.code} · <Pill tone={enrollmentTone[e.status]}>{ENROLLMENT_LABEL[e.status]}</Pill></div></div>
                     <div className="hidden min-w-0 text-[13px] sm:block">{ic ? <><Link to="/contracts/$id" params={{ id: ic.id }} className="block truncate">{ic.title}</Link><Pill tone={contractTone[ic.status]}>{CONTRACT_STATUS_LABEL[ic.status]}</Pill></> : e.teamId ? `Team ${snap.teams.find((t) => t.id === e.teamId)?.name}` : <span className="text-(--color-muted)">No contract yet</span>}</div>
                     <div className="hidden text-[12px] text-(--color-muted) sm:block">{lastNote ? `Note ${fmtDate(lastNote.createdAt)}` : 'No notes'}</div>
                     <div className="flex justify-end"><Button size="sm" onClick={() => { setNoteFor(e.id); setNote(''); setClinicId(''); setErr(null) }}>Add note</Button></div>
@@ -63,6 +69,14 @@ export function CoachingPage() {
           </Section>
         </div>
       </div>
+      {briefingFor && (() => { const note = snap.guidanceNotes.filter((n) => n.kind === 'clinic_briefing' && n.contextId === briefingFor.id).sort((a, b) => b.createdAt.localeCompare(a.createdAt))[0]; const b = note?.content as BriefingOutput | undefined; const gen = async () => { setBriefBusy(true); setBriefErr(null); try { const r = await requestGuidance<BriefingOutput>({ kind: 'clinic_briefing', context: buildClinicContext(snap, briefingFor) }); await saveGuidance.mutateAsync(['clinic_briefing', briefingFor.id, r.output, r.model]) } catch (e) { setBriefErr((e as Error).message) } finally { setBriefBusy(false) } }; return (
+        <Dialog open onClose={() => setBriefingFor(null)} title={`Clinic ${briefingFor.clinicNo} briefing · ${snap.cohorts.find((k) => k.id === briefingFor.cohortId)?.code}`} subtitle="Expert Guidance briefs the human coach before each clinic from learners' evidence, plans and flags." width={760}
+          footer={<><Button variant="ghost" onClick={() => setBriefingFor(null)}>Close</Button><Button variant="primary" icon="stars-02" busy={briefBusy} onClick={gen}>{b ? 'Regenerate briefing' : 'Generate briefing'}</Button></>}>
+          {briefErr && <Notice tone="error" icon="alert-circle">{briefErr}</Notice>}
+          {briefBusy && <p className="text-[13px] text-(--color-muted)">Reading each learner's diagnostic, contract, evidence and notes…</p>}
+          {!b && !briefBusy && <p className="text-[13px] text-(--color-muted)">No briefing yet. Generate one to get per-learner status, focus and a suggested question, plus the clinic agenda.</p>}
+          {b && (<div className="space-y-4"><p className="font-medium">{b.headline}</p><ul className="divide-y divide-(--color-border)">{b.learners.map((l, i) => <li key={i} className="py-2"><div className="font-medium">{l.personaName} <span className="font-normal text-(--color-muted)">· {l.status}</span></div><div className="text-[13px]"><span className="text-(--color-muted)">Focus: </span>{l.focus}</div><div className="text-[13px]"><span className="text-(--color-muted)">Ask: </span>{l.suggestedQuestion}</div></li>)}</ul><div><div className="text-xs font-semibold uppercase tracking-wide text-(--color-faint)">Agenda</div><ol className="list-decimal pl-4 text-[13px]">{b.agenda.map((a, i) => <li key={i}>{a}</li>)}</ol></div><p className="text-[12px] text-(--color-faint)">Generated {fmtDate(note!.createdAt, true)} · {note!.model}</p></div>)}
+        </Dialog>) })()}
       <Dialog open={!!noteFor} onClose={() => setNoteFor(null)} title="Add coaching note" subtitle={noteFor ? personaName(snap, learners.find((e) => e.id === noteFor)?.personaId) : ''}
         footer={<><Button variant="ghost" onClick={() => setNoteFor(null)}>Cancel</Button><Button variant="primary" busy={addNote.isPending} onClick={async () => { if (!note.trim()) { setErr('Write the note.'); return } await addNote.mutateAsync([noteFor!, note, clinicId || null]); setNoteFor(null) }}>Save note</Button></>}>
         <div className="space-y-3">

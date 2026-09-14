@@ -107,11 +107,11 @@ function RolePanel() {
         {enr.length === 0 ? <EmptyState title="You are not enrolled in a program yet" body="The program office invites learners to cohorts. Your diagnostic and journey appear here once invited." /> : (
           <ul className="divide-y divide-(--color-border)">
             {enr.map((e) => { const c = snap.cohorts.find((x) => x.id === e.cohortId)!; const next = c.keyDates.find((k) => k.date >= new Date().toISOString().slice(0, 10)); return (
-              <li key={e.id} className="table-grid grid-cols-[1fr_auto] py-2 sm:grid-cols-[minmax(0,2fr)_140px_minmax(0,1.5fr)]">
+              <li key={e.id}><Link to="/journey" className="row-link table-grid grid-cols-[1fr_auto] px-2 py-2 sm:grid-cols-[minmax(0,2fr)_140px_minmax(0,1.5fr)]">
                 <div className="min-w-0"><div className="truncate font-medium">{c.name}</div><div className="text-[12px] text-(--color-muted)">{c.program === 'ABC' ? 'Skills-first capability accelerator' : 'Business competitiveness accelerator'}</div></div>
                 <div><Pill tone={enrollmentTone[e.status]}>{ENROLLMENT_LABEL[e.status]}</Pill></div>
                 <div className="hidden text-[13px] sm:block">{next ? <><span className="text-(--color-muted)">Next: </span>{next.label} · {fmtDate(next.date)}</> : <span className="text-(--color-muted)">Program completed</span>}</div>
-              </li>) })}
+              </Link></li>) })}
           </ul>
         )}
       </Section>
@@ -141,7 +141,7 @@ function RolePanel() {
         <ul className="divide-y divide-(--color-border)">
           {reports.map((p) => { const c = snap.impactContracts.find((x) => x.learnerId === p.id && !['withdrawn'].includes(x.status)); return (
             <li key={p.id} className="table-grid grid-cols-[1fr_auto] py-2 sm:grid-cols-[minmax(0,1.5fr)_minmax(0,2fr)_160px]">
-              <div className="min-w-0"><div className="truncate font-medium">{p.fullName}</div><div className="truncate text-[12px] text-(--color-muted)">{p.jobTitle}</div></div>
+              <div className="min-w-0"><Link to="/passport" search={{ persona: p.id } as never} className="block truncate font-medium">{p.fullName}</Link><div className="truncate text-[12px] text-(--color-muted)">{p.jobTitle}</div></div>
               <div className="hidden truncate text-[13px] sm:block">{c ? <Link to="/contracts/$id" params={{ id: c.id }}>{c.title}</Link> : <span className="text-(--color-muted)">No impact contract yet</span>}</div>
               <div>{c ? <Pill tone={contractTone[c.status]}>{CONTRACT_STATUS_LABEL[c.status]}</Pill> : <Pill>Not started</Pill>}</div>
             </li>) })}
@@ -155,11 +155,11 @@ function RolePanel() {
       <Section title="Your clinics" icon="message-chat-circle" actions={<Link to="/coaching" className="btn btn-secondary btn-sm">Open coaching workspace</Link>}>
         <ul className="divide-y divide-(--color-border)">
           {clinics.map((c) => (
-            <li key={c.id} className="table-grid grid-cols-[1fr_auto] py-2 sm:grid-cols-[minmax(0,2fr)_150px_150px]">
+            <li key={c.id}><Link to="/coaching" className="row-link table-grid grid-cols-[1fr_auto] px-2 py-2 sm:grid-cols-[minmax(0,2fr)_150px_150px]">
               <div className="min-w-0"><div className="truncate font-medium">Clinic {c.clinicNo} · {snap.cohorts.find((x) => x.id === c.cohortId)?.code}</div><div className="truncate text-[12px] text-(--color-muted)">{c.topics}</div></div>
               <div className="text-[13px]">{fmtDate(c.scheduledAt)}</div>
               <div>{c.briefingReady ? <Pill tone="success">Briefing ready</Pill> : <Pill tone="warning">Briefing not ready</Pill>}</div>
-            </li>
+            </Link></li>
           ))}
         </ul>
       </Section>

@@ -68,7 +68,10 @@ Server-side enforcement in the prototype: every write is a Postgres function tha
 | /ledger | Impact ledger | all except coach (scoped) |
 | /governance | Impact dashboard | sponsor, committee, office |
 | /taxonomy | Skills taxonomy (read-only) | office, committee, coach |
-| /ai-coach | Simulated AI coach (TH/EN) | learner, coach |
+| /assessment | AI skill diagnostic questionnaire → Expert Guidance | learner |
+| /ai-coach | Expert Guidance chat (TH/EN, Claude) | learner, coach |
+| /strategy | Strategy roadmap (sub-plans, components, enablers, live KPIs) | sponsor, committee, office |
+| /agenda | Capability agenda (value-to-skills cascade, build/buy/borrow/bot) | sponsor, committee, office |
 | /notifications | Updates history | all |
 
 ## 5. Requirement matrix (deck → implementation)
@@ -90,6 +93,13 @@ Server-side enforcement in the prototype: every write is a Postgres function tha
 | R13 | p5 04 | Integrated with HR core as single source of truth | — | Not connected (proposed) |
 | R14 | p5 05 | Annual sample audit of ledger | Program office audit action | Implemented |
 | R15 | Brief §13–14 | Guided introduction; page explainer | Tour, Explain this page | Implemented |
+| R16 | p6–7, p10 | AI skill diagnostic (Phase 0 assessment) mapping the six domains and picking priority skills | Assessment page → Expert Guidance diagnostic → gap map, passport levels, learning path | Implemented (Claude) |
+| R17 | p10 | Personalisation engine outputs: micro-learning plan, coaching points, application to role, application to project; re-personalised after every activity | Expert Guidance on journey and contract; refreshable; saved notes | Implemented (Claude) |
+| R18 | p11 | AI coach: navigator, activity guide, content expert, practice partner, progress mirror; TH/EN; grounded; briefs the human coach | Expert Guidance chat with module citations and human-coach flag; clinic briefing in coaching workspace | Implemented (Claude) |
+| R19 | p5 01 | Value-to-skills cascade; 3-year supply vs demand; THB at stake; build / buy / borrow / bot; fund biggest gaps first | Capability agenda page with decision + funding action | Implemented (fixtures + action) |
+| R20 | p3, p4, p5, p12 | Strategic plan, five components, applications, enablers timeline | Strategy roadmap page with live KPI values | Implemented |
+| R21 | p5 02, p12 | Role-level skill requirements published; promotion cases cite passport | Role requirements for next level on the passport | Implemented (proposed ladders) |
+| R22 | p5 04, p5 05 | Before / after uplift dashboards; talent review inputs; premiums; fast-track; incubation roles | Impact dashboard: skill uplift and career & rewards triggers | Implemented |
 
 ## 6. Integration register
 
@@ -97,8 +107,7 @@ Server-side enforcement in the prototype: every write is a Postgres function tha
 | --- | --- | --- |
 | Supabase Postgres (project `bczqgxqlvgbauvtkvdnu`) | Reads via publishable key; writes via RPC | Schema and seed prepared; **installation pending** (see README) |
 | HR core (talent profile sync) | Passport → HR | Proposed, not connected |
-| AI diagnostic / personalisation engine | Work data → gap map | Simulated |
-| AI coach (LLM, retrieval-grounded) | Chat | Simulated script |
+| Expert Guidance (Claude `claude-opus-5` via server-side function) | Assessment, journey, contract, coach chat, clinic briefing | Connected; key server-side; scripted fallback when unavailable |
 | Email / chat notifications | Out | Not connected; in-platform updates only |
 | SCG Start the Dot | Gate 3 route | Recorded as a label only |
 

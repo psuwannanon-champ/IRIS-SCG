@@ -16,7 +16,8 @@ export const NAV_GROUPS: NavGroup[] = [
   {
     label: 'Programs',
     items: [
-      { key: 'journey', label: 'My journey', to: '/journey', icon: 'route', roles: ['learner'], badgeKeys: ['journey'] },
+      { key: 'journey', label: 'My journey', to: '/journey', icon: 'route', roles: ['learner'] },
+      { key: 'assessment', label: 'Assessment', to: '/assessment', icon: 'clipboard-check', roles: ['learner'], badgeKeys: ['journey'] },
       { key: 'learning', label: 'Learning plan', to: '/learning', icon: 'book-open-01', roles: ['learner'], badgeKeys: ['learning'] },
       { key: 'team', label: 'My team', to: '/team', icon: 'users-01', roles: ['line_manager'] },
       { key: 'contracts', label: 'Impact contracts', to: '/contracts', icon: 'file-check-02', roles: ALL, badgeKeys: ['contracts'] },
@@ -38,13 +39,15 @@ export const NAV_GROUPS: NavGroup[] = [
     items: [
       { key: 'ledger', label: 'Impact ledger', to: '/ledger', icon: 'coins-stacked-01', roles: ['learner', 'line_manager', 'bu_sponsor', 'committee', 'program_office'], badgeKeys: ['ledger'] },
       { key: 'governance', label: 'Impact dashboard', to: '/governance', icon: 'bar-chart-square-02', roles: ['bu_sponsor', 'committee', 'program_office'] },
+      { key: 'strategy', label: 'Strategy roadmap', to: '/strategy', icon: 'compass-03', roles: ['bu_sponsor', 'committee', 'program_office'] },
+      { key: 'agenda', label: 'Capability agenda', to: '/agenda', icon: 'target-02', roles: ['bu_sponsor', 'committee', 'program_office'] },
       { key: 'taxonomy', label: 'Skills taxonomy', to: '/taxonomy', icon: 'layers-three-01', roles: ['program_office', 'committee', 'coach'] },
     ],
   },
   {
     label: 'Support',
     items: [
-      { key: 'ai-coach', label: 'AI coach', to: '/ai-coach', icon: 'stars-02', roles: ['learner', 'coach'] },
+      { key: 'ai-coach', label: 'Expert Guidance', to: '/ai-coach', icon: 'stars-02', roles: ['learner', 'coach'] },
       { key: 'notifications', label: 'Updates', to: '/notifications', icon: 'bell-01', roles: ALL },
     ],
   },

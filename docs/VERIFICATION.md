@@ -55,6 +55,17 @@ Date: 14 September 2026 · Environment: local Vite dev server, macOS, Chromium (
 | App header badge | "Connected to Supabase" |
 | Log week-5 evidence as Nara through the UI | Row present in `sprint_evidence`; manager notification "Nara Wongsuwan logged week 5 evidence" created by the function |
 
+## Assessment and Expert Guidance (added 14 Sep 2026, Supabase mode)
+
+| Test | Result |
+| --- | --- |
+| `POST /api/guidance` unknown kind (dev middleware) | 400 `Unknown guidance kind` |
+| Coach question via `runGuidance` script | Grounded reply citing CHG-01.2, ~500 tokens |
+| Nok completes assessment (12 self-ratings, 11 questions, role context) | Assessment row stored; Expert Guidance returned 12 items, 6 priorities, 12-module path with rationale tied to her answers and sprint dates (~70 s) |
+| Accept result | Diagnostic completed; 6 priority items; 12 plan items; enrollment diagnosed; guidance note saved |
+| Weekly guidance on journey | 3 priorities with module codes and actions; saved with `claude-opus-5` and requester |
+| Capability agenda decision as program office | Bot + funded recorded; row updated |
+
 ## Not verified / remaining limitations
 
 - Only the evidence-logging path was exercised against the real Supabase project; the other transitions were validated in PGlite with the same SQL.

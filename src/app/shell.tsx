@@ -51,7 +51,7 @@ export function AppShell() {
             <div key={g.label} className="mt-2">
               <div className="flex h-6 items-center justify-between px-2">
                 {!sidebarCollapsed && <span className="text-[11px] font-semibold uppercase tracking-wide text-(--color-faint)">{g.label}</span>}
-                {sidebarCollapsed && groupCount > 0 && <BadgeLink count={groupCount} to={`/tasks`} label={`${groupCount} tasks in ${g.label}`} />}
+                {sidebarCollapsed && <span className="sr-only">{g.label}{groupCount ? `, ${groupCount} tasks` : ''}</span>}
               </div>
               <ul className="mt-0.5 space-y-0.5">
                 {g.items.map((it) => {
@@ -60,12 +60,14 @@ export function AppShell() {
                   return (
                     <li key={it.key} className="flex items-center">
                       <Link to={it.to} aria-current={active ? 'page' : undefined} onClick={() => setMobileOpen(false)} data-tour={`nav-${it.key}`}
-                        className={`row-link flex h-9 min-w-0 flex-1 items-center gap-2.5 px-2 ${active ? 'bg-(--color-primary-soft) font-medium text-(--color-primary-strong)' : 'text-(--color-text)'}`}
-                        style={active ? { ['--icon-accent' as string]: 'var(--color-accent)' } : undefined} title={sidebarCollapsed ? it.label : undefined}>
+                        className={`row-link relative flex h-9 min-w-0 flex-1 items-center gap-2.5 px-2 ${sidebarCollapsed ? 'justify-center' : ''} ${active ? 'bg-(--color-primary-soft) font-medium text-(--color-primary-strong)' : 'text-(--color-text)'}`}
+                        style={active ? { ['--icon-accent' as string]: 'var(--color-accent)' } : undefined} title={sidebarCollapsed ? `${it.label}${count ? ` · ${count} task${count === 1 ? '' : 's'}` : ''}` : undefined}
+                        aria-label={sidebarCollapsed ? `${it.label}${count ? `, ${count} actionable task${count === 1 ? '' : 's'}` : ''}` : undefined}>
                         <Icon name={it.icon} size={18} />
                         {!sidebarCollapsed && <span className="truncate">{it.label}</span>}
+                        {sidebarCollapsed && count > 0 && <span aria-hidden="true" className="absolute right-1 top-1 grid h-4 min-w-4 place-items-center rounded-full bg-(--color-primary) px-1 text-[10px] font-semibold text-white">{count}</span>}
                       </Link>
-                      <span className="flex w-9 shrink-0 justify-center">{count > 0 && !sidebarCollapsed && <BadgeLink count={count} to={it.key === 'tasks' ? '/tasks' : `/tasks?group=${it.badgeKeys?.[0]}`} label={`${count} actionable ${it.label} task${count === 1 ? '' : 's'}`} />}</span>
+                      {!sidebarCollapsed && <span className="flex w-9 shrink-0 justify-center">{count > 0 && <BadgeLink count={count} to={it.key === 'tasks' ? '/tasks' : `/tasks?group=${it.badgeKeys?.[0]}`} label={`${count} actionable ${it.label} task${count === 1 ? '' : 's'}`} />}</span>}
                     </li>
                   )
                 })}
@@ -94,9 +96,7 @@ export function AppShell() {
         <header className="flex h-12 shrink-0 items-center gap-2 border-b border-(--color-border) bg-(--color-surface) px-3">
           <button type="button" className="btn btn-ghost btn-sm px-2 lg:hidden" onClick={() => setMobileOpen(true)} aria-label="Open navigation"><Icon name="menu-01" size={20} /></button>
           <div className="min-w-0 flex-1" data-tour="backend-status">
-            {backend === 'supabase'
-              ? <Pill tone="success" icon="database-01" title="Reads and writes go to the connected Supabase project">Connected to Supabase</Pill>
-              : <Pill tone="warning" icon="database-01" title={reason ?? undefined}>Local demo fixtures</Pill>}
+            {backend === 'local' && <Pill tone="warning" icon="database-01" title={reason ?? undefined}>Local demo fixtures</Pill>}
           </div>
           <Link to="/notifications" className="btn btn-ghost btn-sm relative px-2" aria-label={`Updates, ${unread} unread`} data-tour="updates">
             <Icon name="bell-01" size={18} />

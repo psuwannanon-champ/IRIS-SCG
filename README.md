@@ -31,6 +31,12 @@ Both migrations were applied to project `bczqgxqlvgbauvtkvdnu` (IRIS-SCG) on 14 
 
 Regenerate the seed after editing fixtures: `pnpm seed:sql`.
 
+## Assessment and Expert Guidance (Claude)
+
+- **Assessment** (`/assessment`): the Phase 0 AI skill diagnostic as a learner questionnaire (self-rating on the critical skills, knowledge check, role context).
+- **Expert Guidance**: Claude (`claude-opus-5`, structured JSON output) turns the assessment into a gap map, priority ranking and personal micro-learning path; gives weekly guidance on the journey; reviews impact-contract evidence; briefs coaches before clinics; and powers the always-on coach chat in Thai and English. Results are saved as guidance notes.
+- The Anthropic key lives **only on the server**: `ANTHROPIC_API_KEY` in `.env` (read by the Vite dev middleware at `/api/guidance`) and as a sensitive Vercel environment variable (read by the serverless function `api/guidance.ts`). The browser never sees it. If the service is unavailable the coach chat falls back to a labelled scripted answer and the assessment offers a simulated result.
+
 ## Hosting
 
 - GitHub: https://github.com/psuwannanon-champ/IRIS-SCG (branch `main`)
@@ -44,6 +50,7 @@ Vite 8 · React 19 · TypeScript · TanStack Router and Query · React Hook Form
 ## Known limitations
 
 - Persona switching replaces authentication; no passwords or service keys are in the browser.
+- Expert Guidance calls cost tokens per request (roughly 40–90 seconds per diagnostic at high effort). Rotate the Anthropic key before wider use; PDPA review is needed before real employee data is sent.
 - AI diagnostic, personalisation engine and AI coach are simulated and labelled as such.
 - HR core sync, email notifications and Start the Dot hand-off are not connected.
 - Cohort creation, team formation and marketplace shortlisting are not implemented.

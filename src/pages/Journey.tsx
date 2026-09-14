@@ -1,4 +1,6 @@
 import { Link } from '@tanstack/react-router'
+import { GuidancePanel } from '@/features/guidance/GuidancePanel'
+import { buildJourneyContext } from '@/features/guidance/api'
 import { useActor } from '@/app/actor'
 import { useAction } from '@/app/data'
 import { personaName } from '@/domain/selectors'
@@ -47,14 +49,15 @@ function JourneyBlock({ snap, e, actorId }: { snap: Snapshot; e: Enrollment; act
         {(e.topDecile || e.fastTrackBcd || e.impactRating) && <div className="mt-3 flex flex-wrap gap-1.5">{e.impactRating && <Pill tone="success">Impact rating: {e.impactRating.replace('_', ' ')}</Pill>}{e.topDecile && <Pill tone="primary">Top ~10%</Pill>}{e.fastTrackBcd && <Pill tone="accent">BCD fast-track</Pill>}</div>}
       </Section>
 
+      {dx?.status === 'completed' && <GuidancePanel personaId={actorId} kind="journey" contextId={e.id} title="Expert Guidance for this week" description="Three priorities, coaching points and how to apply your priority skills in role and project, generated from your diagnostic, contract, evidence and calendar." buildContext={() => buildJourneyContext(snap, snap.personas.find((p) => p.id === actorId)!, e)} canRequest tour="journey-guidance" />}
       <div className="grid gap-4 xl:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
         <Section title="AI skill diagnostic and gap map" icon="target-04" description="Current and target level per critical skill with the evidence source. Priority gaps drive your learning path and the skills verified at the showcase." id="gap-map">
           <div data-tour="gap-map">
           {!dx || dx.status === 'pending' ? (
-            <EmptyState icon="target-04" title="Diagnostic not completed" body="The half-day virtual assessment maps the six domains; the AI then picks your priority skills and builds your personal path. In this prototype the result is simulated and clearly labelled." action={<Button variant="primary" icon="stars-02" busy={run.isPending} onClick={() => run.mutate([])}>Run simulated diagnostic</Button>} />
+            <EmptyState icon="target-04" title="Diagnostic not completed" body="Rate yourself on the critical skills, answer a short knowledge check and describe your role. Expert Guidance maps your gaps, ranks priorities and builds your personal path." action={<div className="flex flex-wrap justify-center gap-2"><Link to="/assessment" className="btn btn-primary" data-tour="start-assessment">Start assessment</Link><Button variant="ghost" busy={run.isPending} onClick={() => run.mutate([])}>Use simulated result</Button></div>} />
           ) : (
             <>
-              <Notice tone="info" icon="stars-02"><strong>Summary (simulated AI):</strong> {dx.summary} <span className="text-(--color-faint)">Completed {fmtDate(dx.completedAt)}.</span></Notice>
+              <Notice tone="info" icon="stars-02"><strong>Diagnostic summary:</strong> {dx.summary} <span className="text-(--color-faint)">Completed {fmtDate(dx.completedAt)}.</span></Notice>
               <div className="table-grid mt-3 hidden grid-cols-[minmax(0,2fr)_90px_120px_minmax(0,1.6fr)] px-1 pb-1 text-[11px] font-semibold uppercase tracking-wide text-(--color-faint) sm:grid"><div>Skill</div><div>Priority</div><div>Level</div><div>Evidence</div></div>
               <ul className="divide-y divide-(--color-border)">
                 {items.map((i) => { const sk = snap.skills.find((s) => s.id === i.skillId)!; const gap = i.currentLevel === 0 ? 'not_assessed' : i.currentLevel >= i.targetLevel ? 'meets' : 'gap'; return (

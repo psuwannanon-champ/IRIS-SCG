@@ -32,7 +32,7 @@ export function MarketplacePage() {
           <ul className="divide-y divide-(--color-border)">
             {roles.map((r) => { const m = matchRole(snap, r, actor.id); const my = mine.find((i) => i.roleId === r.id); return (
               <li key={r.id} className="table-grid grid-cols-[minmax(0,1fr)_auto] py-3 xl:grid-cols-[minmax(0,2.2fr)_90px_minmax(0,1.6fr)_140px_130px]" data-tour="market-row">
-                <div className="min-w-0"><div className="font-medium">{r.title}</div><div className="truncate text-[12px] text-(--color-muted)">{snap.businessUnits.find((b) => b.id === r.buId)?.code} · owner {personaName(snap, r.ownerId)} · open until {fmtDate(r.openUntil)}</div></div>
+                <div className="min-w-0"><button type="button" className="text-left font-medium text-(--color-accent) hover:text-(--color-primary)" onClick={() => setOpen(r)}>{r.title}</button><div className="truncate text-[12px] text-(--color-muted)">{snap.businessUnits.find((b) => b.id === r.buId)?.code} · owner {personaName(snap, r.ownerId)} · open until {fmtDate(r.openUntil)}</div></div>
                 <div className="hidden xl:block"><Pill>{KIND[r.kind]}</Pill></div>
                 <div className="hidden flex-wrap gap-1 xl:flex">{m.rows.map((row) => <Pill key={row.requirement.skillId} tone={STATE[row.state].tone} icon={STATE[row.state].icon} title={`${row.skill?.name ?? 'Unknown skill'}: ${STATE[row.state].label}`}>{row.skill?.code ?? '?'} L{row.requirement.minLevel}</Pill>)}</div>
                 <div className="text-[13px]"><span className="font-semibold">{m.meets} of {m.total}</span> met <span className="text-(--color-faint)">({m.percent}%)</span></div>

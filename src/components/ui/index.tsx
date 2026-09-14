@@ -72,7 +72,7 @@ export function Stat({ label, value, hint, onClick, tone }: { label: string; val
     </>
   )
   return onClick ? (
-    <button type="button" onClick={onClick} className="surface brand-ring rounded-lg px-3 py-2.5 text-left transition hover:bg-[#F7F8FA]">{body}</button>
+    <button type="button" onClick={onClick} className="surface brand-ring relative rounded-lg px-3 py-2.5 pr-8 text-left transition hover:bg-[#F7F8FA]">{body}<span className="absolute right-2.5 top-2.5 text-(--color-faint)" aria-hidden="true"><Icon name="arrow-up-right" size={14} /></span></button>
   ) : (
     <div className="surface px-3 py-2.5">{body}</div>
   )

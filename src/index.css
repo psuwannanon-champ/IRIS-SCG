@@ -57,6 +57,9 @@ body {
 * { box-sizing: border-box; }
 a { color: var(--color-accent); text-decoration: none; }
 a:hover { color: var(--color-primary); text-decoration: none; }
+a.btn, a.btn:hover, a.row-link, a.row-link:hover, a.pill { color: inherit; }
+a.btn-primary, a.btn-primary:hover { color: #fff; }
+a.btn-danger, a.btn-danger:hover { color: var(--color-error); }
 button, input, select, textarea { font: inherit; color: inherit; }
 :focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; border-radius: var(--radius-sm); }
 @media (prefers-reduced-motion: reduce) {

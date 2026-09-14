@@ -538,3 +538,56 @@ export interface ChallengeBriefInput {
   targetValueThb: number | null
   constraints: string | null
 }
+
+/* ---------- Assessment and Expert Guidance ---------- */
+export interface AssessmentResponses {
+  selfRatings: Record<string, number | null> // skillId -> 1..4, null = not sure
+  knowledge: Record<string, number> // questionId -> chosen option index
+  roleFocus: string
+  currentInitiatives: string
+  biggestChallenge: string
+  preferredFormat: 'micro_video' | 'reading' | 'exercise' | 'simulation' | 'mixed'
+}
+export interface Assessment {
+  id: string
+  enrollmentId: string
+  personaId: string
+  responses: AssessmentResponses
+  submittedAt: string
+}
+export type GuidanceKind = 'diagnostic' | 'journey' | 'contract' | 'coach' | 'clinic_briefing'
+export interface GuidanceNote {
+  id: string
+  personaId: string
+  kind: GuidanceKind
+  contextId: string | null
+  content: unknown
+  model: string
+  createdBy: string | null
+  createdAt: string
+}
+export interface DiagnosticResult {
+  summary: string
+  items: { skillId: string; currentLevel: number; targetLevel: number; priorityRank: number | null; evidenceSource: EvidenceSource | null; rationale: string }[]
+  plan: { moduleId: string; reason: string }[]
+  skipped: { moduleId: string; reason: string }[]
+}
+
+/* ---------- Value-led capability agenda ---------- */
+export type GapDecision = 'undecided' | 'build' | 'buy' | 'borrow' | 'bot'
+export const GAP_DECISION_LABEL: Record<GapDecision, string> = { undecided: 'Not decided', build: 'Build (develop internally)', buy: 'Buy (hire)', borrow: 'Borrow (partner or contractor)', bot: 'Bot (automate)' }
+export interface CapabilityGap {
+  id: string
+  buId: string
+  valuePool: string
+  criticalRole: string
+  skillId: string
+  futureSkillNote: string
+  supplyFte: number
+  demandFte: number
+  thbValueAtRisk: number
+  decision: GapDecision
+  funded: boolean
+  decidedById: string | null
+  decidedAt: string | null
+}

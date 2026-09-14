@@ -4,7 +4,7 @@ import { fixtureBundle } from '@/data/fixtures'
 import type { Snapshot, DataSource, ContractAction, ContractActionPayload, BriefAction, BriefActionPayload, EvidenceInput } from '@/data/datasource'
 import { DomainError } from '@/data/datasource'
 import { CONTRACT_TRANSITIONS, BRIEF_TRANSITIONS, contractRelation, briefRelation, GATE_DECISIONS_BY_GATE } from '@/data/rules'
-import type { ChallengeBriefInput, ImpactContractInput, GateDecision, PassportEntry, Notification, RecordEvent } from '@/domain/types'
+import type { ChallengeBriefInput, ImpactContractInput, GateDecision, PassportEntry, Notification, RecordEvent, AssessmentResponses, DiagnosticResult, GuidanceKind, GapDecision } from '@/domain/types'
 
 const STORAGE_KEY = 'scg-capability-suite.local-snapshot.v1'
 
@@ -454,6 +454,64 @@ export class LocalDataSource implements DataSource {
     await delay(700)
     const reply = simulatedCoachReply(content, lang)
     this.snap.coachMessages.push({ id: uid('cm'), personaId: actorId, sender: 'coach', lang, content: reply.content, citedModuleId: reply.moduleId, createdAt: nowIso() })
+    this.write()
+  }
+
+  async appendCoachExchange(actorId: string, content: string, lang: 'th' | 'en', reply: string, citedModuleId: string | null) {
+    this.persona(actorId)
+    this.snap.coachMessages.push({ id: uid('cm'), personaId: actorId, sender: 'user', lang, content, citedModuleId: null, createdAt: nowIso() })
+    this.snap.coachMessages.push({ id: uid('cm'), personaId: actorId, sender: 'coach', lang, content: reply, citedModuleId, createdAt: nowIso() })
+    this.write()
+  }
+
+  async submitAssessment(actorId: string, enrollmentId: string, responses: AssessmentResponses) {
+    await delay(150)
+    const enr = this.snap.enrollments.find((e) => e.id === enrollmentId)
+    if (!enr || enr.personaId !== actorId) throw new DomainError('Only the learner can submit their own assessment.')
+    const id = uid('as')
+    this.snap.assessments.push({ id, enrollmentId, personaId: actorId, responses, submittedAt: nowIso() })
+    this.write()
+    return id
+  }
+
+  async completeDiagnostic(actorId: string, enrollmentId: string, result: DiagnosticResult) {
+    await delay(200)
+    const enr = this.snap.enrollments.find((e) => e.id === enrollmentId)
+    if (!enr || enr.personaId !== actorId) throw new DomainError('Only the learner can complete their diagnostic.')
+    let dx = this.snap.diagnostics.find((d) => d.enrollmentId === enrollmentId)
+    if (!dx) { dx = { id: uid('dx'), enrollmentId, status: 'pending', completedAt: null, summary: null }; this.snap.diagnostics.push(dx) }
+    if (dx.status === 'completed') throw new DomainError('The diagnostic is already completed.')
+    dx.status = 'completed'; dx.completedAt = nowIso(); dx.summary = result.summary
+    this.snap.diagnosticItems = this.snap.diagnosticItems.filter((i) => i.diagnosticId !== dx!.id)
+    for (const it of result.items) {
+      if (!this.snap.skills.some((s) => s.id === it.skillId)) continue
+      this.snap.diagnosticItems.push({ id: uid('dxi'), diagnosticId: dx.id, skillId: it.skillId, currentLevel: it.currentLevel, targetLevel: it.targetLevel, priorityRank: it.priorityRank, evidenceSource: it.evidenceSource, rationale: it.rationale })
+      if (it.currentLevel > 0) this.snap.passportEntries.push({ id: uid('pp'), personaId: actorId, skillId: it.skillId, level: it.currentLevel, tier: it.evidenceSource === 'self_declared' ? 'self_declared' : 'ai_inferred', sourceType: 'diagnostic', sourceId: dx.id, badgeCode: null, mintedAt: nowIso() })
+    }
+    this.snap.learningPlanItems = this.snap.learningPlanItems.filter((p) => p.enrollmentId !== enrollmentId)
+    let seq = 0
+    for (const p of result.plan) if (this.snap.learningModules.some((m) => m.id === p.moduleId)) this.snap.learningPlanItems.push({ id: uid('lp'), enrollmentId, moduleId: p.moduleId, sequence: ++seq, status: 'planned', reason: p.reason })
+    for (const p of result.skipped) if (this.snap.learningModules.some((m) => m.id === p.moduleId)) this.snap.learningPlanItems.push({ id: uid('lp'), enrollmentId, moduleId: p.moduleId, sequence: ++seq, status: 'skipped', reason: p.reason })
+    if (enr.status === 'invited') enr.status = 'diagnosed'
+    this.write()
+  }
+
+  async saveGuidance(actorId: string, personaId: string, kind: GuidanceKind, contextId: string | null, content: unknown, model: string) {
+    const actor = this.persona(actorId)
+    if (actorId !== personaId && !['coach', 'line_manager', 'bu_sponsor', 'program_office'].includes(actor.role)) throw new DomainError('You can only save guidance for yourself or for people you support.')
+    const id = uid('gn')
+    this.snap.guidanceNotes.push({ id, personaId, kind, contextId, content, model, createdBy: actorId, createdAt: nowIso() })
+    this.write()
+    return id
+  }
+
+  async setGapDecision(actorId: string, gapId: string, decision: GapDecision, funded: boolean) {
+    await delay(150)
+    const actor = this.persona(actorId)
+    if (!['program_office', 'committee'].includes(actor.role)) throw new DomainError('Only the program office or the committee records build / buy / borrow / bot decisions.')
+    const g = this.snap.capabilityGaps.find((x) => x.id === gapId)
+    if (!g) throw new DomainError('Gap not found.')
+    g.decision = decision; g.funded = funded; g.decidedById = actorId; g.decidedAt = nowIso()
     this.write()
   }
 

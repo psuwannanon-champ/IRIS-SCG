@@ -19,6 +19,9 @@ import { LedgerPage } from '@/pages/Ledger'
 import { GovernancePage } from '@/pages/Governance'
 import { TaxonomyPage } from '@/pages/Taxonomy'
 import { AiCoachPage } from '@/pages/AiCoach'
+import { AssessmentPage } from '@/pages/Assessment'
+import { StrategyPage } from '@/pages/Strategy'
+import { AgendaPage } from '@/pages/Agenda'
 import { TourPage, TourOverlay } from '@/features/tour/Tour'
 import { NAV_GROUPS } from '@/app/nav'
 
@@ -45,6 +48,7 @@ const routes = [
   r('/notifications', NotificationsPage, { validateSearch: listSearch }),
   r('/journey', guarded('journey', JourneyPage)),
   r('/learning', guarded('learning', LearningPage)),
+  r('/assessment', guarded('assessment', AssessmentPage)),
   r('/team', guarded('team', TeamPage)),
   r('/contracts', ContractsPage, { validateSearch: listSearch }),
   r('/contracts/new', ContractNewPage),
@@ -61,6 +65,8 @@ const routes = [
   r('/marketplace', guarded('marketplace', MarketplacePage)),
   r('/ledger', guarded('ledger', LedgerPage), { validateSearch: listSearch }),
   r('/governance', guarded('governance', GovernancePage)),
+  r('/strategy', guarded('strategy', StrategyPage)),
+  r('/agenda', guarded('agenda', AgendaPage), { validateSearch: (s: Record<string, unknown>) => ({ bu: (s.bu as string) ?? '' }) }),
   r('/taxonomy', guarded('taxonomy', TaxonomyPage), { validateSearch: listSearch }),
   r('/ai-coach', guarded('ai-coach', AiCoachPage)),
 ]

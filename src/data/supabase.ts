@@ -1,7 +1,7 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import type { Snapshot, DataSource, ContractAction, ContractActionPayload, BriefAction, BriefActionPayload, EvidenceInput } from '@/data/datasource'
 import { DomainError } from '@/data/datasource'
-import type { ChallengeBriefInput, ImpactContractInput, GateDecision } from '@/domain/types'
+import type { ChallengeBriefInput, ImpactContractInput, GateDecision, AssessmentResponses, DiagnosticResult, GuidanceKind, GapDecision } from '@/domain/types'
 import { simulatedCoachReply } from '@/data/local'
 
 const TABLES: Record<keyof Snapshot, string> = {
@@ -10,7 +10,7 @@ const TABLES: Record<keyof Snapshot, string> = {
   impactContracts: 'impact_contracts', sprintEvidence: 'sprint_evidence', challengeThemes: 'challenge_themes', challengeBriefs: 'challenge_briefs', teams: 'teams',
   concepts: 'concepts', gateReviews: 'gate_reviews', coachingClinics: 'coaching_clinics', coachingNotes: 'coaching_notes', coachScorecards: 'coach_scorecards',
   passportEntries: 'passport_entries', ledgerEntries: 'ledger_entries', marketplaceRoles: 'marketplace_roles', marketplaceInterests: 'marketplace_interests',
-  notifications: 'notifications', coachMessages: 'coach_messages', recordEvents: 'record_events',
+  notifications: 'notifications', coachMessages: 'coach_messages', recordEvents: 'record_events', assessments: 'assessments', guidanceNotes: 'guidance_notes', capabilityGaps: 'capability_gaps',
 }
 
 export const toSnake = (s: string) => s.replace(/[A-Z]/g, (m) => `_${m.toLowerCase()}`)
@@ -20,6 +20,11 @@ function camelRow<T>(row: Record<string, unknown>): T {
   const out: Record<string, unknown> = {}
   for (const [k, v] of Object.entries(row)) out[toCamel(k)] = v
   return out as T
+}
+function deepSnake(v: unknown): unknown {
+  if (Array.isArray(v)) return v.map(deepSnake)
+  if (v && typeof v === 'object') { const out: Record<string, unknown> = {}; for (const [k, x] of Object.entries(v as Record<string, unknown>)) out[toSnake(k)] = deepSnake(x); return out }
+  return v
 }
 function snakeObj(obj: object) {
   const out: Record<string, unknown> = {}
@@ -107,6 +112,21 @@ export class SupabaseDataSource implements DataSource {
     // The AI coach is simulated in the prototype; the reply is generated from a fixed, program-grounded script.
     const reply = simulatedCoachReply(content, lang)
     await this.rpc('append_coach_messages', { p_actor: actorId, p_content: content, p_lang: lang, p_reply: reply.content, p_module: reply.moduleId })
+  }
+  appendCoachExchange(actorId: string, content: string, lang: 'th' | 'en', reply: string, citedModuleId: string | null) {
+    return this.rpc('append_coach_messages', { p_actor: actorId, p_content: content, p_lang: lang, p_reply: reply, p_module: citedModuleId })
+  }
+  submitAssessment(actorId: string, enrollmentId: string, responses: AssessmentResponses) {
+    return this.rpc<string>('submit_assessment', { p_actor: actorId, p_enrollment: enrollmentId, p_responses: responses })
+  }
+  completeDiagnostic(actorId: string, enrollmentId: string, result: DiagnosticResult) {
+    return this.rpc('complete_diagnostic', { p_actor: actorId, p_enrollment: enrollmentId, p_result: deepSnake(result) })
+  }
+  saveGuidance(actorId: string, personaId: string, kind: GuidanceKind, contextId: string | null, content: unknown, model: string) {
+    return this.rpc<string>('save_guidance', { p_actor: actorId, p_persona: personaId, p_kind: kind, p_context: contextId, p_content: content, p_model: model })
+  }
+  setGapDecision(actorId: string, gapId: string, decision: GapDecision, funded: boolean) {
+    return this.rpc('set_gap_decision', { p_actor: actorId, p_gap: gapId, p_decision: decision, p_funded: funded })
   }
   resetDemo() {
     return this.rpc('reset_demo', {})

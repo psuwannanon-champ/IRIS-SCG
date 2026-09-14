@@ -1,6 +1,7 @@
 import { Link, useSearch } from '@tanstack/react-router'
 import { useActor } from '@/app/actor'
 import { bestEntry } from '@/domain/selectors'
+import { ROLE_LADDERS, nextLevel } from '@/data/strategy-content'
 import { PageHeader, Section, LoadingBlock, ErrorBlock, EmptyState, Pill, Notice, DL } from '@/components/ui'
 import { TIER_LABEL, ROLE_LABEL } from '@/domain/types'
 import { tierTone } from '@/domain/status'
@@ -56,6 +57,16 @@ export function PassportPage() {
           <Section title="Program outcomes" icon="trophy-01" description="Standing inputs to talent reviews and succession.">
             {enr.length === 0 ? <p className="text-[13px] text-(--color-muted)">No programs yet.</p> : <ul className="space-y-2 text-[13px]">{enr.map((e) => { const c = snap.cohorts.find((k) => k.id === e.cohortId)!; return <li key={e.id}><div className="font-medium">{c.name}</div><div className="flex flex-wrap gap-1 pt-1">{e.impactRating && <Pill tone="success">Impact rating: {e.impactRating.replace('_', ' ')}</Pill>}{e.topDecile && <Pill tone="primary">Top ~10%</Pill>}{e.fastTrackBcd && <Pill tone="accent">BCD fast-track</Pill>}{!e.impactRating && !e.topDecile && <Pill>{e.status.replace('_', ' ')}</Pill>}</div></li> })}</ul>}
           </Section>
+          {(() => { const ladder = ROLE_LADDERS.find((l) => l.match(subject.jobTitle, subject.functionType)); const lvl = nextLevel(subject.level); const reqs = ladder?.levels[lvl]; return (
+            <Section title={`Role requirements · next level ${lvl}`} icon="flag-01" description={ladder ? `Published skill requirements for ${ladder.family} at ${lvl} (proposed configuration, to be confirmed by CHR). Promotion cases cite passport evidence.` : 'No role ladder configured for this job family yet.'} tour="passport-requirements">
+              {!reqs ? <p className="text-[13px] text-(--color-muted)">Requirements for {lvl} are not configured.</p> : (
+                <ul className="divide-y divide-(--color-border)">
+                  {reqs.map((r) => { const sk = snap.skills.find((s) => s.id === r.skillId)!; const best = bestEntry(entries, r.skillId); const state = !best ? 'Not assessed' : best.level >= r.minLevel && best.tier === 'outcome_verified' ? 'Meets requirement' : best.level >= r.minLevel ? 'Level met · verification pending' : 'Needs development'; const t = state === 'Meets requirement' ? 'success' : state === 'Not assessed' ? 'neutral' : state.startsWith('Level met') ? 'info' : 'warning'; return (
+                    <li key={r.skillId} className="flex items-center justify-between gap-2 py-2 text-[13px]"><div className="min-w-0"><div className="truncate font-medium">{sk.name}</div><div className="text-[12px] text-(--color-muted)">Required L{r.minLevel} verified · you: {best ? `L${best.level} (${TIER_LABEL[best.tier]})` : 'no evidence'}</div></div><Pill tone={t}>{state}</Pill></li>) })}
+                </ul>
+              )}
+              <p className="mt-2 text-[12px] text-(--color-faint)">Meets requirement needs an outcome-verified badge at or above the required level. Missing evidence is not a failure; close it through ABC / BCD or verification at work.</p>
+            </Section>) })()}
           <Section title="Where this passport is used" icon="link-external-01">
             <ul className="space-y-1 text-[13px]"><li><Link to="/marketplace">Talent marketplace</Link>: roles, projects and gigs matched on verified skills.</li><li>Promotion cases cite passport evidence (policy pack, People Committee).</li><li>Sync to the HR core talent profile: proposed integration, not connected in this prototype.</li></ul>
           </Section>
