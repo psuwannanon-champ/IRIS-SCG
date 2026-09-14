@@ -3,7 +3,7 @@
 Source: *People Strategic Plan Formulation for MTP 2027 — Modernize SCG Capability Development* (IRIS, 2 Aug 2026, 14 pages).
 Status set 14 Sep 2026, re-checked in the browser against the live Supabase backend. `[x]` = implemented and verified end to end.
 
-**23 of 24 closed.** Item 20 stays open: it needs promotion events from the HR core, which the demo dataset does not contain.
+**24 of 25 closed.** Item 20 stays open: it needs promotion events from the HR core, which the demo dataset does not contain. Item 25 was found in a second full read of the deck after the first sweep, and is now closed.
 
 ## Tier 1 · Features the deck sells that the platform could not show
 
@@ -48,3 +48,9 @@ Status set 14 Sep 2026, re-checked in the browser against the live Supabase back
 | 22 | Teams align with management before validation (p8, p9) | [x] Concepts · management alignment section records the alignment before validation. |
 | 23 | Milestones Q1–Q4 with owners carry a status (p3) | [x] Strategy roadmap · Q1–Q4 milestones with owners and an editable status. |
 | 24 | Thai interface for learner-facing surfaces (adoption risk) | [x] Thai/English switch in the shell; navigation, Home, My journey, Learning, Labs and Assessment translated. Governance and admin screens stay English by design. |
+
+## Tier 5 · Found in the re-audit (second full read of the deck)
+
+| # | Deck claim (page) | Status |
+| --- | --- | --- |
+| 25 | "Launchable SCG org-wide: mass assessment and personalized learning for every employee"; "Baseline the organization in waves; Passport from day one" (p4, p5, p10) | [x] Assessment and the passport were cohort-only: every diagnostic hung off an enrolment, so a non-enrolled employee had no passport and could not be read by the marketplace or a talent review. Migration `0015_org_wide_baseline.sql` makes the diagnostic belong to the person; any employee can baseline themselves and mint AI-inferred levels. The program office sees population coverage on the Assessments page. |

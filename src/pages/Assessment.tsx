@@ -4,7 +4,7 @@ import { useActor } from '@/app/actor'
 import { useAction } from '@/app/data'
 import { knowledgeQuestions, SELF_RATING_OPTIONS } from '@/data/assessment-content'
 import { skillsForProgram } from '@/domain/selectors'
-import { requestGuidance, buildDiagnosticContext, toDiagnosticResult, type DiagnosticOutput } from '@/features/guidance/api'
+import { requestGuidance, buildDiagnosticContext, buildBaselineContext, toDiagnosticResult, type DiagnosticOutput } from '@/features/guidance/api'
 import { PageHeader, Section, LoadingBlock, ErrorBlock, EmptyState, Button, Field, Notice, Pill } from '@/components/ui'
 import type { AssessmentResponses, DiagnosticResult } from '@/domain/types'
 import { useT } from '@/app/i18n'
@@ -26,17 +26,22 @@ export function AssessmentPage() {
   const complete = useAction((ds, enrollmentId: string, r: DiagnosticResult) => ds.completeDiagnostic(actor!.id, enrollmentId, r), 'Diagnostic completed. Your personal learning path is ready.')
   const saveGuidance = useAction((ds, content: unknown, model: string) => ds.saveGuidance(actor!.id, actor!.id, 'diagnostic', enrollment?.id ?? null, content, model))
   const simulated = useAction((ds, enrollmentId: string) => ds.runDiagnostic(actor!.id, enrollmentId), 'Simulated diagnostic completed.')
+  const submitBaseline = useAction((ds, responses: AssessmentResponses) => ds.submitBaselineAssessment(actor!.id, responses))
+  const completeBaseline = useAction((ds, r: DiagnosticResult) => ds.completeBaselineDiagnostic(actor!.id, r), 'Baseline complete. Your passport now holds AI-inferred levels.')
 
   const enrollment = useMemo(() => snap && actor ? snap.enrollments.find((e) => e.personaId === actor.id && !['graduated', 'withdrawn'].includes(e.status) && (snap.diagnostics.find((d) => d.enrollmentId === e.id)?.status ?? 'pending') === 'pending') ?? null : null, [snap, actor])
   if (status === 'loading') return <LoadingBlock />
   if (status === 'error' || !snap || !actor) return <ErrorBlock message={error ?? ''} onRetry={refetch} />
-  if (!enrollment) {
-    const done = snap.enrollments.some((e) => e.personaId === actor.id)
-    return (<><PageHeader title="Assessment" description="The AI skill diagnostic that starts every journey." /><EmptyState icon="clipboard-check" title={done ? 'Your diagnostic is already complete' : 'No program to assess for'} body={done ? 'Your gap map and personal path are on My journey. Re-assessment happens at the next program intake.' : 'The program office invites learners to cohorts; the assessment opens once you are enrolled.'} action={<Link to="/journey" className="btn btn-secondary">Open my journey</Link>} /></>)
+  const baseline = !enrollment
+  const myBaseline = snap.diagnostics.find((d) => d.personaId === actor.id && d.enrollmentId === null) ?? null
+  if (baseline && (myBaseline?.status === 'completed' || snap.enrollments.some((e) => e.personaId === actor.id))) {
+    const enrolled = snap.enrollments.some((e) => e.personaId === actor.id)
+    return (<><PageHeader title="Assessment" description="The AI skill diagnostic that starts every journey." /><EmptyState icon="clipboard-check" title={enrolled ? 'Your diagnostic is already complete' : 'Your skill baseline is already complete'} body={enrolled ? 'Your gap map and personal path are on My journey. Re-assessment happens at the next program intake.' : 'Your AI-inferred levels are on your skill passport. A personal learning path opens when you join an ABC or BCD cohort.'} action={<Link to={enrolled ? '/journey' : '/passport'} className="btn btn-secondary">{enrolled ? 'Open my journey' : 'Open my passport'}</Link>} /></>)
   }
-  const cohort = snap.cohorts.find((c) => c.id === enrollment.cohortId)!
-  const skills = skillsForProgram(snap, cohort.program)
-  const questions = knowledgeQuestions.filter((q) => q.program === cohort.program)
+  const cohort = enrollment ? snap.cohorts.find((c) => c.id === enrollment.cohortId)! : null
+  const criticalCodes = new Set(snap.skills.filter((k) => k.critical).map((k) => k.code))
+  const skills = cohort ? skillsForProgram(snap, cohort.program) : snap.skills.filter((k) => k.critical)
+  const questions = cohort ? knowledgeQuestions.filter((q) => q.program === cohort.program) : knowledgeQuestions.filter((q) => criticalCodes.has(q.skillCode))
   const responses: AssessmentResponses = { selfRatings, knowledge, ...ctx }
   const ratedAll = skills.every((k) => k.id in selfRatings)
   const answeredAll = questions.every((q) => q.id in knowledge)
@@ -44,8 +49,9 @@ export function AssessmentPage() {
   const runDiagnostic = async () => {
     setBusy(true); setErrText(null)
     try {
-      await submitAssessment.mutateAsync([enrollment.id, responses])
-      const r = await requestGuidance<DiagnosticOutput>({ kind: 'diagnostic', context: buildDiagnosticContext(snap, actor, enrollment, responses) })
+      if (enrollment) await submitAssessment.mutateAsync([enrollment.id, responses])
+      else await submitBaseline.mutateAsync([responses])
+      const r = await requestGuidance<DiagnosticOutput>({ kind: 'diagnostic', context: enrollment ? buildDiagnosticContext(snap, actor, enrollment, responses) : buildBaselineContext(snap, actor, responses) })
       setResult({ output: r.output, mapped: toDiagnosticResult(snap, r.output), model: r.model })
       setStep(3)
     } catch (e) { setErrText((e as Error).message) } finally { setBusy(false) }
@@ -54,15 +60,16 @@ export function AssessmentPage() {
     if (!result) return
     setBusy(true)
     try {
-      await complete.mutateAsync([enrollment.id, result.mapped])
+      if (enrollment) await complete.mutateAsync([enrollment.id, result.mapped])
+      else await completeBaseline.mutateAsync([result.mapped])
       await saveGuidance.mutateAsync([result.output, result.model])
-      nav({ to: '/journey' })
+      nav({ to: enrollment ? '/journey' : '/passport' })
     } finally { setBusy(false) }
   }
 
   return (
     <>
-      <PageHeader kicker={cohort.name} title={t('AI skill diagnostic')} description="About 20 minutes. Rate yourself on the critical skills, answer a short knowledge check and describe your role context. Expert Guidance then maps your gaps, ranks priorities by skill gap × role relevance × project need, and builds your personal micro-learning path." />
+      <PageHeader kicker={cohort ? cohort.name : 'Org-wide skill baseline'} title={t('AI skill diagnostic')} description={cohort ? 'About 20 minutes. Rate yourself on the critical skills, answer a short knowledge check and describe your role context. Expert Guidance then maps your gaps, ranks priorities by skill gap × role relevance × project need, and builds your personal micro-learning path.' : 'About 15 minutes, open to every employee whether or not you are in a cohort. Rate yourself on the critical skills, answer a short knowledge check and describe your role. Expert Guidance infers your current levels and writes them to your skill passport, so your skills count from day one. The personal learning path opens when you join an ABC or BCD cohort.'} />
       <ol className="mb-4 flex flex-wrap gap-1.5" aria-label="Steps">{STEPS.map((s, i) => <li key={s}><Pill tone={i === step ? 'primary' : i < step ? 'success' : 'neutral'}>{i + 1}. {s}</Pill></li>)}</ol>
 
       {step === 0 && (
@@ -108,9 +115,9 @@ export function AssessmentPage() {
             <Field label="Live initiatives or projects you are part of" hint="Turnaround, automation or service initiatives count.">{(id) => <textarea id={id} className="field-input" rows={2} value={ctx.currentInitiatives} onChange={(e) => setCtx({ ...ctx, currentInitiatives: e.target.value })} />}</Field>
             <Field label="Biggest challenge in your work right now" required>{(id) => <textarea id={id} className="field-input" rows={2} value={ctx.biggestChallenge} onChange={(e) => setCtx({ ...ctx, biggestChallenge: e.target.value })} />}</Field>
             <Field label="Preferred learning format">{(id) => <select id={id} className="field-input max-w-xs" value={ctx.preferredFormat} onChange={(e) => setCtx({ ...ctx, preferredFormat: e.target.value as AssessmentResponses['preferredFormat'] })}><option value="mixed">Mixed</option><option value="micro_video">Micro video</option><option value="reading">Reading</option><option value="exercise">Exercise</option><option value="simulation">Simulation</option></select>}</Field>
-            {errText && <Notice tone="error" icon="alert-circle">{errText} <Button size="sm" variant="ghost" className="ml-2" onClick={async () => { await simulated.mutateAsync([enrollment.id]); nav({ to: '/journey' }) }}>Use simulated result instead</Button></Notice>}
+            {errText && <Notice tone="error" icon="alert-circle">{errText}{enrollment && <Button size="sm" variant="ghost" className="ml-2" onClick={async () => { await simulated.mutateAsync([enrollment.id]); nav({ to: '/journey' }) }}>Use simulated result instead</Button>}</Notice>}
             <div className="flex items-center justify-between gap-2"><Button variant="ghost" onClick={() => setStep(1)}>Back</Button><Button variant="primary" icon="stars-02" busy={busy} disabled={!ctx.roleFocus.trim() || !ctx.biggestChallenge.trim()} onClick={runDiagnostic}>Submit and run Expert Guidance</Button></div>
-            {busy && <p className="text-[13px] text-(--color-muted)">Expert Guidance is analysing your answers against the {skills.length} critical skills and the {cohort.program} module catalogue. This takes about a minute.</p>}
+            {busy && <p className="text-[13px] text-(--color-muted)">Expert Guidance is analysing your answers against the {skills.length} critical skills{cohort ? ` and the ${cohort.program} module catalogue` : ''}. This takes about a minute.</p>}
           </div>
         </Section>
       )}
@@ -129,12 +136,14 @@ export function AssessmentPage() {
                 </li>) })}
             </ul>
           </Section>
+          {enrollment ? (
           <Section title="Personal micro-learning path" icon="book-open-01">
             <ol className="space-y-1.5 text-[13px]">{result.mapped.plan.map((p, i) => { const m = snap.learningModules.find((x) => x.id === p.moduleId)!; return <li key={p.moduleId}><span className="font-medium">{i + 1}. {m.code} · {m.title}</span> <span className="text-(--color-muted)">· {p.reason}</span></li> })}</ol>
             {result.mapped.skipped.length > 0 && <div className="mt-2 text-[12px] text-(--color-muted)">Skipped: {result.mapped.skipped.map((p) => `${snap.learningModules.find((x) => x.id === p.moduleId)?.code} (${p.reason})`).join('; ')}</div>}
             {result.output.coachingPoints?.length > 0 && <div className="mt-3"><div className="text-xs font-semibold uppercase tracking-wide text-(--color-faint)">Pushed to your coach before clinic 1</div><ul className="list-disc pl-4 text-[13px]">{result.output.coachingPoints.map((c, i) => <li key={i}>{c}</li>)}</ul></div>}
           </Section>
-          <div className="flex items-center justify-between gap-2"><Button variant="ghost" onClick={() => setStep(2)}>Back to answers</Button><Button variant="primary" busy={busy} onClick={accept}>Accept and build my path</Button></div>
+          ) : <Notice tone="info" icon="info-circle">No learning path yet: a personal path is built inside a cohort. Accepting writes these AI-inferred levels to your passport, where the marketplace and your next talent review can already read them.</Notice>}
+          <div className="flex items-center justify-between gap-2"><Button variant="ghost" onClick={() => setStep(2)}>Back to answers</Button><Button variant="primary" busy={busy} onClick={accept}>{enrollment ? 'Accept and build my path' : 'Accept and update my passport'}</Button></div>
         </div>
       )}
     </>

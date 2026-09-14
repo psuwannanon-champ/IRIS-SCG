@@ -472,6 +472,32 @@ export class LocalDataSource implements DataSource {
     this.write()
   }
 
+  async submitBaselineAssessment(actorId: string, responses: AssessmentResponses) {
+    await delay(150); this.persona(actorId)
+    const id = uid('as')
+    this.snap.assessments.push({ id, enrollmentId: null, personaId: actorId, responses, submittedAt: nowIso() })
+    this.write()
+    return id
+  }
+
+  /** Org-wide baseline: mints passport levels for anyone, enrolled or not. No learning plan; that needs a cohort. */
+  async completeBaselineDiagnostic(actorId: string, result: DiagnosticResult) {
+    await delay(200); this.persona(actorId)
+    let dx = this.snap.diagnostics.find((d) => d.personaId === actorId && d.enrollmentId === null)
+    if (!dx) { dx = { id: uid('dx'), enrollmentId: null, personaId: actorId, status: 'pending', completedAt: null, summary: null }; this.snap.diagnostics.push(dx) }
+    if (dx.status === 'completed') throw new DomainError('Your baseline is already complete.')
+    dx.status = 'completed'; dx.completedAt = nowIso(); dx.summary = result.summary
+    this.snap.diagnosticItems = this.snap.diagnosticItems.filter((i) => i.diagnosticId !== dx!.id)
+    for (const it of result.items) {
+      if (!this.snap.skills.some((k) => k.id === it.skillId)) continue
+      this.snap.diagnosticItems.push({ id: uid('dxi'), diagnosticId: dx.id, skillId: it.skillId, currentLevel: it.currentLevel, targetLevel: it.targetLevel, priorityRank: it.priorityRank, evidenceSource: it.evidenceSource, rationale: it.rationale })
+      if (it.currentLevel > 0) this.snap.passportEntries.push({ id: uid('pp'), personaId: actorId, skillId: it.skillId, level: it.currentLevel, tier: it.evidenceSource === 'self_declared' ? 'self_declared' : 'ai_inferred', sourceType: 'diagnostic', sourceId: dx.id, badgeCode: null, mintedAt: nowIso() })
+    }
+    this.notify(actorId, 'Your skill baseline is ready', 'Your passport now holds AI-inferred levels. A personal learning path opens when you join an ABC or BCD cohort.', '/passport')
+    this.event({ recordType: 'persona', recordId: actorId, actorId, action: 'baseline_diagnostic', fromStatus: 'none', toStatus: 'baselined', note: 'Org-wide skill baseline completed.' })
+    this.write()
+  }
+
   async submitAssessment(actorId: string, enrollmentId: string, responses: AssessmentResponses) {
     await delay(150)
     const enr = this.snap.enrollments.find((e) => e.id === enrollmentId)
@@ -487,7 +513,7 @@ export class LocalDataSource implements DataSource {
     const enr = this.snap.enrollments.find((e) => e.id === enrollmentId)
     if (!enr || enr.personaId !== actorId) throw new DomainError('Only the learner can complete their diagnostic.')
     let dx = this.snap.diagnostics.find((d) => d.enrollmentId === enrollmentId)
-    if (!dx) { dx = { id: uid('dx'), enrollmentId, status: 'pending', completedAt: null, summary: null }; this.snap.diagnostics.push(dx) }
+    if (!dx) { dx = { id: uid('dx'), enrollmentId, personaId: actorId, status: 'pending', completedAt: null, summary: null }; this.snap.diagnostics.push(dx) }
     if (dx.status === 'completed') throw new DomainError('The diagnostic is already completed.')
     dx.status = 'completed'; dx.completedAt = nowIso(); dx.summary = result.summary
     this.snap.diagnosticItems = this.snap.diagnosticItems.filter((i) => i.diagnosticId !== dx!.id)

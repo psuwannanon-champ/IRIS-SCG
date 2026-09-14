@@ -55,6 +55,7 @@ Everything the deck sells is executable in the platform, not just displayed. `do
 - **Talent and rewards**: recognition records, L2 / L3 succession pools, an AI talent-review pack and an employment-status toggle that feeds the retention measure.
 - **Scale and policy**: package a validated success case as a micro-module, decide policy items in one People Committee resolution, record taxonomy review cycles, and track Q1–Q4 milestones with owners and status.
 - **Thai interface**: a language switch in the shell translates the navigation and the learner journey. Governance and admin screens stay English by design, which the switch states.
+- **Org-wide baseline**: an employee with no cohort seat can run the same AI diagnostic and mint AI-inferred passport levels, so skills count from day one. The program office tracks population coverage on the Assessments page. The personal learning path still belongs to a cohort.
 - Still open: **% promotions citing verified skills**. It needs promotion events from the HR core, which the demo dataset does not contain.
 
 ## Hosting

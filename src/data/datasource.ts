@@ -98,6 +98,8 @@ export interface DataSource {
   markInterestPlaced(actorId: string, interestId: string): Promise<void>
   packageCaseAsModule(actorId: string, contractId: string, input: { title: string; skillCode: string; durationMin: number; body: { whatChanged: string; howToRepeat: string[]; provenResult: string } }): Promise<string>
   decidePolicyItem(actorId: string, itemId: string, status: PolicyStatus, effectiveFrom: string | null, resolutionRef: string, note: string): Promise<void>
+  submitBaselineAssessment(actorId: string, responses: AssessmentResponses): Promise<string>
+  completeBaselineDiagnostic(actorId: string, result: DiagnosticResult): Promise<void>
   submitGatePack(actorId: string, gateId: string, summary: string, evidence: GateEvidence | null, businessCase: GateBusinessCase | null, attachments: GateAttachment[]): Promise<void>
   createPod(actorId: string, cohortId: string, name: string, coachId: string | null): Promise<string>
   assignPod(actorId: string, enrollmentId: string, podId: string | null): Promise<void>

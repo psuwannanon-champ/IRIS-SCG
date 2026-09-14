@@ -133,6 +133,7 @@ Server-side enforcement in the prototype: every write is a Postgres function tha
 | R48 | p3 | Milestones Q1–Q4 with owners and status | Plan milestones on the strategy roadmap with an editable status | Implemented |
 | R49 | adoption risk | Thai interface for learner-facing surfaces | Thai / English switch in the shell; navigation and the learner journey translated, governance screens English by design | Implemented (partial by design) |
 | R50 | p3 KPI 1.4 | % promotions citing verified skills | Not computable: the demo dataset has no promotion events; the simulated HR core connector carries the field | Not implemented |
+| R51 | p4, p5, p10 | Launchable SCG org-wide: mass assessment for every employee, passport from day one, baseline the organisation in waves | Org-wide baseline: the diagnostic belongs to the person, not an enrolment. Any employee can run it, AI-inferred levels reach the passport, and the program office tracks population coverage | Implemented |
 
 ## 6. Integration register
 

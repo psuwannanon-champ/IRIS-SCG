@@ -156,6 +156,8 @@ export class SupabaseDataSource implements DataSource {
   markInterestPlaced(a: string, i: string) { return this.rpc('mark_interest_placed', { p_actor: a, p_interest: i }) }
   packageCaseAsModule(a: string, c: string, i: { title: string; skillCode: string; durationMin: number; body: unknown }) { return this.rpc<string>('package_case_as_module', { p_actor: a, p_contract: c, p_input: snakeObj(i) }) }
   decidePolicyItem(a: string, id: string, s: PolicyStatus, eff: string | null, ref: string, note: string) { return this.rpc('decide_policy_item', { p_actor: a, p_item: id, p_status: s, p_effective: eff, p_resolution: ref, p_note: note }) }
+  submitBaselineAssessment(a: string, r: AssessmentResponses) { return this.rpc<string>('submit_baseline_assessment', { p_actor: a, p_responses: r }) }
+  completeBaselineDiagnostic(a: string, r: DiagnosticResult) { return this.rpc('complete_baseline_diagnostic', { p_actor: a, p_result: deepSnake(r) }) }
   submitGatePack(a: string, g: string, sum: string, ev: GateEvidence | null, bc: GateBusinessCase | null, at: GateAttachment[]) { return this.rpc('submit_gate_pack', { p_actor: a, p_gate: g, p_summary: sum, p_evidence: ev, p_case: bc, p_attachments: at }) }
   createPod(a: string, c: string, n: string, coach: string | null) { return this.rpc<string>('create_pod', { p_actor: a, p_cohort: c, p_name: n, p_coach: coach }) }
   assignPod(a: string, e: string, pod: string | null) { return this.rpc('assign_pod', { p_actor: a, p_enrollment: e, p_pod: pod }) }

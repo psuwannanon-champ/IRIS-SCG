@@ -32,6 +32,11 @@ export function AssessmentsPage() {
   const completed = rows.filter((r) => r.done).length
   const setS = (patch: Record<string, unknown>) => nav({ to: '/assessments', search: { status: search.status ?? '', program: search.program ?? '', page: 1, ...patch } as never })
   const waves = snap.cohorts.filter((c) => rows.some((r) => r.c.id === c.id)).map((c) => { const w = rows.filter((r) => r.c.id === c.id); return { c, total: w.length, done: w.filter((r) => r.done).length } })
+  // Org-wide baseline (deck p10): employees outside every cohort, keyed to the person not an enrolment.
+  const outside = snap.personas.filter((p) => p.role === 'learner' && p.employmentStatus !== 'left' && !snap.enrollments.some((e) => e.personaId === p.id))
+  const baselined = outside.filter((p) => snap.diagnostics.some((d) => d.personaId === p.id && d.enrollmentId === null && d.status === 'completed'))
+  const population = rows.length + outside.length
+  const covered = completed + baselined.length
   return (
     <>
       <PageHeader title="Assessments" description="Org-wide AI skill assessment run in waves by cohort, starting with CBM and CAFI. Each learner completes the diagnostic themselves; Expert Guidance turns it into a gap map and personal path. Learners who have not completed appear first."
@@ -42,6 +47,25 @@ export function AssessmentsPage() {
         <Stat label="Pending diagnostics" value={rows.length - completed} hint="Send a reminder from the list" onClick={() => setS({ status: 'pending' })} />
         <Stat label="Assessment waves" value={waves.length} hint="Cohorts with enrolled learners" onClick={() => document.getElementById('waves')?.scrollIntoView({ behavior: 'smooth' })} />
       </div>
+      {actor.role === 'program_office' && (
+        <Section className="mt-4" title="Org-wide baseline" icon="users-01" description="Launchable SCG-wide: every employee can run the AI skill assessment and hold a passport, whether or not a cohort seat is open. Cohort waves close the gaps; the baseline makes them visible.">
+          <div className="grid gap-3 sm:grid-cols-3">
+            <Stat label="Population covered" value={`${pct(covered, population)}%`} hint={`${covered} of ${population} employees on the platform hold a diagnostic`} tone="primary" />
+            <Stat label="Outside a cohort" value={outside.length} hint={`${baselined.length} baselined, ${outside.length - baselined.length} not yet`} />
+            <Stat label="Passport from day one" value={baselined.length} hint="AI-inferred levels minted without a cohort seat" />
+          </div>
+          {outside.length > 0 && (
+            <ul className="mt-3 divide-y divide-(--color-border)">
+              {outside.map((p) => { const done = baselined.some((b) => b.id === p.id); return (
+                <li key={p.id} className="table-grid grid-cols-[minmax(0,1fr)_auto] py-2 sm:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_120px]">
+                  <div className="min-w-0"><div className="font-medium">{p.fullName}</div><div className="text-[12px] text-(--color-muted)">{p.jobTitle}</div></div>
+                  <div className="text-[13px] text-(--color-muted)">{snap.businessUnits.find((b) => b.id === p.buId)?.code} · no cohort seat</div>
+                  <div><Pill tone={done ? 'success' : 'neutral'} icon={done ? 'check-circle' : 'clock'}>{done ? 'Baselined' : 'Not baselined'}</Pill></div>
+                </li>) })}
+            </ul>
+          )}
+        </Section>
+      )}
       <Section id="waves" className="mt-4" title="Waves by cohort" icon="calendar" description="Baseline the organisation in waves; passport from day one.">
         <ul className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
           {waves.map((w) => (

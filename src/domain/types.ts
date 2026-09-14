@@ -126,7 +126,10 @@ export type EvidenceSource = 'self_declared' | 'ai_inferred' | 'knowledge_test' 
 
 export interface Diagnostic {
   id: string
-  enrollmentId: string
+  /** null for an org-wide baseline: the diagnostic belongs to the person, not a programme. */
+  enrollmentId: string | null
+  /** Set on baselines; cohort diagnostics reach the person through the enrolment. */
+  personaId?: string | null
   completedAt: string | null
   summary: string | null
   status: 'pending' | 'completed'
@@ -246,7 +249,7 @@ export interface SprintEvidence {
 
 export interface RecordEvent {
   id: string
-  recordType: 'impact_contract' | 'challenge_brief' | 'concept' | 'ledger_entry'
+  recordType: 'impact_contract' | 'challenge_brief' | 'concept' | 'ledger_entry' | 'persona'
   recordId: string
   actorId: string | null
   action: string
@@ -571,7 +574,7 @@ export interface AssessmentResponses {
 }
 export interface Assessment {
   id: string
-  enrollmentId: string
+  enrollmentId: string | null
   personaId: string
   responses: AssessmentResponses
   submittedAt: string

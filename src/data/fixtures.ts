@@ -41,6 +41,9 @@ export const personas: Persona[] = [
   P('per-pim', 'Pim Rattanakorn', 'learner', 'bu-cafi', 'enabling', 'Accounts Payable Supervisor', 'L2', 'per-ratree', 'Lead a finance automation squad', false, 'Invoices per FTE per week; touchless rate; exception ageing'),
   P('per-krit', 'Krit Boonmee', 'learner', 'bu-cafi', 'enabling', 'IT Service Desk Lead', 'L3', 'per-ratree', 'Service delivery manager'),
   P('per-nok', 'Nok Saengthong', 'learner', 'bu-cafi', 'enabling', 'Payroll Operations Supervisor', 'L2', 'per-ratree', null),
+  // Not in any cohort: the wider SCG population the org-wide baseline exists for (deck p10).
+  P('per-somchai', 'Somchai Pattanakit', 'learner', 'bu-scgp', 'business', 'Production Planner, Packaging', 'L2', 'per-suchada', 'Move into supply chain analytics'),
+  P('per-ubon', 'Ubon Thongdee', 'learner', 'bu-cbm', 'enabling', 'HR Business Partner, Saraburi', 'L3', 'per-prasert', 'Lead capability for a plant cluster'),
   P('per-warit', 'Warit Thongchai', 'learner', 'bu-cbm', 'business', 'Business Development Manager, Alternative Fuels', 'L4', 'per-prasert', 'Lead a new venture inside SCG', true, 'Alternative fuel substitution rate; new revenue from waste-to-value'),
   P('per-mali', 'Mali Phromma', 'learner', 'bu-cafi', 'enabling', 'Finance Systems Analyst', 'L3', 'per-ratree', 'Product owner for finance platforms'),
   P('per-wichai', 'Wichai Kongkaew', 'learner', 'bu-scgc', 'business', 'Incubation Lead, Solar Dealer Leasing', 'L4', 'per-prasert', 'Scale the venture to three markets'),

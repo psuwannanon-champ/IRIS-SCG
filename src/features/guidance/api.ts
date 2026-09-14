@@ -51,6 +51,27 @@ export function buildDiagnosticContext(s: Snapshot, actor: Persona, enrollment: 
   }
 }
 
+/** Org-wide baseline: no cohort, no programme. Rates the critical skills across ABC and BCD and
+ * asks only for current levels, because there is no sprint yet to build a path against. */
+export function buildBaselineContext(s: Snapshot, actor: Persona, responses: AssessmentResponses) {
+  const skillById = new Map(s.skills.map((k) => [k.id, k.code]))
+  const critical = s.skills.filter((k) => k.critical)
+  const criticalCodes = new Set(critical.map((k) => k.code))
+  return {
+    mode: 'org_wide_baseline',
+    note: 'This person is not enrolled in a cohort. Infer current levels only and rank the gaps. Do not propose a learning plan: leave plan and skipped empty.',
+    learner: learnerCard(s, actor),
+    cohort: null, program: null, buPriorities: buPriority(s, actor.buId), managerInput: [],
+    selfRatings: Object.fromEntries(Object.entries(responses.selfRatings).map(([id, v]) => [skillById.get(id) ?? id, v === null ? 'not sure' : v])),
+    knowledgeCheck: knowledgeQuestions.filter((q) => criticalCodes.has(q.skillCode)).map((q) => ({ id: q.id, skillCode: q.skillCode, question: q.question, chosen: responses.knowledge[q.id] != null ? q.options[responses.knowledge[q.id]] : 'not answered', correct: q.options[q.correct], isCorrect: responses.knowledge[q.id] === q.correct })),
+    roleContext: { roleFocus: responses.roleFocus, currentInitiatives: responses.currentInitiatives, biggestChallenge: responses.biggestChallenge, preferredFormat: responses.preferredFormat },
+    catalogue: {
+      skills: critical.map((k) => ({ code: k.code, name: k.name, domain: s.skillDomains.find((d) => d.id === k.domainId)?.name, description: k.description, critical: k.critical, premiumEligible: k.premiumEligible, levels: k.levelDescriptors })),
+      modules: [],
+    },
+  }
+}
+
 /** Maps skill/module codes returned by the model back to record ids; drops anything not in the catalogue. */
 export function toDiagnosticResult(s: Snapshot, out: DiagnosticOutput): DiagnosticResult {
   const skillByCode = new Map(s.skills.map((k) => [k.code, k.id]))

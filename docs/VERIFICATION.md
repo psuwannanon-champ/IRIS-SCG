@@ -111,6 +111,21 @@ Date: 14 September 2026 · Environment: local Vite dev server, macOS, Chromium (
 | Performance dashboard after the sweep | Mobility moved 9% → 18% from the recorded placement; AI summary picked it up as a next step |
 | Tour steps | New role-blueprint and practice-partner steps land on the right page, persona and highlight |
 
+### Re-audit finding: org-wide baseline (deck p4, p5, p10)
+
+A second full read of the deck against the platform found one genuine gap. Assessment and the
+passport were structurally cohort-only: `diagnostics.enrollment_id` and `assessments.enrollment_id`
+were both NOT NULL, `submit_assessment` and `complete_diagnostic` required an enrolment the actor
+owned, and the Assessment page turned a non-enrolled employee away. The deck sells the opposite.
+
+| Test | Result |
+| --- | --- |
+| Baseline as Somchai Pattanakit, a planner in SCGP with no cohort seat | The diagnostic opens, rates the 16 critical skills across both programmes and runs a 14-question knowledge check |
+| Expert Guidance on the baseline | Inferred levels and ranked gaps; correctly produced no learning plan, and the result screen says why |
+| Accepting the baseline | 16 AI-inferred passport entries minted for a person with no enrolment; 0 outcome-verified, as expected |
+| Program office view | Population covered 85%, 11 of 13; the two employees outside a cohort are listed with their baseline state |
+| Guard | One baseline per person, enforced by a partial unique index and by the page |
+
 ### Bugs found and fixed during this sweep
 
 | Bug | Fix |

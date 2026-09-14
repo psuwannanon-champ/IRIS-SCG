@@ -320,6 +320,18 @@ export const EXPLAINERS: Record<string, PageExplainer> = {
         { icon: 'arrow-right', title: 'What comes next', body: 'The learner starts the micro-learning path before the labs; the coach receives the coaching points before clinic 1.' },
       ],
       limitations: ['Knowledge questions are illustrative (one per domain). Levels are inferred, not certified; outcome-verified badges come only from validated results.'],
+    }, {
+      id: 'baseline', name: 'Org-wide skill baseline', purpose: 'The same diagnostic, open to an employee who is not in any cohort. It rates the critical skills across ABC and BCD, infers current levels and writes them to the passport. No learning path is produced: a path belongs to a cohort.',
+      benefit: 'Skills count from day one, so the marketplace, talent reviews and the capability agenda can read a person\'s level before a cohort seat opens.',
+      users: 'Any employee without an enrolment. The program office sees population coverage on the Assessments page.',
+      roles: [{ role: 'Employee', does: 'Runs the baseline themselves; no invitation or approval is needed.' }, { role: 'Program office', does: 'Watches population coverage and decides which waves to enrol next.' }],
+      stages: [
+        { icon: 'data', title: 'Data enters', body: 'Self-ratings on the critical skills, the knowledge check for those skills and role context.' },
+        { icon: 'stars-02', title: 'Work happens', body: 'Expert Guidance infers current levels and ranks the gaps. It is told not to propose a plan.' },
+        { icon: 'award-01', title: 'Connected records', body: 'Accepting writes diagnostic items and AI-inferred passport levels. One baseline per person.' },
+        { icon: 'arrow-right', title: 'What comes next', body: 'The gaps feed the capability agenda; the person is a candidate for the next cohort wave, where the personal path is built.' },
+      ],
+      limitations: ['Inferred levels are not outcome-verified and carry no premium. The baseline can be run once; re-baselining happens at the next intake.'],
     }],
   },
   assessments: {
