@@ -8,6 +8,9 @@ export const TH: Record<string, string> = {
   'Lab days': 'วันเวิร์กช็อป', 'Impact contracts': 'สัญญาผลลัพธ์', 'Concepts & gates': 'แนวคิดและเกต', 'Skill passport': 'พาสปอร์ตทักษะ',
   'Success cases': 'กรณีความสำเร็จ', 'Talent marketplace': 'ตลาดงานภายใน', 'Impact ledger': 'บัญชีผลลัพธ์', 'Expert Guidance': 'ผู้ช่วยผู้เชี่ยวชาญ',
   'Updates': 'การแจ้งเตือน', 'My team': 'ทีมของฉัน', 'Work': 'งาน', 'Programs': 'โปรแกรม', 'Talent': 'บุคลากร', 'Governance': 'การกำกับดูแล', 'Support': 'ตัวช่วย',
+  'Assessments': 'แบบประเมินทั้งหมด', 'Challenge briefs': 'โจทย์ธุรกิจ', 'Cohorts': 'รุ่นการเรียน', 'Capability agenda': 'วาระขีดความสามารถ',
+  'Coaching workspace': 'พื้นที่งานโค้ช', 'Impact dashboard': 'แดชบอร์ดผลลัพธ์', 'Performance dashboard': 'แดชบอร์ดผลการดำเนินงาน', 'Role blueprints': 'พิมพ์เขียวตำแหน่งงาน',
+  'Skills taxonomy': 'โครงสร้างทักษะ', 'Strategy roadmap': 'แผนกลยุทธ์', 'Integrations': 'การเชื่อมต่อระบบ',
   // common actions
   'Open': 'เปิด', 'View details': 'ดูรายละเอียด', 'Save': 'บันทึก', 'Cancel': 'ยกเลิก', 'Close': 'ปิด', 'Back': 'ย้อนกลับ', 'Next': 'ถัดไป', 'Previous': 'ก่อนหน้า',
   'Send': 'ส่ง', 'Start': 'เริ่ม', 'Skip': 'ข้าม', 'Restore': 'นำกลับ', 'Review': 'ทบทวน', 'Open module': 'เปิดโมดูล', 'Mark completed': 'ทำเครื่องหมายว่าเสร็จ',
@@ -28,6 +31,9 @@ export const TH: Record<string, string> = {
   'Actionable tasks': 'งานที่ต้องทำ', 'Unread updates': 'การแจ้งเตือนที่ยังไม่ได้อ่าน', 'Outcome-verified badges': 'ตราทักษะที่รับรองจากผลงานจริง',
   'Your tasks': 'งานของคุณ', 'Recent updates': 'อัปเดตล่าสุด', 'Your programs': 'โปรแกรมของคุณ',
   'No actions waiting': 'ไม่มีงานที่ต้องทำในตอนนี้', 'You are up to date': 'คุณอ่านครบแล้ว',
+  'Active cohorts': 'รุ่นที่กำลังดำเนินการ', 'Validated impact': 'ผลลัพธ์ที่รับรองแล้ว', 'All BUs, ledger': 'ทุกหน่วยธุรกิจ จากบัญชีผลลัพธ์',
+  'Only actions you can take now': 'เฉพาะงานที่คุณลงมือทำได้ตอนนี้', 'Informational, separate from tasks': 'เป็นข้อมูล แยกจากงานที่ต้องทำ',
+  'Team view': 'มุมมองทีม', 'Company view': 'มุมมองทั้งองค์กร', 'Ask': 'ถาม', 'Practice partner': 'คู่ซ้อม',
 }
 
 export function useT() {

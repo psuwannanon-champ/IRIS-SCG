@@ -42,9 +42,9 @@ export function BlueprintsPage() {
               <li key={b.id} className="table-grid grid-cols-[minmax(0,1fr)_auto] py-3 xl:grid-cols-[minmax(0,2fr)_110px_130px_150px_minmax(0,1fr)_190px]">
                 <div className="min-w-0"><button type="button" className="block max-w-full truncate text-left font-medium text-(--color-accent) hover:text-(--color-primary)" onClick={() => setDetail(b.id)}>{b.roleTitle}</button><div className="truncate text-[12px] text-(--color-muted)">{snap.businessUnits.find((x) => x.id === b.buId)?.code} · {b.level} · {b.headcount} holders · {personaName(snap, b.createdBy)}</div></div>
                 <div className="hidden xl:block"><Pill tone={b.status === 'adopted' ? 'success' : b.status === 'generated' ? 'accent' : 'neutral'}>{b.status === 'draft' ? 'Not generated' : b.status === 'generated' ? 'Plan ready' : 'Adopted'}</Pill></div>
-                <div className="hidden text-[13px] xl:block">{b.generated ? `${b.generated.skills.length} skills` : '—'}</div>
-                <div className="hidden text-[13px] xl:block">{b.generated ? fmtThb(b.generated.skills.reduce((a, s) => a + s.thbValueAtRisk, 0), true) : '—'}</div>
-                <div className="hidden truncate text-[12px] text-(--color-muted) xl:block">{b.generated?.cohortPlan ? `${b.generated.cohortPlan.program} · ${b.generated.cohortPlan.seats} seats · ${b.generated.cohortPlan.startQuarter}` : 'Awaiting plan'}</div>
+                <div className="hidden text-[13px] xl:block">{b.generated?.skills ? `${b.generated.skills.length} skills` : '—'}</div>
+                <div className="hidden text-[13px] xl:block">{b.generated?.skills ? fmtThb(b.generated.skills.reduce((a, s) => a + (s.thbValueAtRisk ?? 0), 0), true) : '—'}</div>
+                <div className="hidden truncate text-[12px] text-(--color-muted) xl:block">{b.generated?.cohortPlan?.program ? `${b.generated.cohortPlan.program} · ${b.generated.cohortPlan.seats} seats · ${b.generated.cohortPlan.startQuarter}` : 'Awaiting plan'}</div>
                 <div className="col-span-2 flex flex-wrap gap-1 xl:col-span-1 xl:justify-end">
                   {b.status === 'draft' && <Button size="sm" variant="primary" icon="stars-02" busy={busy === b.id} onClick={() => generate(b)}>Generate plan</Button>}
                   {b.status === 'generated' && <><Button size="sm" onClick={() => setDetail(b.id)}>Review</Button><Button size="sm" variant="primary" busy={adopt.isPending} onClick={() => adopt.mutate([b.id])}>Adopt into agenda</Button></>}
@@ -77,13 +77,13 @@ export function BlueprintsPage() {
             <div><div className="text-xs font-semibold uppercase tracking-wide text-(--color-faint)">Operating model change</div><p>{current.operatingModelChange || 'Not provided'}</p></div>
             <div><div className="text-xs font-semibold uppercase tracking-wide text-(--color-faint)">Responsibilities</div><p>{current.responsibilities}</p></div>
             {busy === current.id && <p className="text-(--color-muted)">Reading the role against the taxonomy, the BU agenda and verified supply…</p>}
-            {current.generated && (
+            {current.generated?.skills && (
               <>
                 <Notice tone="accent" icon="stars-02"><strong>{current.generated.valuePool}.</strong> {current.generated.summary}</Notice>
                 <div>
                   <div className="mb-1 text-xs font-semibold uppercase tracking-wide text-(--color-faint)">Critical future skills</div>
                   <ul className="divide-y divide-(--color-border) rounded-md border border-(--color-border)">
-                    {current.generated.skills.map((s) => { const sk = snap.skills.find((k) => k.code === s.skillCode); return (
+                    {(current.generated?.skills ?? []).map((s) => { const sk = snap.skills.find((k) => k.code === s.skillCode); return (
                       <li key={s.skillCode} className="grid gap-2 px-3 py-2 md:grid-cols-[minmax(0,1.6fr)_90px_110px_110px_120px]">
                         <div className="min-w-0"><div className="font-medium">{s.skillCode} · {sk?.name ?? 'unknown skill'}</div><div className="text-[12px] text-(--color-muted)">{s.why}</div></div>
                         <div><Pill tone="accent">Level {s.targetLevel}</Pill></div>

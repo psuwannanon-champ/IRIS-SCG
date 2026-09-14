@@ -44,6 +44,19 @@ Regenerate the seed after editing fixtures: `pnpm seed:sql`.
 - **Integrations** (`/integrations`): simulated connectors for HR core talent-profile sync, payroll and rewards merit-cycle export, email and LINE notifications, finance P&L actuals import and the Start the Dot hand-off. Each run builds its payload from live records and is logged with the payload; nothing leaves the platform. Passport and ledger pages show the last sync.
 - **Module content**: `src/data/module-content.json` is generated once by `scripts/gen-module-content.ts` with Claude (summary, objectives, key points, SCG example, practice task, common mistakes, quick check, coach question) and committed; the learning plan viewer requires the reflection and a passed quick check before a module can be marked complete.
 
+## Deck closure (all 14 IRIS deck pages)
+
+Everything the deck sells is executable in the platform, not just displayed. `docs/GAP-LIST.md` tracks the 24 items found in the last read-through; 23 are closed and verified in the browser against the live Supabase backend.
+
+- **Role blueprints** (`/blueprints`): describe a role as the new operating model needs it; Claude returns the skills, levels, supply against demand, THB at risk, a build / buy / borrow / bot call and a cohort plan. Adopting the blueprint writes the rows into the capability agenda.
+- **Self-funding economics**: cost lines per cohort drive ROI, cost per learner and cost by category on Governance and the cohort page.
+- **Structured gate packs**: summary, field evidence, business case (pricing, payback, base / best / worst, the ask) and pre-read or recorded-pitch attachments. A Gate 2 pack without the business case is refused by the database function, not just the form.
+- **Practice partner** (`/ai-coach?mode=practice`): Claude Sonnet plays the counterpart in four scenarios and scores each turn against the program rubric; a session below 3 out of 5 is flagged to the certified coach.
+- **Talent and rewards**: recognition records, L2 / L3 succession pools, an AI talent-review pack and an employment-status toggle that feeds the retention measure.
+- **Scale and policy**: package a validated success case as a micro-module, decide policy items in one People Committee resolution, record taxonomy review cycles, and track Q1–Q4 milestones with owners and status.
+- **Thai interface**: a language switch in the shell translates the navigation and the learner journey. Governance and admin screens stay English by design, which the switch states.
+- Still open: **% promotions citing verified skills**. It needs promotion events from the HR core, which the demo dataset does not contain.
+
 ## Hosting
 
 - GitHub: https://github.com/psuwannanon-champ/IRIS-SCG (branch `main`)

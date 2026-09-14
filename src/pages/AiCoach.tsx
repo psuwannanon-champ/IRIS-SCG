@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Link } from '@tanstack/react-router'
+import { Link, useSearch } from '@tanstack/react-router'
 import { useActor } from '@/app/actor'
 import { useAction } from '@/app/data'
 import { requestGuidance, buildCoachContext, buildPracticeContext, PRACTICE_SCENARIOS, GuidanceUnavailable, type CoachOutput, type PracticeOutput } from '@/features/guidance/api'
@@ -15,7 +15,7 @@ export function AiCoachPage() {
   const [lang, setLang] = useState<'th' | 'en'>('en')
   const [pending, setPending] = useState(false)
   const [notice, setNotice] = useState<string | null>(null)
-  const [tab, setTab] = useState<'chat' | 'practice'>('chat')
+  const [tab, setTab] = useState<'chat' | 'practice'>((useSearch({ strict: false }) as { mode?: string }).mode === 'practice' ? 'practice' : 'chat')
   const [scenario, setScenario] = useState<string>('')
   const [turns, setTurns] = useState<{ role: 'learner' | 'partner'; text: string }[]>([])
   const [pScores, setPScores] = useState<PracticeOutput['scores']>([])
@@ -43,7 +43,7 @@ export function AiCoachPage() {
       setPScores(r.output.scores); setPOverall(r.output.overall); setPAdvice(r.output.advice); setPModel(r.model)
     } catch (e) { setNotice((e as Error).message) } finally { setPBusy(false) }
   }
-  const PracticePanel = () => {
+  const practicePanel = () => {
     const sc = PRACTICE_SCENARIOS.find((x) => x.id === scenario)
     const past = snap!.practiceSessions.filter((x) => x.personaId === actor!.id).sort((a, b) => b.createdAt.localeCompare(a.createdAt))
     return (
@@ -113,8 +113,8 @@ export function AiCoachPage() {
   }
   return (
     <>
-      <PageHeader title="Expert Guidance" description="Always-on coach in Thai and English, grounded in the program content and your own records: it navigates the program, guides each activity, answers content questions with the source module, rehearses pitches and mirrors your progress." state={<Pill tone="accent" icon="stars-02">Powered by Claude</Pill>} />
-      {tab === 'practice' ? <PracticePanel /> : (
+      <PageHeader title="Expert Guidance" description="Always-on coach in Thai and English, grounded in the program content and your own records: it navigates the program, guides each activity, answers content questions with the source module, rehearses pitches and mirrors your progress." state={<Pill tone="accent" icon="stars-02">Powered by Claude</Pill>} actions={<div className="flex items-center gap-1" role="tablist" aria-label="Mode"><Button size="sm" role="tab" aria-selected={tab === 'chat'} variant={tab === 'chat' ? 'primary' : 'secondary'} onClick={() => setTab('chat')}>Ask</Button><Button size="sm" role="tab" aria-selected={tab === 'practice'} variant={tab === 'practice' ? 'primary' : 'secondary'} icon="users-01" onClick={() => setTab('practice')}>Practice partner</Button></div>} />
+      {tab === 'practice' ? practicePanel() : (
       <div className="grid gap-4 xl:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
         <Section className="flex min-h-[420px] flex-col p-0">
           <div className="scroll-y flex-1 space-y-3 px-4 py-4" style={{ maxHeight: 460 }} data-tour="ai-coach-thread">

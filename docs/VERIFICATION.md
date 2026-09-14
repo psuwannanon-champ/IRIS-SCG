@@ -93,10 +93,37 @@ Date: 14 September 2026 · Environment: local Vite dev server, macOS, Chromium (
 | Dashboard AI summary, company view | Reports company health score, leading and trailing unit, two weakest company measures; stable across two refreshes |
 | Expert Guidance reply format | "Where you are / Next step / three bullets" under 120 words, module cited |
 
+## Deck closure sweep (14 Sep 2026, live Supabase)
+
+| Test | Result |
+| --- | --- |
+| Role blueprint end to end | Created "Shared Service Squad Lead (automation-first)" for CAFI; Claude returned 6 skills, THB 97M at risk, ABC · 5 seats · Q1 2027; adopting it took the capability agenda to 9 rows, 7 awaiting a build/buy/borrow/bot decision |
+| Gate 2 evidence pack | Pack with field evidence, business case and two attachments submitted; concept moved to Gate 2; committee notified. A pack without the business case is rejected by the database function, not just the form |
+| Practice partner | Gate 2 pitch scenario: in-character challenge back, 2.2/5 across five rubric criteria, "change next time" line, session saved and listed |
+| Passport recognition | CEO showcase recognition recorded and attributed |
+| Succession pool | L3 pool entry with basis and due date; "Mark fulfilled" appears |
+| Talent-review pack | Claude pack cited the recognition and the unfulfilled pool entry created minutes earlier, plus gate and badge history |
+| Employment status | "Mark as left" stamps the leaving date and reverses cleanly |
+| Marketplace placement | Express interest (learner) → shortlist → record placement (posting owner); status reached `placed` in the database |
+| Package a success case | Published `COMM-02.C1` with body content; visible in the catalogue with a success-case origin |
+| Deadline nudges | 2 nudges sent for diagnostics, gates and showcases due within three weeks |
+| Thai interface | Switch translates the whole navigation and the learner surfaces; governance screens stay English by design |
+| Performance dashboard after the sweep | Mobility moved 9% → 18% from the recorded placement; AI summary picked it up as a next step |
+| Tour steps | New role-blueprint and practice-partner steps land on the right page, persona and highlight |
+
+### Bugs found and fixed during this sweep
+
+| Bug | Fix |
+| --- | --- |
+| `submit_gate_pack` checked `payback_months` while the client sends `paybackMonths`, so every Gate 2 pack was rejected | Migration `0014_gate_pack_camel.sql` accepts both key styles |
+| The practice partner was unreachable: the tab state existed but nothing rendered a switcher | Ask / Practice partner tablist in the page header, plus `?mode=practice` for deep links |
+| `PracticePanel` was defined inside the render function, so every keystroke remounted the input and dropped focus | Rendered as a call rather than a child component; it holds no hooks of its own |
+| Thai navigation was half-translated (Assessments, Challenge briefs, Cohorts and the governance pages stayed English) | Dictionary extended to cover every navigation label |
+
 ## Not verified / remaining limitations
 
-- Only the evidence-logging path was exercised against the real Supabase project; the other transitions were validated in PGlite with the same SQL.
+- The deck-closure sweep above ran against the real Supabase project. Earlier transitions were validated in PGlite with the same SQL.
 - No automated accessibility audit; keyboard focus trap, Escape and restoration were exercised manually on dialogs and panels only.
 - Long-title and large-count stress cases were covered by fixtures (60-character titles, THB 120M) but not exhaustively.
-- Thai UI text is limited to the AI coach demo; the typeface renders Thai tone marks correctly there.
+- Thai UI covers navigation and the learner journey. Governance and admin screens stay English by design, as stated at the language switch.
 - 1440 × 900 was not separately captured; layout uses the same breakpoints as 1280.

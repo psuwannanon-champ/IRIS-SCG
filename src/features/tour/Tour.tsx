@@ -18,7 +18,7 @@ export function TourPage() {
     sessionStorage.setItem(STORAGE, String(step))
     window.dispatchEvent(new Event('tour-change'))
     if (s.personaId) signIn(s.personaId); else signOut()
-    nav({ to: s.path, replace: true })
+    nav({ to: s.path, search: s.search, replace: true })
   }, [step, nav, signIn, signOut])
   return <div className="p-6 text-(--color-muted)">Opening the guided introduction…</div>
 }

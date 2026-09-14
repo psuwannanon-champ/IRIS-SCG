@@ -1,7 +1,7 @@
 import { Link, useParams } from '@tanstack/react-router'
 import { useActor } from '@/app/actor'
 import { personaName } from '@/domain/selectors'
-import { PageHeader, Section, LoadingBlock, ErrorBlock, EmptyState, Pill, DL, Notice } from '@/components/ui'
+import { PageHeader, Section, LoadingBlock, ErrorBlock, EmptyState, Pill, DL } from '@/components/ui'
 import { fmtDate, fmtThb } from '@/lib/format'
 import { ENROLLMENT_LABEL, enrollmentTone, contractTone } from '@/domain/status'
 import { CONTRACT_STATUS_LABEL, CONCEPT_STAGE_LABEL } from '@/domain/types'

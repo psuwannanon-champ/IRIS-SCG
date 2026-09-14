@@ -80,7 +80,7 @@ const routes = [
   r('/agenda', guarded('agenda', AgendaPage), { validateSearch: (s: Record<string, unknown>) => ({ bu: (s.bu as string) ?? '' }) }),
   r('/blueprints', guarded('blueprints', BlueprintsPage)),
   r('/taxonomy', guarded('taxonomy', TaxonomyPage), { validateSearch: listSearch }),
-  r('/ai-coach', guarded('ai-coach', AiCoachPage)),
+  r('/ai-coach', guarded('ai-coach', AiCoachPage), { validateSearch: (s: Record<string, unknown>) => ({ mode: (s.mode as string) ?? 'chat' }) }),
 ]
 
 const routeTree = rootRoute.addChildren([indexRoute, loginRoute, tourRoute, appRoute.addChildren(routes)])

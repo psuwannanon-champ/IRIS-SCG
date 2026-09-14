@@ -1,5 +1,5 @@
 // Guided introduction: follows the business journey from strategy to rewards. Each step signs in a fictional persona, opens a real page and highlights one area.
-export interface TourStep { id: string; title: string; personaId: string | null; path: string; target: string | null; what: string; why: string; benefit: string }
+export interface TourStep { id: string; title: string; personaId: string | null; path: string; search?: Record<string, unknown>; target: string | null; what: string; why: string; benefit: string }
 
 export const TOUR_STEPS: TourStep[] = [
   { id: 'purpose', title: 'Purpose, audience and benefits', personaId: null, path: '/login', target: 'intro-button',
@@ -15,6 +15,9 @@ export const TOUR_STEPS: TourStep[] = [
   { id: 'agenda', title: 'Value-led capability agenda', personaId: 'per-supattra', path: '/agenda', target: 'page-header',
     what: 'Value pools → critical roles → future skills per BU, with supply versus demand, THB at stake and the build / buy / borrow / bot decision.',
     why: 'Start from strategy, not courses. Fund the biggest value-at-risk gaps first, governed like capex.', benefit: 'Capability spend follows P&L value.' },
+  { id: 'blueprints', title: 'Role blueprints', personaId: 'per-supattra', path: '/blueprints', target: 'page-header',
+    what: 'Describe a role as the operating model will need it, and Expert Guidance returns the skills it requires, the levels, supply against demand, the THB at risk and a build / buy / borrow / bot call with a cohort plan. Adopt it and the rows join the capability agenda.',
+    why: 'MTP 2027 redefines roles before it buys training; the blueprint is how a new role becomes a funded capability line.', benefit: 'A BU head gets a costed capability plan for a role in minutes instead of a quarter.' },
   { id: 'cohorts', title: 'Cohorts from the playbook', personaId: 'per-supattra', path: '/cohorts', target: 'page-header',
     what: 'Create a cohort and the calendar, clinics and gates are generated from the ABC / BCD playbook. Enrol learners to start an assessment wave.',
     why: 'Industrialised playbooks let any BU run the accelerators without redesign.', benefit: 'Scalable and simple to run.' },
@@ -48,6 +51,9 @@ export const TOUR_STEPS: TourStep[] = [
   { id: 'coach-chat', title: 'Expert Guidance, always on', personaId: 'per-nara', path: '/ai-coach', target: 'ai-coach-thread',
     what: 'Learners ask in Thai or English. Answers are short: where you are, the next step with its date, and up to three actions, citing the module they rely on. Stuck learners are flagged to the human coach.',
     why: 'Learning continues after every program, grounded only in approved content.', benefit: 'Navigator, activity guide, content expert, practice partner and progress mirror in one place.' },
+  { id: 'practice', title: 'Practice partner', personaId: 'per-mali', path: '/ai-coach', search: { mode: 'practice' }, target: 'practice-panel',
+    what: 'Pick a scenario, such as the Gate 2 pitch or a customer discovery interview. Claude plays the counterpart in character and scores every turn against the program rubric, then names the one change to make next time.',
+    why: 'Rehearsal is what makes a gate pitch land, and a coach cannot sit with every learner.', benefit: 'Unlimited rehearsal; a session below 3 out of 5 is flagged so the next clinic covers it.' },
   { id: 'ledger', title: 'Sponsor validation and the impact ledger', personaId: 'per-prasert', path: '/ledger', target: 'ledger-stats',
     what: 'Prasert validates claimed THB value. Validated entries are tracked 6–12 months, matched to P&L actuals and sample-audited.',
     why: 'Sponsor-validated value is the second verified currency, feeding reviews, recognition and value-linked incentives.', benefit: 'Capability pays for itself and the P&L feels it.' },

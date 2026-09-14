@@ -117,6 +117,22 @@ Server-side enforcement in the prototype: every write is a Postgres function tha
 | R32 | p5 04, p12 | Integrated with HR core; rewards linked to impact; notifications; P&L actuals; Start the Dot | Integrations page with five simulated connectors, run log and payloads; sync indicators on passport and ledger | Simulated |
 | R34 | p5 05, p12 | Dashboard read by leaders quarterly | AI summary on the performance dashboard (Claude Sonnet, deterministic inputs, 2 lines + 2 next steps) | Implemented |
 | R33 | p6, p10 | Modular micro-learning aligned to SCG business, split by BU variant | Authored module content per module (Claude-generated at build time) with quick check | Implemented (content illustrative) |
+| R35 | p4, p5, p13 | Self-funding: capability spend earns its keep | Cost lines per cohort; ROI, cost per learner and cost by category on Governance and the cohort page | Implemented |
+| R36 | p4 | The platform reads new roles and generates capability plans without lengthy co-design | Role blueprints: role capture → Claude plan (skills, levels, supply/demand, THB at risk, build/buy/borrow/bot, cohort plan, risks) → adopt into the capability agenda | Implemented |
+| R37 | p5, p13 | Mobility, retention of critical talent and time to proficiency | mobilityRate, retentionRate and timeToProficiencyDays on the performance dashboard and Governance; employment status toggle drives retention | Implemented |
+| R38 | p4 | Best practices captured once, scaled everywhere | Package a validated success case as a micro-module; it joins the catalogue with a "proven at" origin | Implemented |
+| R39 | p5, p12 | Policy pack approved in one People Committee resolution | Policy items on the strategy roadmap with a decision dialog (status, effective date, resolution reference) | Implemented |
+| R40 | p6, p8 | From → TO transformation narrative | From→TO tables for ABC and BCD plus the turnaround rationale on the strategy roadmap | Implemented |
+| R41 | p9 | Gate evidence packs: pre-reads, recorded pitches, pricing, best / worst case | Structured gate pack dialog; Gate 2 rejects a pack without pricing, payback and best / worst case | Implemented |
+| R42 | p6 | Peer pods support the sprint | Pods per cohort with a coach and learner assignment; assignment notifies the learner | Implemented |
+| R43 | p11 | Practice Partner gives instant feedback against program rubrics | Practice tab in Expert Guidance: four scenarios, in-character reply, per-turn rubric scores, coach flag below 3/5 | Implemented |
+| R44 | p11 | Program Navigator nudges ahead of deadlines and gates | Send deadline nudges on Assessments and the coaching workspace; notifies open diagnostics, gates and showcases due within three weeks | Implemented |
+| R45 | p9, p12 | Talent-review packs, L2 / L3 succession pools, incubation leadership | AI talent-review pack, succession pools with fulfilment and recognition records on the passport | Implemented |
+| R46 | p5, p12 | Taxonomy and agenda refreshed on a cycle | Quarterly and annual review cycles on the skills taxonomy, each recordable | Implemented |
+| R47 | p8, p9 | Teams align with management before validation | Management alignment section on the concept record, recorded before validation | Implemented |
+| R48 | p3 | Milestones Q1–Q4 with owners and status | Plan milestones on the strategy roadmap with an editable status | Implemented |
+| R49 | adoption risk | Thai interface for learner-facing surfaces | Thai / English switch in the shell; navigation and the learner journey translated, governance screens English by design | Implemented (partial by design) |
+| R50 | p3 KPI 1.4 | % promotions citing verified skills | Not computable: the demo dataset has no promotion events; the simulated HR core connector carries the field | Not implemented |
 
 ## 6. Integration register
 
