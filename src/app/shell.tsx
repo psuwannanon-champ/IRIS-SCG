@@ -8,6 +8,7 @@ import { ROLE_LABEL } from '@/domain/types'
 import { Icon } from '@/icons/Icon'
 import { Avatar, Button, Dialog, LoadingBlock, ErrorBlock, Pill } from '@/components/ui'
 import { ExplainButton } from '@/features/explain/ExplainPanel'
+import { personas as demoOrder } from '@/data/fixtures'
 
 export function AppShell() {
   const { personaId, signOut, sidebarCollapsed, toggleSidebar, signIn } = useSession()
@@ -132,7 +133,7 @@ export function PersonaList({ onPick, current }: { onPick: (id: string) => void;
         <div key={r}>
           <div className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-(--color-faint)">{ROLE_LABEL[r]}</div>
           <ul className="grid gap-1.5 sm:grid-cols-2">
-            {snap.data!.personas.filter((p) => p.role === r).map((p) => (
+            {[...snap.data!.personas].filter((p) => p.role === r).sort((a, b) => demoOrder.findIndex((x) => x.id === a.id) - demoOrder.findIndex((x) => x.id === b.id)).map((p) => (
               <li key={p.id}>
                 <button type="button" onClick={() => onPick(p.id)} data-selected={p.id === current} data-tour={`persona-${p.code}`}
                   className="surface brand-ring flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left transition hover:bg-[#F7F8FA]">
