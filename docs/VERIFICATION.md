@@ -65,6 +65,7 @@ Date: 14 September 2026 · Environment: local Vite dev server, macOS, Chromium (
 | Accept result | Diagnostic completed; 6 priority items; 12 plan items; enrollment diagnosed; guidance note saved |
 | Weekly guidance on journey | 3 priorities with module codes and actions; saved with `claude-opus-5` and requester |
 | Capability agenda decision as program office | Bot + funded recorded; row updated |
+| Production `POST /api/guidance` on iris-scg.vercel.app | 400 for unknown kind; Thai coach question answered by `claude-opus-5` (after fixing an ESM import that crashed the first deploy) |
 
 ## Not verified / remaining limitations
 
