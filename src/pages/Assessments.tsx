@@ -3,7 +3,7 @@ import { Link, useNavigate, useSearch } from '@tanstack/react-router'
 import { useActor } from '@/app/actor'
 import { useAction } from '@/app/data'
 import { personaName } from '@/domain/selectors'
-import { PageHeader, Section, LoadingBlock, ErrorBlock, EmptyState, Pill, Button, Stat, Pagination, paginate } from '@/components/ui'
+import { PageHeader, Section, LoadingBlock, ErrorBlock, EmptyState, Pill, Button, Stat, Pagination, paginate, Notice } from '@/components/ui'
 import { fmtDate, pct } from '@/lib/format'
 import type { Enrollment, Persona } from '@/domain/types'
 
@@ -13,6 +13,8 @@ export function AssessmentsPage() {
   const nav = useNavigate()
   const [sent, setSent] = useState<Record<string, boolean>>({})
   const remind = useAction((ds, enrollmentId: string) => ds.remindAssessment(actor!.id, enrollmentId), 'Reminder sent to the learner.')
+  const nudge = useAction((ds) => ds.sendNudges(actor!.id))
+  const [nudged, setNudged] = useState<number | null>(null)
   if (status === 'loading') return <LoadingBlock />
   if (status === 'error' || !snap || !actor) return <ErrorBlock message={error ?? ''} onRetry={refetch} />
   const inScope = (e: Enrollment, p: Persona) => {
@@ -32,7 +34,9 @@ export function AssessmentsPage() {
   const waves = snap.cohorts.filter((c) => rows.some((r) => r.c.id === c.id)).map((c) => { const w = rows.filter((r) => r.c.id === c.id); return { c, total: w.length, done: w.filter((r) => r.done).length } })
   return (
     <>
-      <PageHeader title="Assessments" description="Org-wide AI skill assessment run in waves by cohort, starting with CBM and CAFI. Each learner completes the diagnostic themselves; Expert Guidance turns it into a gap map and personal path. Learners who have not completed appear first." />
+      <PageHeader title="Assessments" description="Org-wide AI skill assessment run in waves by cohort, starting with CBM and CAFI. Each learner completes the diagnostic themselves; Expert Guidance turns it into a gap map and personal path. Learners who have not completed appear first."
+        actions={['program_office', 'coach'].includes(actor.role) && <Button icon="bell-01" busy={nudge.isPending} onClick={async () => { const n = await nudge.mutateAsync([]); setNudged(Number(n)) }}>Send deadline nudges</Button>} />
+      {nudged !== null && <div className="mb-3"><Notice tone="success" icon="check-circle">{nudged} nudge{nudged === 1 ? '' : 's'} sent: open diagnostics, gates and showcases due within the next three weeks.</Notice></div>}
       <div className="grid gap-3 sm:grid-cols-3">
         <Stat label="Completion in your scope" value={`${pct(completed, rows.length)}%`} hint={`${completed} of ${rows.length} learners completed`} onClick={() => setS({ status: '' })} tone="primary" />
         <Stat label="Pending diagnostics" value={rows.length - completed} hint="Send a reminder from the list" onClick={() => setS({ status: 'pending' })} />

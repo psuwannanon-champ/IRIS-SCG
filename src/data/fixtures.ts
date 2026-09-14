@@ -2,6 +2,7 @@
 // Names, numbers and outcomes are invented for walkthrough purposes.
 import type {
   Assessment, GuidanceNote, CapabilityGap, LabAttendance, IntegrationRun,
+  CostLine, RoleBlueprint, PolicyItem, Pod, PracticeSession, TalentReview, SuccessionEntry, Recognition, GovernanceReview, PlanMilestone,
   BusinessUnit, Persona, SkillDomain, Skill, Cohort, Enrollment, Diagnostic, DiagnosticItem,
   LearningModule, LearningPlanItem, ImpactContract, SprintEvidence, RecordEvent, ChallengeTheme,
   ChallengeBrief, Team, Concept, GateReview, CoachingClinic, CoachingNote, CoachScorecard,
@@ -22,32 +23,34 @@ export const businessUnits: BusinessUnit[] = [
 const P = (
   id: string, fullName: string, role: Persona['role'], buId: string, functionType: Persona['functionType'],
   jobTitle: string, level: string, managerId: string | null, careerAspiration: string | null = null,
+  leader = false, kpis: string | null = null,
 ): Persona => ({
   id, code: id.replace('per-', ''), fullName,
   email: `${id.replace('per-', '')}@demo.scg-capability.example`, role, buId, functionType, jobTitle, level, managerId,
   initials: fullName.split(' ').map((w) => w[0]).join('').slice(0, 2).toUpperCase(), careerAspiration,
+  employmentStatus: 'active', leftAt: null, leaderCohort: leader, kpis,
 })
 
 export const personas: Persona[] = [
   // Learners
-  P('per-nara', 'Nara Wongsuwan', 'learner', 'bu-cbm', 'business', 'Regional Sales Lead, Building Materials Distribution', 'L3', 'per-kittipong', 'Lead a regional commercial team and own dealer P&L'),
-  P('per-tanawat', 'Tanawat Srisuk', 'learner', 'bu-cbm', 'business', 'Plant Operations Supervisor, Saraburi', 'L3', 'per-somsak', 'Plant manager within three years'),
+  P('per-nara', 'Nara Wongsuwan', 'learner', 'bu-cbm', 'business', 'Regional Sales Lead, Building Materials Distribution', 'L3', 'per-kittipong', 'Lead a regional commercial team and own dealer P&L', false, 'Share of wallet on top 40 dealers; revenue per dealer; days sales outstanding'),
+  P('per-tanawat', 'Tanawat Srisuk', 'learner', 'bu-cbm', 'business', 'Plant Operations Supervisor, Saraburi', 'L3', 'per-somsak', 'Plant manager within three years', false, 'Unplanned stop hours; cost per tonne; safety incidents'),
   P('per-boonchu', 'Boonchu Rakdee', 'learner', 'bu-cbm', 'enabling', 'Logistics Planning Supervisor', 'L2', 'per-somsak', 'Move into supply-chain analytics'),
   P('per-arisa', 'Arisa Chaiyaporn', 'learner', 'bu-cbm', 'enabling', 'Procurement Supervisor', 'L3', 'per-somsak', 'Category lead for green materials'),
   P('per-jiraporn', 'Jiraporn Suksawat', 'learner', 'bu-cbm', 'enabling', 'Quality Assurance Supervisor', 'L2', 'per-somsak', null),
-  P('per-pim', 'Pim Rattanakorn', 'learner', 'bu-cafi', 'enabling', 'Accounts Payable Supervisor', 'L2', 'per-ratree', 'Lead a finance automation squad'),
+  P('per-pim', 'Pim Rattanakorn', 'learner', 'bu-cafi', 'enabling', 'Accounts Payable Supervisor', 'L2', 'per-ratree', 'Lead a finance automation squad', false, 'Invoices per FTE per week; touchless rate; exception ageing'),
   P('per-krit', 'Krit Boonmee', 'learner', 'bu-cafi', 'enabling', 'IT Service Desk Lead', 'L3', 'per-ratree', 'Service delivery manager'),
   P('per-nok', 'Nok Saengthong', 'learner', 'bu-cafi', 'enabling', 'Payroll Operations Supervisor', 'L2', 'per-ratree', null),
-  P('per-warit', 'Warit Thongchai', 'learner', 'bu-cbm', 'business', 'Business Development Manager, Alternative Fuels', 'L4', 'per-prasert', 'Lead a new venture inside SCG'),
+  P('per-warit', 'Warit Thongchai', 'learner', 'bu-cbm', 'business', 'Business Development Manager, Alternative Fuels', 'L4', 'per-prasert', 'Lead a new venture inside SCG', true, 'Alternative fuel substitution rate; new revenue from waste-to-value'),
   P('per-mali', 'Mali Phromma', 'learner', 'bu-cafi', 'enabling', 'Finance Systems Analyst', 'L3', 'per-ratree', 'Product owner for finance platforms'),
   P('per-wichai', 'Wichai Kongkaew', 'learner', 'bu-scgc', 'business', 'Incubation Lead, Solar Dealer Leasing', 'L4', 'per-prasert', 'Scale the venture to three markets'),
   // Line managers
-  P('per-kittipong', 'Kittipong Jaidee', 'line_manager', 'bu-cbm', 'business', 'Sales Manager, Central Region', 'L4', 'per-prasert'),
-  P('per-somsak', 'Somsak Petchsri', 'line_manager', 'bu-cbm', 'business', 'Plant Manager, Saraburi', 'L4', 'per-prasert'),
-  P('per-ratree', 'Ratree Kaewkla', 'line_manager', 'bu-cafi', 'enabling', 'Head of Transaction Services', 'L4', 'per-wanida'),
+  P('per-kittipong', 'Kittipong Jaidee', 'line_manager', 'bu-cbm', 'business', 'Sales Manager, Central Region', 'L4', 'per-prasert', null, true),
+  P('per-somsak', 'Somsak Petchsri', 'line_manager', 'bu-cbm', 'business', 'Plant Manager, Saraburi', 'L4', 'per-prasert', null, true),
+  P('per-ratree', 'Ratree Kaewkla', 'line_manager', 'bu-cafi', 'enabling', 'Head of Transaction Services', 'L4', 'per-wanida', null, true),
   // BU sponsors (also set BU themes as BU-head delegates in this prototype)
-  P('per-prasert', 'Prasert Vong-anan', 'bu_sponsor', 'bu-cbm', 'business', 'Turnaround Sponsor, CBM', 'L5', null),
-  P('per-wanida', 'Wanida Sukjai', 'bu_sponsor', 'bu-cafi', 'enabling', 'Head of Shared Services, CAFI', 'L5', null),
+  P('per-prasert', 'Prasert Vong-anan', 'bu_sponsor', 'bu-cbm', 'business', 'Turnaround Sponsor, CBM', 'L5', null, null, true),
+  P('per-wanida', 'Wanida Sukjai', 'bu_sponsor', 'bu-cafi', 'enabling', 'Head of Shared Services, CAFI', 'L5', null, null, true),
   P('per-suchada', 'Suchada Limpanont', 'bu_sponsor', 'bu-scgp', 'business', 'Commercial Director, SCGP', 'L5', null),
   // Coaches
   P('per-anong', 'Anong Thepsiri', 'coach', 'bu-corp', 'enabling', 'Certified Capability Coach', 'L4', 'per-supattra'),
@@ -136,6 +139,7 @@ export const learningModules: LearningModule[] = Object.entries(moduleTitles).fl
     durationMin: [12, 18, 25, 30][i % 4],
     format: formats[i % 4],
     variant: skillId === 'sk-b2bsales' && i === 0 ? 'B2B external customer · CBM dealers' : skillId === 'sk-custneeds' && i === 0 ? 'Internal customer · shared services' : null,
+    origin: 'catalogue', sourceContractId: null, buId: null, body: null,
   })),
 )
 
@@ -147,7 +151,7 @@ export const cohorts: Cohort[] = [
       { label: 'AI skill diagnostic', date: '2026-04-06' }, { label: 'Applied capability labs', date: '2026-04-20' },
       { label: 'Impact sprint', date: '2026-04-27' }, { label: 'Mid-sprint gate', date: '2026-06-05' }, { label: 'Impact showcase', date: '2026-07-24' },
     ],
-    pipelineTargetThb: 6_000_000, seats: 24,
+    pipelineTargetThb: 6_000_000, seats: 24, budgetThb: 1_800_000,
   },
   {
     id: 'coh-abc-l1', program: 'ABC', code: 'ABC-L1', name: 'ABC Lighthouse 1 · CBM turnaround roles', buId: 'bu-cbm', status: 'sprint',
@@ -158,7 +162,7 @@ export const cohorts: Cohort[] = [
       { label: 'Coaching clinic 1', date: '2026-09-11' }, { label: 'Mid-sprint gate', date: '2026-09-25' },
       { label: 'Coaching clinic 2', date: '2026-10-16' }, { label: 'Impact showcase', date: '2026-11-13' },
     ],
-    pipelineTargetThb: 12_000_000, seats: 30,
+    pipelineTargetThb: 12_000_000, seats: 30, budgetThb: 2_400_000,
   },
   {
     id: 'coh-abc-l2', program: 'ABC', code: 'ABC-L2', name: 'ABC Lighthouse 2 · CAFI service teams', buId: 'bu-cafi', status: 'sprint',
@@ -168,19 +172,19 @@ export const cohorts: Cohort[] = [
       { label: 'Impact sprint starts', date: '2026-09-07' }, { label: 'Coaching clinic 1', date: '2026-10-02' },
       { label: 'Mid-sprint gate', date: '2026-10-16' }, { label: 'Coaching clinic 2', date: '2026-11-06' }, { label: 'Impact showcase', date: '2026-12-04' },
     ],
-    pipelineTargetThb: 9_000_000, seats: 30,
+    pipelineTargetThb: 9_000_000, seats: 30, budgetThb: 2_200_000,
   },
   {
     id: 'coh-abc-2027-1', program: 'ABC', code: 'ABC-2027-01', name: 'ABC Batch 1/2027 · enterprise-wide', buId: null, status: 'planned',
     startDate: '2027-01-11', endDate: '2027-04-30',
     keyDates: [{ label: 'AI skill diagnostic', date: '2027-01-11' }, { label: 'Applied capability labs', date: '2027-01-25' }, { label: 'Impact showcase', date: '2027-04-30' }],
-    pipelineTargetThb: 20_000_000, seats: 60,
+    pipelineTargetThb: 20_000_000, seats: 60, budgetThb: 4_500_000,
   },
   {
     id: 'coh-bcd-2025', program: 'BCD', code: 'BCD-2025', name: 'BCD Pilot cohort 2025', buId: null, status: 'scale_up',
     startDate: '2025-06-02', endDate: '2025-10-17',
     keyDates: [{ label: 'Gate 1', date: '2025-07-28' }, { label: 'Gate 2', date: '2025-09-19' }, { label: 'Gate 3', date: '2026-03-13' }],
-    pipelineTargetThb: 100_000_000, seats: 18,
+    pipelineTargetThb: 100_000_000, seats: 18, budgetThb: 6_000_000,
   },
   {
     id: 'coh-bcd-l1', program: 'BCD', code: 'BCD-L1', name: 'BCD Lighthouse cohort 2026', buId: null, status: 'building_case',
@@ -192,30 +196,30 @@ export const cohorts: Cohort[] = [
       { label: 'Commercial build', date: '2026-08-31' }, { label: 'Prototype & stress-test', date: '2026-09-28' },
       { label: 'Gate 2 · CEO investment pitch', date: '2026-10-23' },
     ],
-    pipelineTargetThb: 150_000_000, seats: 18,
+    pipelineTargetThb: 150_000_000, seats: 18, budgetThb: 6_800_000,
   },
   {
     id: 'coh-bcd-2027-1', program: 'BCD', code: 'BCD-2027-01', name: 'BCD Batch 1/2027', buId: null, status: 'framing',
     startDate: '2027-01-18', endDate: '2027-05-14',
     keyDates: [{ label: 'Challenge brief deadline', date: '2026-10-30' }, { label: 'Selection board', date: '2026-11-13' }, { label: 'Immersion camp', date: '2027-01-25' }],
-    pipelineTargetThb: 200_000_000, seats: 24,
+    pipelineTargetThb: 200_000_000, seats: 24, budgetThb: 8_000_000,
   },
 ]
 
 const E = (id: string, cohortId: string, personaId: string, status: Enrollment['status'], extra: Partial<Enrollment> = {}): Enrollment => ({
   id, cohortId, personaId, status, teamId: null, coachId: null, sponsorId: null, managerId: personas.find((p) => p.id === personaId)?.managerId ?? null,
-  impactRating: null, topDecile: false, fastTrackBcd: false, ...extra,
+  impactRating: null, topDecile: false, fastTrackBcd: false, podId: null, ...extra,
 })
 
 export const enrollments: Enrollment[] = [
   E('enr-arisa', 'coh-abc-a0', 'per-arisa', 'graduated', { coachId: 'per-anong', sponsorId: 'per-prasert', impactRating: 'exceptional', topDecile: true, fastTrackBcd: true }),
   E('enr-jiraporn', 'coh-abc-a0', 'per-jiraporn', 'showcase', { coachId: 'per-anong', sponsorId: 'per-prasert', impactRating: 'strong' }),
-  E('enr-nara', 'coh-abc-l1', 'per-nara', 'in_sprint', { coachId: 'per-anong', sponsorId: 'per-prasert' }),
-  E('enr-tanawat', 'coh-abc-l1', 'per-tanawat', 'in_sprint', { coachId: 'per-anong', sponsorId: 'per-prasert' }),
-  E('enr-boonchu', 'coh-abc-l1', 'per-boonchu', 'in_sprint', { coachId: 'per-anong', sponsorId: 'per-prasert' }),
-  E('enr-pim', 'coh-abc-l2', 'per-pim', 'in_sprint', { coachId: 'per-decha', sponsorId: 'per-wanida' }),
-  E('enr-krit', 'coh-abc-l2', 'per-krit', 'in_sprint', { coachId: 'per-decha', sponsorId: 'per-wanida' }),
-  E('enr-nok', 'coh-abc-l2', 'per-nok', 'in_sprint', { coachId: 'per-decha', sponsorId: 'per-wanida' }),
+  E('enr-nara', 'coh-abc-l1', 'per-nara', 'in_sprint', { coachId: 'per-anong', sponsorId: 'per-prasert', podId: 'pod-l1-a' }),
+  E('enr-tanawat', 'coh-abc-l1', 'per-tanawat', 'in_sprint', { coachId: 'per-anong', sponsorId: 'per-prasert', podId: 'pod-l1-a' }),
+  E('enr-boonchu', 'coh-abc-l1', 'per-boonchu', 'in_sprint', { coachId: 'per-anong', sponsorId: 'per-prasert', podId: 'pod-l1-a' }),
+  E('enr-pim', 'coh-abc-l2', 'per-pim', 'in_sprint', { coachId: 'per-decha', sponsorId: 'per-wanida', podId: 'pod-l2-a' }),
+  E('enr-krit', 'coh-abc-l2', 'per-krit', 'in_sprint', { coachId: 'per-decha', sponsorId: 'per-wanida', podId: 'pod-l2-a' }),
+  E('enr-nok', 'coh-abc-l2', 'per-nok', 'in_sprint', { coachId: 'per-decha', sponsorId: 'per-wanida', podId: 'pod-l2-a' }),
   E('enr-warit', 'coh-bcd-l1', 'per-warit', 'in_sprint', { teamId: 'team-a', coachId: 'per-decha', sponsorId: 'per-prasert' }),
   E('enr-mali', 'coh-bcd-l1', 'per-mali', 'in_sprint', { teamId: 'team-b', coachId: 'per-decha', sponsorId: 'per-wanida' }),
   E('enr-wichai', 'coh-bcd-2025', 'per-wichai', 'graduated', { teamId: 'team-d', coachId: 'per-anong', sponsorId: 'per-prasert', impactRating: 'exceptional', topDecile: true }),
@@ -401,21 +405,21 @@ export const teams: Team[] = [
 ]
 
 export const concepts: Concept[] = [
-  { id: 'cp-fuel', teamId: 'team-a', briefId: 'cb-fuel', cohortId: 'coh-bcd-l1', title: 'RDF supply marketplace for kilns', summary: 'A managed marketplace that contracts municipal and industrial waste streams into refuse-derived fuel with quality guarantees, lifting substitution to 35% at two kilns.', stage: 'build_case', pipelineValueThb: 45_000_000, validatedValueThb: null, scaleRoute: null, createdAt: d('2026-07-13'), updatedAt: d('2026-09-10') },
-  { id: 'cp-invoice', teamId: 'team-b', briefId: 'cb-invoice', cohortId: 'coh-bcd-l1', title: 'Touchless invoicing with a supplier portal', summary: 'Supplier self-service portal plus AI exception handling, targeting 80% touchless processing and a 24-hour exception service level.', stage: 'gate2', pipelineValueThb: 18_000_000, validatedValueThb: null, scaleRoute: null, createdAt: d('2026-07-13'), updatedAt: d('2026-09-13') },
-  { id: 'cp-pack', teamId: 'team-c', briefId: 'cb-pack', cohortId: 'coh-bcd-l1', title: 'Mono-material recyclable pouch for snack brands', summary: 'Field validation showed brands value recyclability but will not absorb a 12% cost premium. Pivoting to a co-branded take-back scheme that lowers net cost.', stage: 'pivot', pipelineValueThb: 25_000_000, validatedValueThb: null, scaleRoute: null, createdAt: d('2026-07-13'), updatedAt: d('2026-08-24') },
-  { id: 'cp-solar', teamId: 'team-d', briefId: 'cb-solar', cohortId: 'coh-bcd-2025', title: 'Solar rooftop leasing via dealers', summary: 'Dealers sell and install leased rooftop solar for SME customers. Scaled under SCG Start the Dot in March 2026.', stage: 'scaled', pipelineValueThb: 100_000_000, validatedValueThb: 120_000_000, scaleRoute: 'start_the_dot', createdAt: d('2025-07-01'), updatedAt: d('2026-03-13') },
+  { id: 'cp-fuel', teamId: 'team-a', briefId: 'cb-fuel', cohortId: 'coh-bcd-l1', title: 'RDF supply marketplace for kilns', summary: 'A managed marketplace that contracts municipal and industrial waste streams into refuse-derived fuel with quality guarantees, lifting substitution to 35% at two kilns.', stage: 'build_case', pipelineValueThb: 45_000_000, validatedValueThb: null, scaleRoute: null, alignmentNote: null, alignedBy: null, alignedAt: null, createdAt: d('2026-07-13'), updatedAt: d('2026-09-10') },
+  { id: 'cp-invoice', teamId: 'team-b', briefId: 'cb-invoice', cohortId: 'coh-bcd-l1', title: 'Touchless invoicing with a supplier portal', summary: 'Supplier self-service portal plus AI exception handling, targeting 80% touchless processing and a 24-hour exception service level.', stage: 'gate2', pipelineValueThb: 18_000_000, validatedValueThb: null, scaleRoute: null, alignmentNote: null, alignedBy: null, alignedAt: null, createdAt: d('2026-07-13'), updatedAt: d('2026-09-13') },
+  { id: 'cp-pack', teamId: 'team-c', briefId: 'cb-pack', cohortId: 'coh-bcd-l1', title: 'Mono-material recyclable pouch for snack brands', summary: 'Field validation showed brands value recyclability but will not absorb a 12% cost premium. Pivoting to a co-branded take-back scheme that lowers net cost.', stage: 'pivot', pipelineValueThb: 25_000_000, validatedValueThb: null, scaleRoute: null, alignmentNote: null, alignedBy: null, alignedAt: null, createdAt: d('2026-07-13'), updatedAt: d('2026-08-24') },
+  { id: 'cp-solar', teamId: 'team-d', briefId: 'cb-solar', cohortId: 'coh-bcd-2025', title: 'Solar rooftop leasing via dealers', summary: 'Dealers sell and install leased rooftop solar for SME customers. Scaled under SCG Start the Dot in March 2026.', stage: 'scaled', pipelineValueThb: 100_000_000, validatedValueThb: 120_000_000, scaleRoute: 'start_the_dot', alignmentNote: 'Aligned with SCG management on 2 Aug 2025: dealer leasing model approved for field validation.', alignedBy: 'per-prasert', alignedAt: d('2025-08-02'), createdAt: d('2025-07-01'), updatedAt: d('2026-03-13') },
 ]
 
 export const gateReviews: GateReview[] = [
-  { id: 'gr-fuel-1', conceptId: 'cp-fuel', gateNo: 1, scheduledDate: '2026-08-24', evidenceSummary: 'Evidence pack: 14 waste-stream owners interviewed; two pilot contracts signed; RDF quality test passed at kiln 2.', submittedAt: d('2026-08-20'), decision: 'go', decidedById: 'per-chatchai', decidedAt: d('2026-08-24'), note: 'Go. Build the commercial case with a firm supply plan.', validatedValueThb: null },
-  { id: 'gr-fuel-2', conceptId: 'cp-fuel', gateNo: 2, scheduledDate: '2026-10-23', evidenceSummary: null, submittedAt: null, decision: 'pending', decidedById: null, decidedAt: null, note: null, validatedValueThb: null },
-  { id: 'gr-invoice-1', conceptId: 'cp-invoice', gateNo: 1, scheduledDate: '2026-08-24', evidenceSummary: 'Evidence pack: 30 suppliers tested the portal prototype; exception model 91% accurate on 2,000 invoices.', submittedAt: d('2026-08-20'), decision: 'go', decidedById: 'per-chatchai', decidedAt: d('2026-08-24'), note: 'Go, with a service-level commitment in the case.', validatedValueThb: null },
-  { id: 'gr-invoice-2', conceptId: 'cp-invoice', gateNo: 2, scheduledDate: '2026-10-23', evidenceSummary: 'Pre-read submitted early: business case THB 18M annual saving, payback 14 months, best / worst case THB 9M–24M; recorded 6-minute pitch attached.', submittedAt: d('2026-09-13'), decision: 'pending', decidedById: null, decidedAt: null, note: null, validatedValueThb: null },
-  { id: 'gr-pack-1', conceptId: 'cp-pack', gateNo: 1, scheduledDate: '2026-08-24', evidenceSummary: 'Evidence pack: 12 brand interviews; willingness to pay below cost premium.', submittedAt: d('2026-08-20'), decision: 'pivot', decidedById: 'per-chatchai', decidedAt: d('2026-08-24'), note: 'Pivot to the take-back scheme; re-validate with five brands before Gate 2.', validatedValueThb: null },
-  { id: 'gr-solar-1', conceptId: 'cp-solar', gateNo: 1, scheduledDate: '2025-07-28', evidenceSummary: 'Evidence pack: 40 SME customers; 8 dealers committed.', submittedAt: d('2025-07-24'), decision: 'go', decidedById: 'per-chatchai', decidedAt: d('2025-07-28'), note: 'Go.', validatedValueThb: null },
-  { id: 'gr-solar-2', conceptId: 'cp-solar', gateNo: 2, scheduledDate: '2025-09-19', evidenceSummary: 'Business case THB 100M recurring revenue by year 3.', submittedAt: d('2025-09-15'), decision: 'invest', decidedById: 'per-chatchai', decidedAt: d('2025-09-19'), note: 'Invest THB 30M for small-scale roll-out in two provinces.', validatedValueThb: null },
-  { id: 'gr-solar-3', conceptId: 'cp-solar', gateNo: 3, scheduledDate: '2026-03-13', evidenceSummary: 'Two provinces live; THB 120M contracted recurring revenue; 46 dealers activated.', submittedAt: d('2026-03-09'), decision: 'scale', decidedById: 'per-chatchai', decidedAt: d('2026-03-13'), note: 'Scale as a Start the Dot venture.', validatedValueThb: 120_000_000 },
+  { id: 'gr-fuel-1', conceptId: 'cp-fuel', gateNo: 1, scheduledDate: '2026-08-24', evidenceSummary: 'Evidence pack: 14 waste-stream owners interviewed; two pilot contracts signed; RDF quality test passed at kiln 2.', submittedAt: d('2026-08-20'), decision: 'go', decidedById: 'per-chatchai', decidedAt: d('2026-08-24'), note: 'Go. Build the commercial case with a firm supply plan.', validatedValueThb: null, evidence: { customerInterviews: 14, validatedNeeds: 'Municipal and industrial waste owners want a guaranteed offtake and a disposal certificate; both rank above price.', prototype: 'Two pilot supply contracts signed; RDF batch passed the kiln 2 quality test at 3,900 kcal/kg.', risks: 'Moisture in the rainy season; sorting capacity at the transfer station.' }, businessCase: null, attachments: [{ name: 'Waste-owner interview log', kind: 'evidence_pack', note: '14 interviews, coded by need' }, { name: 'Kiln 2 quality test report', kind: 'evidence_pack', note: 'Batch 2026-08-14' }] },
+  { id: 'gr-fuel-2', conceptId: 'cp-fuel', gateNo: 2, scheduledDate: '2026-10-23', evidenceSummary: null, submittedAt: null, decision: 'pending', decidedById: null, decidedAt: null, note: null, validatedValueThb: null, evidence: null, businessCase: null, attachments: [] },
+  { id: 'gr-invoice-1', conceptId: 'cp-invoice', gateNo: 1, scheduledDate: '2026-08-24', evidenceSummary: 'Evidence pack: 30 suppliers tested the portal prototype; exception model 91% accurate on 2,000 invoices.', submittedAt: d('2026-08-20'), decision: 'go', decidedById: 'per-chatchai', decidedAt: d('2026-08-24'), note: 'Go, with a service-level commitment in the case.', validatedValueThb: null, evidence: null, businessCase: null, attachments: [] },
+  { id: 'gr-invoice-2', conceptId: 'cp-invoice', gateNo: 2, scheduledDate: '2026-10-23', evidenceSummary: 'Pre-read submitted early: business case THB 18M annual saving, payback 14 months, best / worst case THB 9M–24M; recorded 6-minute pitch attached.', submittedAt: d('2026-09-13'), decision: 'pending', decidedById: null, decidedAt: null, note: null, validatedValueThb: null, evidence: { customerInterviews: 30, validatedNeeds: 'Suppliers want status visibility without emailing AP; BU finance wants exceptions resolved inside 24 hours.', prototype: 'Portal prototype tested with 30 suppliers; exception model 91% accurate on 2,000 invoices.', risks: 'Master-data quality for small suppliers; change effort in two BU finance teams.' }, businessCase: { pricing: 'No external pricing: internal cost-to-serve model, THB 42 per invoice today against THB 17 at 80% touchless.', paybackMonths: 14, baseCaseThb: 18_000_000, bestCaseThb: 24_000_000, worstCaseThb: 9_000_000, ask: 'THB 21M over 18 months for the portal build, integration and two-team roll-out.' }, attachments: [{ name: 'Gate 2 pre-read (6 pages)', kind: 'pre_read', note: 'Sent to committee 13 Sep' }, { name: 'Recorded pitch, 6 minutes', kind: 'recorded_pitch', note: 'Team Touchless, Mali presenting' }, { name: 'Business case model', kind: 'model', note: 'Base, best and worst case with assumptions' }] },
+  { id: 'gr-pack-1', conceptId: 'cp-pack', gateNo: 1, scheduledDate: '2026-08-24', evidenceSummary: 'Evidence pack: 12 brand interviews; willingness to pay below cost premium.', submittedAt: d('2026-08-20'), decision: 'pivot', decidedById: 'per-chatchai', decidedAt: d('2026-08-24'), note: 'Pivot to the take-back scheme; re-validate with five brands before Gate 2.', validatedValueThb: null, evidence: null, businessCase: null, attachments: [] },
+  { id: 'gr-solar-1', conceptId: 'cp-solar', gateNo: 1, scheduledDate: '2025-07-28', evidenceSummary: 'Evidence pack: 40 SME customers; 8 dealers committed.', submittedAt: d('2025-07-24'), decision: 'go', decidedById: 'per-chatchai', decidedAt: d('2025-07-28'), note: 'Go.', validatedValueThb: null, evidence: null, businessCase: null, attachments: [] },
+  { id: 'gr-solar-2', conceptId: 'cp-solar', gateNo: 2, scheduledDate: '2025-09-19', evidenceSummary: 'Business case THB 100M recurring revenue by year 3.', submittedAt: d('2025-09-15'), decision: 'invest', decidedById: 'per-chatchai', decidedAt: d('2025-09-19'), note: 'Invest THB 30M for small-scale roll-out in two provinces.', validatedValueThb: null, evidence: null, businessCase: null, attachments: [] },
+  { id: 'gr-solar-3', conceptId: 'cp-solar', gateNo: 3, scheduledDate: '2026-03-13', evidenceSummary: 'Two provinces live; THB 120M contracted recurring revenue; 46 dealers activated.', submittedAt: d('2026-03-09'), decision: 'scale', decidedById: 'per-chatchai', decidedAt: d('2026-03-13'), note: 'Scale as a Start the Dot venture.', validatedValueThb: 120_000_000, evidence: null, businessCase: null, attachments: [] },
 ]
 
 export const coachingClinics: CoachingClinic[] = [
@@ -497,8 +501,8 @@ export const marketplaceRoles: MarketplaceRole[] = [
 ]
 
 export const marketplaceInterests: MarketplaceInterest[] = [
-  { id: 'mi-1', roleId: 'mr-green-category', personaId: 'per-arisa', createdAt: d('2026-08-15'), status: 'shortlisted' },
-  { id: 'mi-2', roleId: 'mr-incubation', personaId: 'per-warit', createdAt: d('2026-09-01'), status: 'expressed' },
+  { id: 'mi-1', roleId: 'mr-green-category', personaId: 'per-arisa', createdAt: d('2026-08-15'), status: 'placed', placedAt: d('2026-09-01') },
+  { id: 'mi-2', roleId: 'mr-incubation', personaId: 'per-warit', createdAt: d('2026-09-01'), status: 'expressed', placedAt: null },
 ]
 
 const N = (id: string, personaId: string, title: string, body: string, link: string | null, createdAt: string, readAt: string | null = null): Notification => ({ id, personaId, kind: 'update', title, body, link, readAt, createdAt: d(createdAt) })
@@ -583,6 +587,81 @@ export const integrationRuns: IntegrationRun[] = [
   { id: 'ir-3', system: 'notifications', direction: 'outbound', status: 'failed', records: 0, summary: 'LINE Official Account delivery failed: token expired. Email fallback delivered 6 of 6.', payload: [{ channel: 'LINE', delivered: 0, failed: 6 }, { channel: 'Email', delivered: 6, failed: 0 }], triggeredBy: 'per-supattra', startedAt: d('2026-09-08'), finishedAt: d('2026-09-08') },
 ]
 
+export const costLines: CostLine[] = [
+  { id: 'cl-a0-1', cohortId: 'coh-abc-a0', category: 'design', description: 'Journey redesign and module authoring (one-off, amortised over 2026 cohorts)', amountThb: 600_000, recordedBy: 'per-supattra', recordedAt: d('2026-04-06') },
+  { id: 'cl-a0-2', cohortId: 'coh-abc-a0', category: 'delivery', description: 'Four lab days, facilitation and materials, 24 learners', amountThb: 720_000, recordedBy: 'per-supattra', recordedAt: d('2026-04-20') },
+  { id: 'cl-a0-3', cohortId: 'coh-abc-a0', category: 'coaching', description: 'Certified coach time, clinics and sprint support', amountThb: 300_000, recordedBy: 'per-supattra', recordedAt: d('2026-07-24') },
+  { id: 'cl-a0-4', cohortId: 'coh-abc-a0', category: 'platform', description: 'AI platform licences and GenAI usage, 24 seats', amountThb: 180_000, recordedBy: 'per-supattra', recordedAt: d('2026-07-24') },
+  { id: 'cl-l1-1', cohortId: 'coh-abc-l1', category: 'delivery', description: 'Four lab days, facilitation and venue, 30 learners', amountThb: 900_000, recordedBy: 'per-supattra', recordedAt: d('2026-08-10') },
+  { id: 'cl-l1-2', cohortId: 'coh-abc-l1', category: 'coaching', description: 'Coach certification and clinic delivery', amountThb: 420_000, recordedBy: 'per-supattra', recordedAt: d('2026-08-17') },
+  { id: 'cl-l1-3', cohortId: 'coh-abc-l1', category: 'platform', description: 'AI platform licences and GenAI usage, 30 seats', amountThb: 225_000, recordedBy: 'per-supattra', recordedAt: d('2026-08-17') },
+  { id: 'cl-l1-4', cohortId: 'coh-abc-l1', category: 'travel', description: 'Travel and accommodation for lab week', amountThb: 310_000, recordedBy: 'per-supattra', recordedAt: d('2026-08-13') },
+  { id: 'cl-l2-1', cohortId: 'coh-abc-l2', category: 'delivery', description: 'Four lab days, CAFI service teams', amountThb: 840_000, recordedBy: 'per-supattra', recordedAt: d('2026-08-31') },
+  { id: 'cl-l2-2', cohortId: 'coh-abc-l2', category: 'coaching', description: 'Coach time and async clinics', amountThb: 380_000, recordedBy: 'per-supattra', recordedAt: d('2026-09-07') },
+  { id: 'cl-l2-3', cohortId: 'coh-abc-l2', category: 'platform', description: 'AI platform licences, 30 seats', amountThb: 225_000, recordedBy: 'per-supattra', recordedAt: d('2026-09-07') },
+  { id: 'cl-bcd-1', cohortId: 'coh-bcd-l1', category: 'delivery', description: 'Immersion camp, concept studio and field validation support', amountThb: 2_400_000, recordedBy: 'per-supattra', recordedAt: d('2026-07-06') },
+  { id: 'cl-bcd-2', cohortId: 'coh-bcd-l1', category: 'coaching', description: 'Async certified coaching across five stages', amountThb: 1_100_000, recordedBy: 'per-supattra', recordedAt: d('2026-08-31') },
+  { id: 'cl-bcd-3', cohortId: 'coh-bcd-l1', category: 'platform', description: 'AI platform and research tooling', amountThb: 480_000, recordedBy: 'per-supattra', recordedAt: d('2026-08-31') },
+  { id: 'cl-bcd-4', cohortId: 'coh-bcd-2025', category: 'delivery', description: 'Pilot cohort delivery and gates', amountThb: 3_200_000, recordedBy: 'per-supattra', recordedAt: d('2025-10-17') },
+  { id: 'cl-bcd-5', cohortId: 'coh-bcd-2025', category: 'coaching', description: 'Coaching spine, pilot cohort', amountThb: 900_000, recordedBy: 'per-supattra', recordedAt: d('2025-10-17') },
+]
+
+export const roleBlueprints: RoleBlueprint[] = [
+  { id: 'rb-cbm-plant', buId: 'bu-cbm', roleTitle: 'Plant Performance Lead (new operating model)', level: 'L4', operatingModelChange: 'CBM moves from plant-by-plant reporting to a regional performance cell. The role owns cost per tonne across three plants and runs a daily data-led routine instead of monthly reviews.', responsibilities: 'Own cost per tonne and unplanned downtime across three plants; run the daily performance routine; lead alternative-fuel substitution; coach shift supervisors on data use.', headcount: 6, status: 'adopted', model: 'claude-opus-5', createdBy: 'per-supattra', createdAt: d('2026-08-28'), adoptedAt: d('2026-08-29'),
+    generated: { valuePool: 'Cement cost per tonne across the Saraburi cluster', summary: 'The new role shifts judgement from monthly review to daily data-led decisions across three plants. The binding gaps are data storytelling and OpEx quantification at Level 3, with GenAI copilot practice as the enabler; green economics matters only for the fuel mix decision.',
+      skills: [
+        { skillCode: 'OPEX-02', targetLevel: 4, why: 'Owns cost per tonne across three plants and must quantify waste in THB, not hours.', supplyFte: 2, demandFte: 6, thbValueAtRisk: 90_000_000, decision: 'build' },
+        { skillCode: 'OPEX-01', targetLevel: 3, why: 'The daily routine only works if the performance story is readable by shift teams.', supplyFte: 1, demandFte: 6, thbValueAtRisk: 45_000_000, decision: 'build' },
+        { skillCode: 'AI-01', targetLevel: 3, why: 'Daily cadence is only affordable with copilot-assisted analysis and handover.', supplyFte: 1, demandFte: 6, thbValueAtRisk: 30_000_000, decision: 'build' },
+        { skillCode: 'COMM-02', targetLevel: 2, why: 'Fuel mix choices now carry a carbon cost that the role must weigh.', supplyFte: 0, demandFte: 6, thbValueAtRisk: 25_000_000, decision: 'borrow' },
+      ],
+      cohortPlan: { program: 'ABC', seats: 6, startQuarter: 'Q1 2027', rationale: 'Six holders of one critical role, same gaps: one ABC wave with a shared impact contract theme on cost per tonne.' },
+      risks: ['Shift patterns limit lab attendance; run labs in two half-cohorts.', 'Plant data access must be granted before the sprint or baselines slip.'] } },
+]
+
+export const policyItems: PolicyItem[] = [
+  { id: 'pol-roi', name: 'ROI-tracking policy', description: 'Targeted objectives are set on day one for every learner and cohort; delivered value is sponsor-validated into the impact ledger and tracked 6–12 months.', status: 'approved', effectiveFrom: '2027-01-01', resolutionRef: 'PC-2026-11', owner: 'CHR / Capability Development', decidedBy: 'per-chatchai', decidedAt: d('2026-08-14'), note: 'Approved as part of the MTP 2027 policy pack.' },
+  { id: 'pol-promo', name: 'Skills-based promotion criteria', description: 'Each role level defines required verified skills; promotion cases must cite skill passport evidence.', status: 'submitted', effectiveFrom: '2027-01-01', resolutionRef: null, owner: 'Rewards & Career', decidedBy: null, decidedAt: null, note: 'With the People Committee for the Q2 resolution.' },
+  { id: 'pol-premium', name: 'Skill premiums for critical skills', description: 'Verified passport skills on the annual critical-skill list qualify for skill-premium consideration in the merit cycle.', status: 'submitted', effectiveFrom: '2027-04-01', resolutionRef: null, owner: 'Rewards & Career', decidedBy: null, decidedAt: null, note: 'Requires the critical-skill list to be refreshed first.' },
+  { id: 'pol-incentive', name: 'Value-linked incentives', description: 'Sponsor-validated impact and funded Gate-2 concepts feed recognition and value-linked bonuses.', status: 'drafted', effectiveFrom: null, resolutionRef: null, owner: 'Rewards & Career', decidedBy: null, decidedAt: null, note: 'Draft pending finance review of the ledger audit trail.' },
+  { id: 'pol-pdpa', name: 'Responsible-AI and PDPA standard', description: 'Retrieval-grounded content only, PDPA-compliant processing, human-in-the-loop for career decisions, full telemetry for re-personalisation.', status: 'approved', effectiveFrom: '2026-09-01', resolutionRef: 'PC-2026-09', owner: 'CHR digital / Legal', decidedBy: 'per-chatchai', decidedAt: d('2026-08-14'), note: 'Standing operating standard for the AI platform suite.' },
+]
+
+export const pods: Pod[] = [
+  { id: 'pod-l1-a', cohortId: 'coh-abc-l1', name: 'Pod A · CBM turnaround', coachId: 'per-anong' },
+  { id: 'pod-l2-a', cohortId: 'coh-abc-l2', name: 'Pod A · CAFI services', coachId: 'per-decha' },
+]
+
+export const practiceSessions: PracticeSession[] = [
+  { id: 'ps-warit-1', personaId: 'per-warit', scenario: 'Gate 2 investment pitch, six minutes', overall: 3.4, model: 'claude-opus-5', createdAt: d('2026-09-10'),
+    transcript: [{ role: 'partner', text: 'You have six minutes with the committee. Start.' }, { role: 'learner', text: 'Our concept builds an RDF supply marketplace so kilns reach 35% substitution...' }],
+    scores: [{ criterion: 'Problem and value stated first', score: 4, comment: 'Clear THB value in the opening line.' }, { criterion: 'Evidence quality', score: 4, comment: 'Interview count and pilot contracts cited.' }, { criterion: 'Business case and best / worst case', score: 2, comment: 'No payback period and no downside case.' }, { criterion: 'The ask', score: 3, comment: 'Amount given, but not what it buys or when.' }] },
+]
+
+export const talentReviews: TalentReview[] = []
+export const successionEntries: SuccessionEntry[] = [
+  { id: 'se-wichai', personaId: 'per-wichai', pool: 'incubation_lead', basis: 'Gate 3 scale decision on Solar rooftop leasing; leads the venture under SCG Start the Dot.', enteredBy: 'per-chatchai', enteredAt: d('2026-03-13'), dueBy: '2026-09-13', fulfilledAt: d('2026-04-01') },
+  { id: 'se-arisa', personaId: 'per-arisa', pool: 'L3', basis: 'ABC top decile with three outcome-verified badges and THB 2.4M validated impact.', enteredBy: 'per-supattra', enteredAt: d('2026-08-05'), dueBy: null, fulfilledAt: null },
+]
+
+export const recognitions: Recognition[] = [
+  { id: 'rc-arisa', personaId: 'per-arisa', kind: 'ceo_showcase', note: 'CEO recognition at the Alpha pilot showcase for the CBAM-exposure category switch.', givenBy: 'per-chatchai', givenAt: d('2026-07-31') },
+  { id: 'rc-wichai', personaId: 'per-wichai', kind: 'gate2', note: 'CEO recognition at Gate 2 for the solar dealer leasing investment case.', givenBy: 'per-chatchai', givenAt: d('2025-09-19') },
+]
+
+export const governanceReviews: GovernanceReview[] = [
+  { id: 'gv-tax-q3', area: 'taxonomy', cycle: 'Q3 2026', note: 'Quarterly taxonomy review with function experts: level descriptors sharpened for OpEx and GenAI; no skills retired.', itemsReviewed: 18, reviewedBy: 'per-supattra', reviewedAt: d('2026-07-15'), nextDue: '2026-10-15' },
+  { id: 'gv-crit-2026', area: 'critical_skills', cycle: '2026 annual', note: 'People Committee refreshed the critical-skill list: AI, green commercial and business building confirmed as premium-eligible.', itemsReviewed: 7, reviewedBy: 'per-chatchai', reviewedAt: d('2026-06-20'), nextDue: '2027-06-20' },
+  { id: 'gv-agenda-2026', area: 'capability_agenda', cycle: 'MTP 2027 cycle', note: 'Value-to-skills cascade run with CBM and CAFI BU heads; SCGP and SCGC scheduled for Q4.', itemsReviewed: 9, reviewedBy: 'per-supattra', reviewedAt: d('2026-08-28'), nextDue: '2027-08-28' },
+]
+
+export const planMilestones: PlanMilestone[] = [
+  { id: 'ms-11', subPlan: '1.1', milestone: 'Five components live as one operating system; AI platform suite deployed', owner: 'CHR / IRIS', dueQuarter: 'Q1 2027', status: 'on_track', note: 'Two lighthouses running; SCGP and SCGC onboarding in Q4 2026.', updatedBy: 'per-supattra', updatedAt: d('2026-09-01') },
+  { id: 'ms-12', subPlan: '1.2', milestone: 'New ABC live from Batch 1/2027; all graduates hold verified skill passports', owner: 'Capability Development', dueQuarter: 'Q2 2027', status: 'on_track', note: 'Alpha pilot graduated with verified passports; Batch 1/2027 calendar published.', updatedBy: 'per-supattra', updatedAt: d('2026-09-01') },
+  { id: 'ms-13', subPlan: '1.3', milestone: '≥70% of concepts pass Gate 1; funded concepts incubating with P&L owners', owner: 'Capability Dev / BU Sponsors', dueQuarter: 'Q3 2027', status: 'at_risk', note: 'Gate 1 pass rate is on target, but only one concept is funded and incubating so far.', updatedBy: 'per-chatchai', updatedAt: d('2026-09-05') },
+  { id: 'ms-14', subPlan: '1.4', milestone: 'Capability–career–reward loop operational; impact dashboard live', owner: 'CHR / Rewards & Career', dueQuarter: 'Q4 2027', status: 'at_risk', note: 'Dashboard is live; promotion criteria and premium policy still with the People Committee.', updatedBy: 'per-supattra', updatedAt: d('2026-09-05') },
+]
+
 export const assessments: Assessment[] = []
 export const guidanceNotes: GuidanceNote[] = []
 
@@ -591,5 +670,6 @@ export const fixtureBundle = {
   learningPlanItems, impactContracts, sprintEvidence, challengeThemes, challengeBriefs, teams, concepts, gateReviews,
   coachingClinics, coachingNotes, coachScorecards, passportEntries, ledgerEntries, marketplaceRoles, marketplaceInterests,
   notifications, coachMessages, recordEvents, assessments, guidanceNotes, capabilityGaps, labAttendance, integrationRuns,
+  costLines, roleBlueprints, policyItems, pods, practiceSessions, talentReviews, successionEntries, recognitions, governanceReviews, planMilestones,
 }
 export type FixtureBundle = typeof fixtureBundle

@@ -8,6 +8,15 @@ export interface Unit { kind: UnitKind; id: string; name: string; ownerId: strin
 export interface MetricDef { key: keyof UnitMetrics; label: string; unit: '%' | 'thb' | 'n' | 'days'; higherIsBetter: boolean; explain: string; program?: 'ABC' | 'BCD' }
 export interface UnitMetrics {
   learners: number
+  sprintCompletion: number | null
+  timeToProficiencyDays: number | null
+  mobilityRate: number | null
+  retentionRate: number | null
+  aiReadyRate: number | null
+  validationAgeingDays: number | null
+  costThb: number
+  costPerLearner: number | null
+  roiRatio: number | null
   diagnosticCompletion: number | null
   learningProgress: number | null
   labAttendance: number | null
@@ -24,6 +33,14 @@ export interface UnitMetrics {
 }
 
 export const METRICS: MetricDef[] = [
+  { key: 'sprintCompletion', label: 'Sprint completion', unit: '%', higherIsBetter: true, explain: 'Learners who finished the 90-day sprint (graduated) out of those who reached showcase or ended.', program: 'ABC' },
+  { key: 'timeToProficiencyDays', label: 'Time to proficiency', unit: 'days', higherIsBetter: false, explain: 'Average days from completing the diagnostic to the first outcome-verified badge at target level.' },
+  { key: 'mobilityRate', label: 'Internal mobility', unit: '%', higherIsBetter: true, explain: 'Learners placed into a marketplace role, project or gig on verified skills.' },
+  { key: 'retentionRate', label: 'Retention', unit: '%', higherIsBetter: true, explain: 'Learners in these programmes still employed at SCG.' },
+  { key: 'aiReadyRate', label: 'AI-ready', unit: '%', higherIsBetter: true, explain: 'Learners with a verified AI skill at Level 2 or above, able to redesign work with AI.' },
+  { key: 'validationAgeingDays', label: 'Sponsor validation ageing', unit: 'days', higherIsBetter: false, explain: 'Average days a claimed impact has waited for sponsor validation.' },
+  { key: 'costPerLearner', label: 'Cost per learner', unit: 'thb', higherIsBetter: false, explain: 'Programme cost for these learners\' cohorts divided by their learners.' },
+  { key: 'roiRatio', label: 'Return on capability spend', unit: 'n', higherIsBetter: true, explain: 'Validated THB impact divided by programme cost. Above 1.0 means capability pays for itself.' },
   { key: 'diagnosticCompletion', label: 'Diagnostic completion', unit: '%', higherIsBetter: true, explain: 'Enrolled learners whose AI skill diagnostic is complete.' },
   { key: 'learningProgress', label: 'Micro-learning progress', unit: '%', higherIsBetter: true, explain: 'Completed modules as a share of modules in learners\' paths (skipped modules excluded).' },
   { key: 'labAttendance', label: 'Lab attendance', unit: '%', higherIsBetter: true, explain: 'Lab days checked in as a share of four days per ABC learner past the labs date.', program: 'ABC' },
@@ -68,9 +85,46 @@ export function computeMetrics(s: Snapshot, personaIds: string[]): UnitMetrics {
   }
   const teams = new Set(enr.map((e) => e.teamId).filter(Boolean))
   const gate1 = s.gateReviews.filter((g) => g.gateNo === 1 && g.decision !== 'pending' && teams.has(s.concepts.find((c) => c.id === g.conceptId)?.teamId ?? ''))
+  // outcomes
+  const ended = enr.filter((e) => ['showcase', 'graduated'].includes(e.status) || contracts.some((c) => c.enrollmentId === e.id && ['validated', 'reset'].includes(c.status)))
+  const completed = ended.filter((e) => e.status === 'graduated')
+  const ttp: number[] = []
+  for (const e of enr) {
+    const dx = s.diagnostics.find((d) => d.enrollmentId === e.id && d.completedAt)
+    if (!dx?.completedAt) continue
+    const first = s.passportEntries.filter((p) => p.personaId === e.personaId && p.tier === 'outcome_verified').sort((a, b) => a.mintedAt.localeCompare(b.mintedAt))[0]
+    if (first) ttp.push((new Date(first.mintedAt).getTime() - new Date(dx.completedAt).getTime()) / 86400000)
+  }
+  const placed = s.marketplaceInterests.filter((i) => ids.has(i.personaId) && i.status === 'placed')
+  const people = s.personas.filter((p) => ids.has(p.id))
+  const aiSkillIds = new Set(s.skills.filter((k) => s.skillDomains.find((d) => d.id === k.domainId)?.code === 'AI' || k.code.startsWith('AIS')).map((k) => k.id))
+  const aiReady = people.filter((p) => s.passportEntries.some((x) => x.personaId === p.id && aiSkillIds.has(x.skillId) && x.tier === 'outcome_verified' && x.level >= 2))
+  const pending = s.ledgerEntries.filter((l) => ids.has(l.personaId) && l.status === 'pending_validation')
+  const ageing = pending.map((l) => (Date.now() - new Date(l.createdAt).getTime()) / 86400000)
+  // economics: a cohort's cost is shared across its learners; a unit carries its learners' share
+  const cohortIds = Array.from(new Set(enr.map((e) => e.cohortId)))
+  let costThb = 0
+  for (const cid of cohortIds) {
+    const lines = s.costLines.filter((l) => l.cohortId === cid).reduce((a, l) => a + l.amountThb, 0)
+    const total = lines || (s.cohorts.find((c) => c.id === cid)?.budgetThb ?? 0)
+    const cohortLearners = s.enrollments.filter((e) => e.cohortId === cid && e.status !== 'withdrawn').length
+    const mine = enr.filter((e) => e.cohortId === cid).length
+    if (cohortLearners > 0) costThb += (total * mine) / cohortLearners
+  }
+  costThb = Math.round(costThb)
+
   const parts = [pct(dxDone, enr.length), pct(plan.filter((p) => p.status === 'completed').length, plan.length), pct(labDays, labEligible.length * 4), pct(activeContracts.length, abc.length), pct(gapsClosed, gaps.length)].filter((x): x is number => x != null)
   return {
     learners: enr.length,
+    sprintCompletion: pct(completed.length, ended.length),
+    timeToProficiencyDays: avg(ttp),
+    mobilityRate: pct(placed.length, enr.length),
+    retentionRate: pct(people.filter((p) => p.employmentStatus === 'active').length, people.length),
+    aiReadyRate: pct(aiReady.length, people.length),
+    validationAgeingDays: avg(ageing),
+    costThb,
+    costPerLearner: enr.length ? Math.round(costThb / enr.length) : null,
+    roiRatio: costThb > 0 ? Math.round((validatedThb / costThb) * 10) / 10 : null,
     diagnosticCompletion: pct(dxDone, enr.length),
     learningProgress: pct(plan.filter((p) => p.status === 'completed').length, plan.length),
     labAttendance: pct(labDays, labEligible.length * 4),

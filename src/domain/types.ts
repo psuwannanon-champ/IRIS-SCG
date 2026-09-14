@@ -42,6 +42,10 @@ export interface Persona {
   managerId: string | null
   initials: string
   careerAspiration: string | null
+  employmentStatus: 'active' | 'left'
+  leftAt: string | null
+  leaderCohort: boolean
+  kpis: string | null
 }
 
 export interface SkillDomain {
@@ -91,6 +95,7 @@ export interface Cohort {
   keyDates: { label: string; date: string }[]
   pipelineTargetThb: number | null
   seats: number
+  budgetThb: number | null
 }
 
 export type EnrollmentStatus =
@@ -114,6 +119,7 @@ export interface Enrollment {
   impactRating: 'exceptional' | 'strong' | 'on_track' | 'needs_support' | null
   topDecile: boolean
   fastTrackBcd: boolean
+  podId: string | null
 }
 
 export type EvidenceSource = 'self_declared' | 'ai_inferred' | 'knowledge_test' | 'manager_input'
@@ -145,6 +151,10 @@ export interface LearningModule {
   durationMin: number
   format: 'micro_video' | 'reading' | 'exercise' | 'simulation'
   variant: string | null // e.g. "B2B external customer"
+  origin: 'catalogue' | 'success_case'
+  sourceContractId: string | null
+  buId: string | null
+  body: { whatChanged: string; howToRepeat: string[]; provenResult: string } | null
 }
 
 export interface LearningPlanItem {
@@ -348,6 +358,9 @@ export interface Concept {
   pipelineValueThb: number | null
   validatedValueThb: number | null
   scaleRoute: 'start_the_dot' | 'internal_high_impact' | null
+  alignmentNote: string | null
+  alignedBy: string | null
+  alignedAt: string | null
   createdAt: string
   updatedAt: string
 }
@@ -385,7 +398,14 @@ export interface GateReview {
   decidedAt: string | null
   note: string | null
   validatedValueThb: number | null
+  evidence: GateEvidence | null
+  businessCase: GateBusinessCase | null
+  attachments: GateAttachment[]
 }
+
+export interface GateEvidence { customerInterviews: number | null; validatedNeeds: string; prototype: string; risks: string }
+export interface GateBusinessCase { pricing: string; paybackMonths: number | null; baseCaseThb: number | null; bestCaseThb: number | null; worstCaseThb: number | null; ask: string }
+export interface GateAttachment { name: string; kind: 'pre_read' | 'recorded_pitch' | 'evidence_pack' | 'model' | 'other'; note: string }
 
 export interface CoachingClinic {
   id: string
@@ -479,7 +499,8 @@ export interface MarketplaceInterest {
   roleId: string
   personaId: string
   createdAt: string
-  status: 'expressed' | 'shortlisted' | 'declined'
+  status: 'expressed' | 'shortlisted' | 'declined' | 'placed'
+  placedAt: string | null
 }
 
 export interface Notification {
@@ -555,7 +576,7 @@ export interface Assessment {
   responses: AssessmentResponses
   submittedAt: string
 }
-export type GuidanceKind = 'diagnostic' | 'journey' | 'contract' | 'coach' | 'clinic_briefing' | 'performance'
+export type GuidanceKind = 'diagnostic' | 'journey' | 'contract' | 'coach' | 'clinic_briefing' | 'performance' | 'role_blueprint' | 'practice' | 'talent_review'
 export interface GuidanceNote {
   id: string
   personaId: string
@@ -610,3 +631,30 @@ export interface IntegrationRun {
   startedAt: string
   finishedAt: string
 }
+
+/* ---------- Deck closure records ---------- */
+export type CostCategory = 'design' | 'delivery' | 'coaching' | 'platform' | 'travel' | 'other'
+export const COST_CATEGORY_LABEL: Record<CostCategory, string> = { design: 'Design and content', delivery: 'Delivery (labs, facilitation)', coaching: 'Coaching', platform: 'AI platform and licences', travel: 'Travel and venue', other: 'Other' }
+export interface CostLine { id: string; cohortId: string; category: CostCategory; description: string; amountThb: number; recordedBy: string | null; recordedAt: string }
+
+export interface BlueprintSkill { skillCode: string; targetLevel: number; why: string; supplyFte: number; demandFte: number; thbValueAtRisk: number; decision: 'build' | 'buy' | 'borrow' | 'bot' }
+export interface BlueprintPlan { valuePool: string; summary: string; skills: BlueprintSkill[]; cohortPlan: { program: 'ABC' | 'BCD'; seats: number; startQuarter: string; rationale: string }; risks: string[] }
+export interface RoleBlueprint { id: string; buId: string; roleTitle: string; level: string; operatingModelChange: string; responsibilities: string; headcount: number; status: 'draft' | 'generated' | 'adopted'; generated: BlueprintPlan | null; model: string | null; createdBy: string | null; createdAt: string; adoptedAt: string | null }
+
+export type PolicyStatus = 'drafted' | 'submitted' | 'approved' | 'deferred'
+export const POLICY_STATUS_LABEL: Record<PolicyStatus, string> = { drafted: 'Drafted', submitted: 'With People Committee', approved: 'Approved', deferred: 'Deferred' }
+export interface PolicyItem { id: string; name: string; description: string; status: PolicyStatus; effectiveFrom: string | null; resolutionRef: string | null; owner: string; decidedBy: string | null; decidedAt: string | null; note: string | null }
+
+export interface Pod { id: string; cohortId: string; name: string; coachId: string | null }
+export interface PracticeSession { id: string; personaId: string; scenario: string; transcript: { role: 'learner' | 'partner'; text: string }[]; scores: { criterion: string; score: number; comment: string }[] | null; overall: number | null; model: string | null; createdAt: string }
+export interface TalentReview { id: string; personaId: string; cycle: string; content: { headline: string; evidence: string[]; strengths: string[]; development: string[]; recommendation: string }; model: string | null; createdBy: string | null; createdAt: string }
+export type SuccessionPool = 'L2' | 'L3' | 'incubation_lead'
+export const POOL_LABEL: Record<SuccessionPool, string> = { L2: 'L2 succession pool', L3: 'L3 succession pool', incubation_lead: 'Incubation leadership' }
+export interface SuccessionEntry { id: string; personaId: string; pool: SuccessionPool; basis: string; enteredBy: string | null; enteredAt: string; dueBy: string | null; fulfilledAt: string | null }
+export type RecognitionKind = 'ceo_showcase' | 'gate2' | 'impact_award' | 'skill_premium'
+export const RECOGNITION_LABEL: Record<RecognitionKind, string> = { ceo_showcase: 'CEO recognition at showcase', gate2: 'CEO recognition at Gate 2', impact_award: 'Impact recognition award', skill_premium: 'Skill premium considered' }
+export interface Recognition { id: string; personaId: string; kind: RecognitionKind; note: string; givenBy: string | null; givenAt: string }
+export interface GovernanceReview { id: string; area: 'taxonomy' | 'critical_skills' | 'capability_agenda'; cycle: string; note: string; itemsReviewed: number; reviewedBy: string | null; reviewedAt: string; nextDue: string | null }
+export type MilestoneStatus = 'not_started' | 'on_track' | 'at_risk' | 'done'
+export const MILESTONE_LABEL: Record<MilestoneStatus, string> = { not_started: 'Not started', on_track: 'On track', at_risk: 'At risk', done: 'Done' }
+export interface PlanMilestone { id: string; subPlan: string; milestone: string; owner: string; dueQuarter: string; status: MilestoneStatus; note: string | null; updatedBy: string | null; updatedAt: string }

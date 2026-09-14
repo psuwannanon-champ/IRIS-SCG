@@ -1,5 +1,5 @@
 import type { FixtureBundle } from '@/data/fixtures'
-import type { ChallengeBriefInput, ImpactContractInput, GateDecision, AssessmentResponses, DiagnosticResult, GuidanceKind, GapDecision, MarketplaceRoleInput, IntegrationSystem } from '@/domain/types'
+import type { ChallengeBriefInput, ImpactContractInput, GateDecision, AssessmentResponses, DiagnosticResult, GuidanceKind, GapDecision, MarketplaceRoleInput, IntegrationSystem, CostCategory, BlueprintPlan, PolicyStatus, SuccessionPool, RecognitionKind, MilestoneStatus, GateEvidence, GateBusinessCase, GateAttachment, TalentReview, PracticeSession } from '@/domain/types'
 
 export type Snapshot = FixtureBundle
 
@@ -87,6 +87,29 @@ export interface DataSource {
   createMarketplaceRole(actorId: string, input: MarketplaceRoleInput): Promise<string>
   updateInterest(actorId: string, interestId: string, status: 'shortlisted' | 'declined' | 'expressed'): Promise<void>
   recordIntegrationRun(actorId: string, run: { system: IntegrationSystem; direction: 'outbound' | 'inbound'; status: 'succeeded' | 'failed'; records: number; summary: string; payload: Record<string, unknown>[] }): Promise<string>
+
+  /* Deck closure */
+  setCohortBudget(actorId: string, cohortId: string, budgetThb: number): Promise<void>
+  addCostLine(actorId: string, cohortId: string, category: CostCategory, description: string, amountThb: number): Promise<string>
+  saveRoleBlueprint(actorId: string, input: { buId: string; roleTitle: string; level: string; operatingModelChange: string; responsibilities: string; headcount: number }): Promise<string>
+  saveBlueprintPlan(actorId: string, blueprintId: string, generated: BlueprintPlan, model: string): Promise<void>
+  adoptBlueprint(actorId: string, blueprintId: string): Promise<number>
+  setEmploymentStatus(actorId: string, personaId: string, status: 'active' | 'left', leftAt: string | null): Promise<void>
+  markInterestPlaced(actorId: string, interestId: string): Promise<void>
+  packageCaseAsModule(actorId: string, contractId: string, input: { title: string; skillCode: string; durationMin: number; body: { whatChanged: string; howToRepeat: string[]; provenResult: string } }): Promise<string>
+  decidePolicyItem(actorId: string, itemId: string, status: PolicyStatus, effectiveFrom: string | null, resolutionRef: string, note: string): Promise<void>
+  submitGatePack(actorId: string, gateId: string, summary: string, evidence: GateEvidence | null, businessCase: GateBusinessCase | null, attachments: GateAttachment[]): Promise<void>
+  createPod(actorId: string, cohortId: string, name: string, coachId: string | null): Promise<string>
+  assignPod(actorId: string, enrollmentId: string, podId: string | null): Promise<void>
+  savePracticeSession(actorId: string, session: { scenario: string; transcript: PracticeSession['transcript']; scores: PracticeSession['scores']; overall: number | null; model: string }): Promise<string>
+  saveTalentReview(actorId: string, personaId: string, cycle: string, content: TalentReview['content'], model: string): Promise<string>
+  addSuccessionEntry(actorId: string, personaId: string, pool: SuccessionPool, basis: string, dueBy: string | null): Promise<string>
+  fulfilSuccession(actorId: string, entryId: string): Promise<void>
+  addRecognition(actorId: string, personaId: string, kind: RecognitionKind, note: string): Promise<string>
+  recordGovernanceReview(actorId: string, area: 'taxonomy' | 'critical_skills' | 'capability_agenda', cycle: string, note: string, itemsReviewed: number, nextDue: string | null): Promise<string>
+  recordAlignment(actorId: string, conceptId: string, note: string): Promise<void>
+  setMilestoneStatus(actorId: string, milestoneId: string, status: MilestoneStatus, note: string): Promise<void>
+  sendNudges(actorId: string): Promise<number>
 
   resetDemo(): Promise<void>
 }

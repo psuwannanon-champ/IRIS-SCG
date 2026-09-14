@@ -27,6 +27,7 @@ import { LabsPage } from '@/pages/Labs'
 import { SuccessCasesPage } from '@/pages/SuccessCases'
 import { IntegrationsPage } from '@/pages/Integrations'
 import { PerformancePage } from '@/pages/Performance'
+import { BlueprintsPage } from '@/pages/Blueprints'
 import { TourPage, TourOverlay } from '@/features/tour/Tour'
 import { NAV_GROUPS } from '@/app/nav'
 
@@ -77,6 +78,7 @@ const routes = [
   r('/governance', guarded('governance', GovernancePage)),
   r('/strategy', guarded('strategy', StrategyPage)),
   r('/agenda', guarded('agenda', AgendaPage), { validateSearch: (s: Record<string, unknown>) => ({ bu: (s.bu as string) ?? '' }) }),
+  r('/blueprints', guarded('blueprints', BlueprintsPage)),
   r('/taxonomy', guarded('taxonomy', TaxonomyPage), { validateSearch: listSearch }),
   r('/ai-coach', guarded('ai-coach', AiCoachPage)),
 ]

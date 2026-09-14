@@ -8,29 +8,29 @@ begin
     ('bu-scgc', 'SCGC', 'SCG Chemicals', 'business', false, false),
     ('bu-corp', 'CORP', 'Corporate HR (CHR)', 'shared_service', true, true);
 
-  insert into public.personas (id, code, full_name, email, role, bu_id, function_type, job_title, level, manager_id, initials, career_aspiration) values
-    ('per-nara', 'nara', 'Nara Wongsuwan', 'nara@demo.scg-capability.example', 'learner', 'bu-cbm', 'business', 'Regional Sales Lead, Building Materials Distribution', 'L3', 'per-kittipong', 'NW', 'Lead a regional commercial team and own dealer P&L'),
-    ('per-tanawat', 'tanawat', 'Tanawat Srisuk', 'tanawat@demo.scg-capability.example', 'learner', 'bu-cbm', 'business', 'Plant Operations Supervisor, Saraburi', 'L3', 'per-somsak', 'TS', 'Plant manager within three years'),
-    ('per-boonchu', 'boonchu', 'Boonchu Rakdee', 'boonchu@demo.scg-capability.example', 'learner', 'bu-cbm', 'enabling', 'Logistics Planning Supervisor', 'L2', 'per-somsak', 'BR', 'Move into supply-chain analytics'),
-    ('per-arisa', 'arisa', 'Arisa Chaiyaporn', 'arisa@demo.scg-capability.example', 'learner', 'bu-cbm', 'enabling', 'Procurement Supervisor', 'L3', 'per-somsak', 'AC', 'Category lead for green materials'),
-    ('per-jiraporn', 'jiraporn', 'Jiraporn Suksawat', 'jiraporn@demo.scg-capability.example', 'learner', 'bu-cbm', 'enabling', 'Quality Assurance Supervisor', 'L2', 'per-somsak', 'JS', null),
-    ('per-pim', 'pim', 'Pim Rattanakorn', 'pim@demo.scg-capability.example', 'learner', 'bu-cafi', 'enabling', 'Accounts Payable Supervisor', 'L2', 'per-ratree', 'PR', 'Lead a finance automation squad'),
-    ('per-krit', 'krit', 'Krit Boonmee', 'krit@demo.scg-capability.example', 'learner', 'bu-cafi', 'enabling', 'IT Service Desk Lead', 'L3', 'per-ratree', 'KB', 'Service delivery manager'),
-    ('per-nok', 'nok', 'Nok Saengthong', 'nok@demo.scg-capability.example', 'learner', 'bu-cafi', 'enabling', 'Payroll Operations Supervisor', 'L2', 'per-ratree', 'NS', null),
-    ('per-warit', 'warit', 'Warit Thongchai', 'warit@demo.scg-capability.example', 'learner', 'bu-cbm', 'business', 'Business Development Manager, Alternative Fuels', 'L4', 'per-prasert', 'WT', 'Lead a new venture inside SCG'),
-    ('per-mali', 'mali', 'Mali Phromma', 'mali@demo.scg-capability.example', 'learner', 'bu-cafi', 'enabling', 'Finance Systems Analyst', 'L3', 'per-ratree', 'MP', 'Product owner for finance platforms'),
-    ('per-wichai', 'wichai', 'Wichai Kongkaew', 'wichai@demo.scg-capability.example', 'learner', 'bu-scgc', 'business', 'Incubation Lead, Solar Dealer Leasing', 'L4', 'per-prasert', 'WK', 'Scale the venture to three markets'),
-    ('per-kittipong', 'kittipong', 'Kittipong Jaidee', 'kittipong@demo.scg-capability.example', 'line_manager', 'bu-cbm', 'business', 'Sales Manager, Central Region', 'L4', 'per-prasert', 'KJ', null),
-    ('per-somsak', 'somsak', 'Somsak Petchsri', 'somsak@demo.scg-capability.example', 'line_manager', 'bu-cbm', 'business', 'Plant Manager, Saraburi', 'L4', 'per-prasert', 'SP', null),
-    ('per-ratree', 'ratree', 'Ratree Kaewkla', 'ratree@demo.scg-capability.example', 'line_manager', 'bu-cafi', 'enabling', 'Head of Transaction Services', 'L4', 'per-wanida', 'RK', null),
-    ('per-prasert', 'prasert', 'Prasert Vong-anan', 'prasert@demo.scg-capability.example', 'bu_sponsor', 'bu-cbm', 'business', 'Turnaround Sponsor, CBM', 'L5', null, 'PV', null),
-    ('per-wanida', 'wanida', 'Wanida Sukjai', 'wanida@demo.scg-capability.example', 'bu_sponsor', 'bu-cafi', 'enabling', 'Head of Shared Services, CAFI', 'L5', null, 'WS', null),
-    ('per-suchada', 'suchada', 'Suchada Limpanont', 'suchada@demo.scg-capability.example', 'bu_sponsor', 'bu-scgp', 'business', 'Commercial Director, SCGP', 'L5', null, 'SL', null),
-    ('per-anong', 'anong', 'Anong Thepsiri', 'anong@demo.scg-capability.example', 'coach', 'bu-corp', 'enabling', 'Certified Capability Coach', 'L4', 'per-supattra', 'AT', null),
-    ('per-decha', 'decha', 'Decha Rungroj', 'decha@demo.scg-capability.example', 'coach', 'bu-corp', 'enabling', 'Certified Capability Coach', 'L4', 'per-supattra', 'DR', null),
-    ('per-chatchai', 'chatchai', 'Chatchai Boonyarat', 'chatchai@demo.scg-capability.example', 'committee', 'bu-corp', 'business', 'Chair, Capability Investment Committee', 'L5', null, 'CB', null),
-    ('per-ploy', 'ploy', 'Ploy Nimman', 'ploy@demo.scg-capability.example', 'committee', 'bu-corp', 'business', 'Member, Capability Investment Committee (Finance)', 'L5', null, 'PN', null),
-    ('per-supattra', 'supattra', 'Supattra Meesuk', 'supattra@demo.scg-capability.example', 'program_office', 'bu-corp', 'enabling', 'Capability Development Lead, CHR', 'L4', null, 'SM', null);
+  insert into public.personas (id, code, full_name, email, role, bu_id, function_type, job_title, level, manager_id, initials, career_aspiration, employment_status, left_at, leader_cohort, kpis) values
+    ('per-nara', 'nara', 'Nara Wongsuwan', 'nara@demo.scg-capability.example', 'learner', 'bu-cbm', 'business', 'Regional Sales Lead, Building Materials Distribution', 'L3', 'per-kittipong', 'NW', 'Lead a regional commercial team and own dealer P&L', 'active', null, false, 'Share of wallet on top 40 dealers; revenue per dealer; days sales outstanding'),
+    ('per-tanawat', 'tanawat', 'Tanawat Srisuk', 'tanawat@demo.scg-capability.example', 'learner', 'bu-cbm', 'business', 'Plant Operations Supervisor, Saraburi', 'L3', 'per-somsak', 'TS', 'Plant manager within three years', 'active', null, false, 'Unplanned stop hours; cost per tonne; safety incidents'),
+    ('per-boonchu', 'boonchu', 'Boonchu Rakdee', 'boonchu@demo.scg-capability.example', 'learner', 'bu-cbm', 'enabling', 'Logistics Planning Supervisor', 'L2', 'per-somsak', 'BR', 'Move into supply-chain analytics', 'active', null, false, null),
+    ('per-arisa', 'arisa', 'Arisa Chaiyaporn', 'arisa@demo.scg-capability.example', 'learner', 'bu-cbm', 'enabling', 'Procurement Supervisor', 'L3', 'per-somsak', 'AC', 'Category lead for green materials', 'active', null, false, null),
+    ('per-jiraporn', 'jiraporn', 'Jiraporn Suksawat', 'jiraporn@demo.scg-capability.example', 'learner', 'bu-cbm', 'enabling', 'Quality Assurance Supervisor', 'L2', 'per-somsak', 'JS', null, 'active', null, false, null),
+    ('per-pim', 'pim', 'Pim Rattanakorn', 'pim@demo.scg-capability.example', 'learner', 'bu-cafi', 'enabling', 'Accounts Payable Supervisor', 'L2', 'per-ratree', 'PR', 'Lead a finance automation squad', 'active', null, false, 'Invoices per FTE per week; touchless rate; exception ageing'),
+    ('per-krit', 'krit', 'Krit Boonmee', 'krit@demo.scg-capability.example', 'learner', 'bu-cafi', 'enabling', 'IT Service Desk Lead', 'L3', 'per-ratree', 'KB', 'Service delivery manager', 'active', null, false, null),
+    ('per-nok', 'nok', 'Nok Saengthong', 'nok@demo.scg-capability.example', 'learner', 'bu-cafi', 'enabling', 'Payroll Operations Supervisor', 'L2', 'per-ratree', 'NS', null, 'active', null, false, null),
+    ('per-warit', 'warit', 'Warit Thongchai', 'warit@demo.scg-capability.example', 'learner', 'bu-cbm', 'business', 'Business Development Manager, Alternative Fuels', 'L4', 'per-prasert', 'WT', 'Lead a new venture inside SCG', 'active', null, true, 'Alternative fuel substitution rate; new revenue from waste-to-value'),
+    ('per-mali', 'mali', 'Mali Phromma', 'mali@demo.scg-capability.example', 'learner', 'bu-cafi', 'enabling', 'Finance Systems Analyst', 'L3', 'per-ratree', 'MP', 'Product owner for finance platforms', 'active', null, false, null),
+    ('per-wichai', 'wichai', 'Wichai Kongkaew', 'wichai@demo.scg-capability.example', 'learner', 'bu-scgc', 'business', 'Incubation Lead, Solar Dealer Leasing', 'L4', 'per-prasert', 'WK', 'Scale the venture to three markets', 'active', null, false, null),
+    ('per-kittipong', 'kittipong', 'Kittipong Jaidee', 'kittipong@demo.scg-capability.example', 'line_manager', 'bu-cbm', 'business', 'Sales Manager, Central Region', 'L4', 'per-prasert', 'KJ', null, 'active', null, true, null),
+    ('per-somsak', 'somsak', 'Somsak Petchsri', 'somsak@demo.scg-capability.example', 'line_manager', 'bu-cbm', 'business', 'Plant Manager, Saraburi', 'L4', 'per-prasert', 'SP', null, 'active', null, true, null),
+    ('per-ratree', 'ratree', 'Ratree Kaewkla', 'ratree@demo.scg-capability.example', 'line_manager', 'bu-cafi', 'enabling', 'Head of Transaction Services', 'L4', 'per-wanida', 'RK', null, 'active', null, true, null),
+    ('per-prasert', 'prasert', 'Prasert Vong-anan', 'prasert@demo.scg-capability.example', 'bu_sponsor', 'bu-cbm', 'business', 'Turnaround Sponsor, CBM', 'L5', null, 'PV', null, 'active', null, true, null),
+    ('per-wanida', 'wanida', 'Wanida Sukjai', 'wanida@demo.scg-capability.example', 'bu_sponsor', 'bu-cafi', 'enabling', 'Head of Shared Services, CAFI', 'L5', null, 'WS', null, 'active', null, true, null),
+    ('per-suchada', 'suchada', 'Suchada Limpanont', 'suchada@demo.scg-capability.example', 'bu_sponsor', 'bu-scgp', 'business', 'Commercial Director, SCGP', 'L5', null, 'SL', null, 'active', null, false, null),
+    ('per-anong', 'anong', 'Anong Thepsiri', 'anong@demo.scg-capability.example', 'coach', 'bu-corp', 'enabling', 'Certified Capability Coach', 'L4', 'per-supattra', 'AT', null, 'active', null, false, null),
+    ('per-decha', 'decha', 'Decha Rungroj', 'decha@demo.scg-capability.example', 'coach', 'bu-corp', 'enabling', 'Certified Capability Coach', 'L4', 'per-supattra', 'DR', null, 'active', null, false, null),
+    ('per-chatchai', 'chatchai', 'Chatchai Boonyarat', 'chatchai@demo.scg-capability.example', 'committee', 'bu-corp', 'business', 'Chair, Capability Investment Committee', 'L5', null, 'CB', null, 'active', null, false, null),
+    ('per-ploy', 'ploy', 'Ploy Nimman', 'ploy@demo.scg-capability.example', 'committee', 'bu-corp', 'business', 'Member, Capability Investment Committee (Finance)', 'L5', null, 'PN', null, 'active', null, false, null),
+    ('per-supattra', 'supattra', 'Supattra Meesuk', 'supattra@demo.scg-capability.example', 'program_office', 'bu-corp', 'enabling', 'Capability Development Lead, CHR', 'L4', null, 'SM', null, 'active', null, false, null);
 
   insert into public.skill_domains (id, code, program, name, description) values
     ('dom-ai', 'AI', 'ABC', 'AI-augmented decision-making', 'Using GenAI copilots and analytics to make faster, better-evidenced decisions in own role.'),
@@ -66,77 +66,77 @@ begin
     ('sk-pitch', 'dom-exec', 'EXP-01', 'Executive pitching', 'Presents evidence, asks and risks concisely to executives.', true, false, '["Level 1 · Aware: understands concepts and vocabulary; applies with close guidance.","Level 2 · Practising: applies the skill in routine situations in own role with occasional support.","Level 3 · Proficient: applies independently in complex situations and coaches peers.","Level 4 · Leading: sets standards, redesigns work around the skill and delivers measured impact."]'::jsonb),
     ('sk-leadchange', 'dom-lead', 'LTC-01', 'Leading cross-BU teams', 'Leads mixed teams through gates, pivots and stops.', true, false, '["Level 1 · Aware: understands concepts and vocabulary; applies with close guidance.","Level 2 · Practising: applies the skill in routine situations in own role with occasional support.","Level 3 · Proficient: applies independently in complex situations and coaches peers.","Level 4 · Leading: sets standards, redesigns work around the skill and delivers measured impact."]'::jsonb);
 
-  insert into public.learning_modules (id, skill_id, code, title, duration_min, format, variant) values
-    ('mod-genai-1', 'sk-genai', 'AI-01.1', 'Prompting for analysis (SCG approved tools)', 12, 'micro_video', null),
-    ('mod-genai-2', 'sk-genai', 'AI-01.2', 'Drafting proposals with a copilot', 18, 'reading', null),
-    ('mod-genai-3', 'sk-genai', 'AI-01.3', 'Checking AI output against source data', 25, 'exercise', null),
-    ('mod-decision-1', 'sk-decision', 'AI-02.1', 'Framing a decision in one page', 12, 'micro_video', null),
-    ('mod-decision-2', 'sk-decision', 'AI-02.2', 'Weighing evidence and risk', 18, 'reading', null),
-    ('mod-decision-3', 'sk-decision', 'AI-02.3', 'Recording rationale for review', 25, 'exercise', null),
-    ('mod-datastory-1', 'sk-datastory', 'OPEX-01.1', 'From spreadsheet to story', 12, 'micro_video', null),
-    ('mod-datastory-2', 'sk-datastory', 'OPEX-01.2', 'Choosing the right chart for OpEx', 18, 'reading', null),
-    ('mod-datastory-3', 'sk-datastory', 'OPEX-01.3', 'Presenting a baseline and target', 25, 'exercise', null),
-    ('mod-opex-1', 'sk-opex', 'OPEX-02.1', 'Value-stream mapping in one hour', 12, 'micro_video', null),
-    ('mod-opex-2', 'sk-opex', 'OPEX-02.2', 'Quantifying waste in THB', 18, 'reading', null),
-    ('mod-opex-3', 'sk-opex', 'OPEX-02.3', 'Daily management routines', 25, 'exercise', null),
-    ('mod-valuechain-1', 'sk-valuechain', 'COMM-01.1', 'Where value is created in building materials', 12, 'micro_video', null),
-    ('mod-valuechain-2', 'sk-valuechain', 'COMM-01.2', 'Partnership economics', 18, 'reading', null),
-    ('mod-valuechain-3', 'sk-valuechain', 'COMM-01.3', 'Dealer economics and margin pools', 25, 'exercise', null),
-    ('mod-green-1', 'sk-green', 'COMM-02.1', 'Green / SVP / HVA basics', 12, 'micro_video', null),
-    ('mod-green-2', 'sk-green', 'COMM-02.2', 'CBAM exposure for exports', 18, 'reading', null),
-    ('mod-green-3', 'sk-green', 'COMM-02.3', 'Pricing green options', 25, 'exercise', null),
-    ('mod-selfaware-1', 'sk-selfaware', 'SILO-01.1', 'Feedback that lands', 12, 'micro_video', null),
-    ('mod-selfaware-2', 'sk-selfaware', 'SILO-01.2', 'Working styles across functions', 18, 'reading', null),
-    ('mod-selfaware-3', 'sk-selfaware', 'SILO-01.3', 'Personal operating rhythm', 25, 'exercise', null),
-    ('mod-collab-1', 'sk-collab', 'SILO-02.1', 'Aligning priorities across silos', 12, 'micro_video', null),
-    ('mod-collab-2', 'sk-collab', 'SILO-02.2', 'Decision rights in practice', 18, 'reading', null),
-    ('mod-collab-3', 'sk-collab', 'SILO-02.3', 'Running a cross-functional stand-up', 25, 'exercise', null),
-    ('mod-custneeds-1', 'sk-custneeds', 'CUST-01.1', 'Internal customer interviews', 12, 'micro_video', 'Internal customer · shared services'),
-    ('mod-custneeds-2', 'sk-custneeds', 'CUST-01.2', 'External customer interviews (B2B)', 18, 'reading', null),
-    ('mod-custneeds-3', 'sk-custneeds', 'CUST-01.3', 'Turning needs into requirements', 25, 'exercise', null),
-    ('mod-b2bsales-1', 'sk-b2bsales', 'CUST-02.1', 'AI lead scoring for dealers', 12, 'micro_video', 'B2B external customer · CBM dealers'),
-    ('mod-b2bsales-2', 'sk-b2bsales', 'CUST-02.2', 'Segmenting B2B accounts', 18, 'reading', null),
-    ('mod-b2bsales-3', 'sk-b2bsales', 'CUST-02.3', 'Designing offers with AI', 25, 'exercise', null),
-    ('mod-changeplan-1', 'sk-changeplan', 'CHG-01.1', 'Baseline, target and owner', 12, 'micro_video', null),
-    ('mod-changeplan-2', 'sk-changeplan', 'CHG-01.2', 'Weekly evidence cadence', 18, 'reading', null),
-    ('mod-changeplan-3', 'sk-changeplan', 'CHG-01.3', 'Impact contract walkthrough', 25, 'exercise', null),
-    ('mod-sustain-1', 'sk-sustain', 'CHG-02.1', 'Standard work after the sprint', 12, 'micro_video', null),
-    ('mod-sustain-2', 'sk-sustain', 'CHG-02.2', 'Metrics that keep change alive', 18, 'reading', null),
-    ('mod-sustain-3', 'sk-sustain', 'CHG-02.3', 'Handing over an improvement', 25, 'exercise', null),
-    ('mod-bizbuild-1', 'sk-bizbuild', 'BB-01.1', 'Problem framing with a sponsor', 12, 'micro_video', null),
-    ('mod-bizbuild-2', 'sk-bizbuild', 'BB-01.2', 'Business model canvas on a live concept', 18, 'reading', null),
-    ('mod-invest-1', 'sk-invest', 'FIN-01.1', 'Pricing and unit economics', 12, 'micro_video', null),
-    ('mod-invest-2', 'sk-invest', 'FIN-01.2', 'Best / worst case in one model', 18, 'reading', null),
-    ('mod-greendesign-1', 'sk-greendesign', 'GRN-01.1', 'Sustainability value the customer will pay for', 12, 'micro_video', null),
-    ('mod-greendesign-2', 'sk-greendesign', 'GRN-01.2', 'Measuring green outcomes', 18, 'reading', null),
-    ('mod-aistrat-1', 'sk-aistrat', 'AIS-01.1', 'AI market research sprint', 12, 'micro_video', null),
-    ('mod-aistrat-2', 'sk-aistrat', 'AIS-01.2', 'Stress-testing strategy with scenarios', 18, 'reading', null),
-    ('mod-pitch-1', 'sk-pitch', 'EXP-01.1', 'Pre-read that decides for you', 12, 'micro_video', null),
-    ('mod-pitch-2', 'sk-pitch', 'EXP-01.2', 'Recorded pitch in six minutes', 18, 'reading', null),
-    ('mod-leadchange-1', 'sk-leadchange', 'LTC-01.1', 'Forming a cross-BU team fast', 12, 'micro_video', null),
-    ('mod-leadchange-2', 'sk-leadchange', 'LTC-01.2', 'Leading after a pivot or stop', 18, 'reading', null);
+  insert into public.learning_modules (id, skill_id, code, title, duration_min, format, variant, origin, source_contract_id, bu_id, body) values
+    ('mod-genai-1', 'sk-genai', 'AI-01.1', 'Prompting for analysis (SCG approved tools)', 12, 'micro_video', null, 'catalogue', null, null, null),
+    ('mod-genai-2', 'sk-genai', 'AI-01.2', 'Drafting proposals with a copilot', 18, 'reading', null, 'catalogue', null, null, null),
+    ('mod-genai-3', 'sk-genai', 'AI-01.3', 'Checking AI output against source data', 25, 'exercise', null, 'catalogue', null, null, null),
+    ('mod-decision-1', 'sk-decision', 'AI-02.1', 'Framing a decision in one page', 12, 'micro_video', null, 'catalogue', null, null, null),
+    ('mod-decision-2', 'sk-decision', 'AI-02.2', 'Weighing evidence and risk', 18, 'reading', null, 'catalogue', null, null, null),
+    ('mod-decision-3', 'sk-decision', 'AI-02.3', 'Recording rationale for review', 25, 'exercise', null, 'catalogue', null, null, null),
+    ('mod-datastory-1', 'sk-datastory', 'OPEX-01.1', 'From spreadsheet to story', 12, 'micro_video', null, 'catalogue', null, null, null),
+    ('mod-datastory-2', 'sk-datastory', 'OPEX-01.2', 'Choosing the right chart for OpEx', 18, 'reading', null, 'catalogue', null, null, null),
+    ('mod-datastory-3', 'sk-datastory', 'OPEX-01.3', 'Presenting a baseline and target', 25, 'exercise', null, 'catalogue', null, null, null),
+    ('mod-opex-1', 'sk-opex', 'OPEX-02.1', 'Value-stream mapping in one hour', 12, 'micro_video', null, 'catalogue', null, null, null),
+    ('mod-opex-2', 'sk-opex', 'OPEX-02.2', 'Quantifying waste in THB', 18, 'reading', null, 'catalogue', null, null, null),
+    ('mod-opex-3', 'sk-opex', 'OPEX-02.3', 'Daily management routines', 25, 'exercise', null, 'catalogue', null, null, null),
+    ('mod-valuechain-1', 'sk-valuechain', 'COMM-01.1', 'Where value is created in building materials', 12, 'micro_video', null, 'catalogue', null, null, null),
+    ('mod-valuechain-2', 'sk-valuechain', 'COMM-01.2', 'Partnership economics', 18, 'reading', null, 'catalogue', null, null, null),
+    ('mod-valuechain-3', 'sk-valuechain', 'COMM-01.3', 'Dealer economics and margin pools', 25, 'exercise', null, 'catalogue', null, null, null),
+    ('mod-green-1', 'sk-green', 'COMM-02.1', 'Green / SVP / HVA basics', 12, 'micro_video', null, 'catalogue', null, null, null),
+    ('mod-green-2', 'sk-green', 'COMM-02.2', 'CBAM exposure for exports', 18, 'reading', null, 'catalogue', null, null, null),
+    ('mod-green-3', 'sk-green', 'COMM-02.3', 'Pricing green options', 25, 'exercise', null, 'catalogue', null, null, null),
+    ('mod-selfaware-1', 'sk-selfaware', 'SILO-01.1', 'Feedback that lands', 12, 'micro_video', null, 'catalogue', null, null, null),
+    ('mod-selfaware-2', 'sk-selfaware', 'SILO-01.2', 'Working styles across functions', 18, 'reading', null, 'catalogue', null, null, null),
+    ('mod-selfaware-3', 'sk-selfaware', 'SILO-01.3', 'Personal operating rhythm', 25, 'exercise', null, 'catalogue', null, null, null),
+    ('mod-collab-1', 'sk-collab', 'SILO-02.1', 'Aligning priorities across silos', 12, 'micro_video', null, 'catalogue', null, null, null),
+    ('mod-collab-2', 'sk-collab', 'SILO-02.2', 'Decision rights in practice', 18, 'reading', null, 'catalogue', null, null, null),
+    ('mod-collab-3', 'sk-collab', 'SILO-02.3', 'Running a cross-functional stand-up', 25, 'exercise', null, 'catalogue', null, null, null),
+    ('mod-custneeds-1', 'sk-custneeds', 'CUST-01.1', 'Internal customer interviews', 12, 'micro_video', 'Internal customer · shared services', 'catalogue', null, null, null),
+    ('mod-custneeds-2', 'sk-custneeds', 'CUST-01.2', 'External customer interviews (B2B)', 18, 'reading', null, 'catalogue', null, null, null),
+    ('mod-custneeds-3', 'sk-custneeds', 'CUST-01.3', 'Turning needs into requirements', 25, 'exercise', null, 'catalogue', null, null, null),
+    ('mod-b2bsales-1', 'sk-b2bsales', 'CUST-02.1', 'AI lead scoring for dealers', 12, 'micro_video', 'B2B external customer · CBM dealers', 'catalogue', null, null, null),
+    ('mod-b2bsales-2', 'sk-b2bsales', 'CUST-02.2', 'Segmenting B2B accounts', 18, 'reading', null, 'catalogue', null, null, null),
+    ('mod-b2bsales-3', 'sk-b2bsales', 'CUST-02.3', 'Designing offers with AI', 25, 'exercise', null, 'catalogue', null, null, null),
+    ('mod-changeplan-1', 'sk-changeplan', 'CHG-01.1', 'Baseline, target and owner', 12, 'micro_video', null, 'catalogue', null, null, null),
+    ('mod-changeplan-2', 'sk-changeplan', 'CHG-01.2', 'Weekly evidence cadence', 18, 'reading', null, 'catalogue', null, null, null),
+    ('mod-changeplan-3', 'sk-changeplan', 'CHG-01.3', 'Impact contract walkthrough', 25, 'exercise', null, 'catalogue', null, null, null),
+    ('mod-sustain-1', 'sk-sustain', 'CHG-02.1', 'Standard work after the sprint', 12, 'micro_video', null, 'catalogue', null, null, null),
+    ('mod-sustain-2', 'sk-sustain', 'CHG-02.2', 'Metrics that keep change alive', 18, 'reading', null, 'catalogue', null, null, null),
+    ('mod-sustain-3', 'sk-sustain', 'CHG-02.3', 'Handing over an improvement', 25, 'exercise', null, 'catalogue', null, null, null),
+    ('mod-bizbuild-1', 'sk-bizbuild', 'BB-01.1', 'Problem framing with a sponsor', 12, 'micro_video', null, 'catalogue', null, null, null),
+    ('mod-bizbuild-2', 'sk-bizbuild', 'BB-01.2', 'Business model canvas on a live concept', 18, 'reading', null, 'catalogue', null, null, null),
+    ('mod-invest-1', 'sk-invest', 'FIN-01.1', 'Pricing and unit economics', 12, 'micro_video', null, 'catalogue', null, null, null),
+    ('mod-invest-2', 'sk-invest', 'FIN-01.2', 'Best / worst case in one model', 18, 'reading', null, 'catalogue', null, null, null),
+    ('mod-greendesign-1', 'sk-greendesign', 'GRN-01.1', 'Sustainability value the customer will pay for', 12, 'micro_video', null, 'catalogue', null, null, null),
+    ('mod-greendesign-2', 'sk-greendesign', 'GRN-01.2', 'Measuring green outcomes', 18, 'reading', null, 'catalogue', null, null, null),
+    ('mod-aistrat-1', 'sk-aistrat', 'AIS-01.1', 'AI market research sprint', 12, 'micro_video', null, 'catalogue', null, null, null),
+    ('mod-aistrat-2', 'sk-aistrat', 'AIS-01.2', 'Stress-testing strategy with scenarios', 18, 'reading', null, 'catalogue', null, null, null),
+    ('mod-pitch-1', 'sk-pitch', 'EXP-01.1', 'Pre-read that decides for you', 12, 'micro_video', null, 'catalogue', null, null, null),
+    ('mod-pitch-2', 'sk-pitch', 'EXP-01.2', 'Recorded pitch in six minutes', 18, 'reading', null, 'catalogue', null, null, null),
+    ('mod-leadchange-1', 'sk-leadchange', 'LTC-01.1', 'Forming a cross-BU team fast', 12, 'micro_video', null, 'catalogue', null, null, null),
+    ('mod-leadchange-2', 'sk-leadchange', 'LTC-01.2', 'Leading after a pivot or stop', 18, 'reading', null, 'catalogue', null, null, null);
 
-  insert into public.cohorts (id, program, code, name, bu_id, status, start_date, end_date, key_dates, pipeline_target_thb, seats) values
-    ('coh-abc-a0', 'ABC', 'ABC-A0', 'ABC Alpha pilot 2026 (CBM)', 'bu-cbm', 'completed', '2026-04-06', '2026-07-24', '[{"label":"AI skill diagnostic","date":"2026-04-06"},{"label":"Applied capability labs","date":"2026-04-20"},{"label":"Impact sprint","date":"2026-04-27"},{"label":"Mid-sprint gate","date":"2026-06-05"},{"label":"Impact showcase","date":"2026-07-24"}]'::jsonb, 6000000, 24),
-    ('coh-abc-l1', 'ABC', 'ABC-L1', 'ABC Lighthouse 1 · CBM turnaround roles', 'bu-cbm', 'sprint', '2026-07-27', '2026-11-13', '[{"label":"AI skill diagnostic","date":"2026-07-27"},{"label":"Flipped micro-learning","date":"2026-07-27"},{"label":"Applied capability labs (4 days)","date":"2026-08-10"},{"label":"Impact sprint starts","date":"2026-08-17"},{"label":"Coaching clinic 1","date":"2026-09-11"},{"label":"Mid-sprint gate","date":"2026-09-25"},{"label":"Coaching clinic 2","date":"2026-10-16"},{"label":"Impact showcase","date":"2026-11-13"}]'::jsonb, 12000000, 30),
-    ('coh-abc-l2', 'ABC', 'ABC-L2', 'ABC Lighthouse 2 · CAFI service teams', 'bu-cafi', 'sprint', '2026-08-17', '2026-12-04', '[{"label":"AI skill diagnostic","date":"2026-08-17"},{"label":"Applied capability labs (4 days)","date":"2026-08-31"},{"label":"Impact sprint starts","date":"2026-09-07"},{"label":"Coaching clinic 1","date":"2026-10-02"},{"label":"Mid-sprint gate","date":"2026-10-16"},{"label":"Coaching clinic 2","date":"2026-11-06"},{"label":"Impact showcase","date":"2026-12-04"}]'::jsonb, 9000000, 30),
-    ('coh-abc-2027-1', 'ABC', 'ABC-2027-01', 'ABC Batch 1/2027 · enterprise-wide', null, 'planned', '2027-01-11', '2027-04-30', '[{"label":"AI skill diagnostic","date":"2027-01-11"},{"label":"Applied capability labs","date":"2027-01-25"},{"label":"Impact showcase","date":"2027-04-30"}]'::jsonb, 20000000, 60),
-    ('coh-bcd-2025', 'BCD', 'BCD-2025', 'BCD Pilot cohort 2025', null, 'scale_up', '2025-06-02', '2025-10-17', '[{"label":"Gate 1","date":"2025-07-28"},{"label":"Gate 2","date":"2025-09-19"},{"label":"Gate 3","date":"2026-03-13"}]'::jsonb, 100000000, 18),
-    ('coh-bcd-l1', 'BCD', 'BCD-L1', 'BCD Lighthouse cohort 2026', null, 'building_case', '2026-06-01', '2026-10-23', '[{"label":"Challenge sourcing","date":"2026-06-01"},{"label":"Onboard, diagnose & team up","date":"2026-06-29"},{"label":"Immersion camp (3 days)","date":"2026-07-06"},{"label":"Concept studio sprint","date":"2026-07-13"},{"label":"Field validation","date":"2026-08-03"},{"label":"Gate 1 · Proof of concept","date":"2026-08-24"},{"label":"Commercial build","date":"2026-08-31"},{"label":"Prototype & stress-test","date":"2026-09-28"},{"label":"Gate 2 · CEO investment pitch","date":"2026-10-23"}]'::jsonb, 150000000, 18),
-    ('coh-bcd-2027-1', 'BCD', 'BCD-2027-01', 'BCD Batch 1/2027', null, 'framing', '2027-01-18', '2027-05-14', '[{"label":"Challenge brief deadline","date":"2026-10-30"},{"label":"Selection board","date":"2026-11-13"},{"label":"Immersion camp","date":"2027-01-25"}]'::jsonb, 200000000, 24);
+  insert into public.cohorts (id, program, code, name, bu_id, status, start_date, end_date, key_dates, pipeline_target_thb, seats, budget_thb) values
+    ('coh-abc-a0', 'ABC', 'ABC-A0', 'ABC Alpha pilot 2026 (CBM)', 'bu-cbm', 'completed', '2026-04-06', '2026-07-24', '[{"label":"AI skill diagnostic","date":"2026-04-06"},{"label":"Applied capability labs","date":"2026-04-20"},{"label":"Impact sprint","date":"2026-04-27"},{"label":"Mid-sprint gate","date":"2026-06-05"},{"label":"Impact showcase","date":"2026-07-24"}]'::jsonb, 6000000, 24, 1800000),
+    ('coh-abc-l1', 'ABC', 'ABC-L1', 'ABC Lighthouse 1 · CBM turnaround roles', 'bu-cbm', 'sprint', '2026-07-27', '2026-11-13', '[{"label":"AI skill diagnostic","date":"2026-07-27"},{"label":"Flipped micro-learning","date":"2026-07-27"},{"label":"Applied capability labs (4 days)","date":"2026-08-10"},{"label":"Impact sprint starts","date":"2026-08-17"},{"label":"Coaching clinic 1","date":"2026-09-11"},{"label":"Mid-sprint gate","date":"2026-09-25"},{"label":"Coaching clinic 2","date":"2026-10-16"},{"label":"Impact showcase","date":"2026-11-13"}]'::jsonb, 12000000, 30, 2400000),
+    ('coh-abc-l2', 'ABC', 'ABC-L2', 'ABC Lighthouse 2 · CAFI service teams', 'bu-cafi', 'sprint', '2026-08-17', '2026-12-04', '[{"label":"AI skill diagnostic","date":"2026-08-17"},{"label":"Applied capability labs (4 days)","date":"2026-08-31"},{"label":"Impact sprint starts","date":"2026-09-07"},{"label":"Coaching clinic 1","date":"2026-10-02"},{"label":"Mid-sprint gate","date":"2026-10-16"},{"label":"Coaching clinic 2","date":"2026-11-06"},{"label":"Impact showcase","date":"2026-12-04"}]'::jsonb, 9000000, 30, 2200000),
+    ('coh-abc-2027-1', 'ABC', 'ABC-2027-01', 'ABC Batch 1/2027 · enterprise-wide', null, 'planned', '2027-01-11', '2027-04-30', '[{"label":"AI skill diagnostic","date":"2027-01-11"},{"label":"Applied capability labs","date":"2027-01-25"},{"label":"Impact showcase","date":"2027-04-30"}]'::jsonb, 20000000, 60, 4500000),
+    ('coh-bcd-2025', 'BCD', 'BCD-2025', 'BCD Pilot cohort 2025', null, 'scale_up', '2025-06-02', '2025-10-17', '[{"label":"Gate 1","date":"2025-07-28"},{"label":"Gate 2","date":"2025-09-19"},{"label":"Gate 3","date":"2026-03-13"}]'::jsonb, 100000000, 18, 6000000),
+    ('coh-bcd-l1', 'BCD', 'BCD-L1', 'BCD Lighthouse cohort 2026', null, 'building_case', '2026-06-01', '2026-10-23', '[{"label":"Challenge sourcing","date":"2026-06-01"},{"label":"Onboard, diagnose & team up","date":"2026-06-29"},{"label":"Immersion camp (3 days)","date":"2026-07-06"},{"label":"Concept studio sprint","date":"2026-07-13"},{"label":"Field validation","date":"2026-08-03"},{"label":"Gate 1 · Proof of concept","date":"2026-08-24"},{"label":"Commercial build","date":"2026-08-31"},{"label":"Prototype & stress-test","date":"2026-09-28"},{"label":"Gate 2 · CEO investment pitch","date":"2026-10-23"}]'::jsonb, 150000000, 18, 6800000),
+    ('coh-bcd-2027-1', 'BCD', 'BCD-2027-01', 'BCD Batch 1/2027', null, 'framing', '2027-01-18', '2027-05-14', '[{"label":"Challenge brief deadline","date":"2026-10-30"},{"label":"Selection board","date":"2026-11-13"},{"label":"Immersion camp","date":"2027-01-25"}]'::jsonb, 200000000, 24, 8000000);
 
-  insert into public.enrollments (id, cohort_id, persona_id, status, team_id, coach_id, sponsor_id, manager_id, impact_rating, top_decile, fast_track_bcd) values
-    ('enr-arisa', 'coh-abc-a0', 'per-arisa', 'graduated', null, 'per-anong', 'per-prasert', 'per-somsak', 'exceptional', true, true),
-    ('enr-jiraporn', 'coh-abc-a0', 'per-jiraporn', 'showcase', null, 'per-anong', 'per-prasert', 'per-somsak', 'strong', false, false),
-    ('enr-nara', 'coh-abc-l1', 'per-nara', 'in_sprint', null, 'per-anong', 'per-prasert', 'per-kittipong', null, false, false),
-    ('enr-tanawat', 'coh-abc-l1', 'per-tanawat', 'in_sprint', null, 'per-anong', 'per-prasert', 'per-somsak', null, false, false),
-    ('enr-boonchu', 'coh-abc-l1', 'per-boonchu', 'in_sprint', null, 'per-anong', 'per-prasert', 'per-somsak', null, false, false),
-    ('enr-pim', 'coh-abc-l2', 'per-pim', 'in_sprint', null, 'per-decha', 'per-wanida', 'per-ratree', null, false, false),
-    ('enr-krit', 'coh-abc-l2', 'per-krit', 'in_sprint', null, 'per-decha', 'per-wanida', 'per-ratree', null, false, false),
-    ('enr-nok', 'coh-abc-l2', 'per-nok', 'in_sprint', null, 'per-decha', 'per-wanida', 'per-ratree', null, false, false),
-    ('enr-warit', 'coh-bcd-l1', 'per-warit', 'in_sprint', 'team-a', 'per-decha', 'per-prasert', 'per-prasert', null, false, false),
-    ('enr-mali', 'coh-bcd-l1', 'per-mali', 'in_sprint', 'team-b', 'per-decha', 'per-wanida', 'per-ratree', null, false, false),
-    ('enr-wichai', 'coh-bcd-2025', 'per-wichai', 'graduated', 'team-d', 'per-anong', 'per-prasert', 'per-prasert', 'exceptional', true, false);
+  insert into public.enrollments (id, cohort_id, persona_id, status, team_id, coach_id, sponsor_id, manager_id, impact_rating, top_decile, fast_track_bcd, pod_id) values
+    ('enr-arisa', 'coh-abc-a0', 'per-arisa', 'graduated', null, 'per-anong', 'per-prasert', 'per-somsak', 'exceptional', true, true, null),
+    ('enr-jiraporn', 'coh-abc-a0', 'per-jiraporn', 'showcase', null, 'per-anong', 'per-prasert', 'per-somsak', 'strong', false, false, null),
+    ('enr-nara', 'coh-abc-l1', 'per-nara', 'in_sprint', null, 'per-anong', 'per-prasert', 'per-kittipong', null, false, false, 'pod-l1-a'),
+    ('enr-tanawat', 'coh-abc-l1', 'per-tanawat', 'in_sprint', null, 'per-anong', 'per-prasert', 'per-somsak', null, false, false, 'pod-l1-a'),
+    ('enr-boonchu', 'coh-abc-l1', 'per-boonchu', 'in_sprint', null, 'per-anong', 'per-prasert', 'per-somsak', null, false, false, 'pod-l1-a'),
+    ('enr-pim', 'coh-abc-l2', 'per-pim', 'in_sprint', null, 'per-decha', 'per-wanida', 'per-ratree', null, false, false, 'pod-l2-a'),
+    ('enr-krit', 'coh-abc-l2', 'per-krit', 'in_sprint', null, 'per-decha', 'per-wanida', 'per-ratree', null, false, false, 'pod-l2-a'),
+    ('enr-nok', 'coh-abc-l2', 'per-nok', 'in_sprint', null, 'per-decha', 'per-wanida', 'per-ratree', null, false, false, 'pod-l2-a'),
+    ('enr-warit', 'coh-bcd-l1', 'per-warit', 'in_sprint', 'team-a', 'per-decha', 'per-prasert', 'per-prasert', null, false, false, null),
+    ('enr-mali', 'coh-bcd-l1', 'per-mali', 'in_sprint', 'team-b', 'per-decha', 'per-wanida', 'per-ratree', null, false, false, null),
+    ('enr-wichai', 'coh-bcd-2025', 'per-wichai', 'graduated', 'team-d', 'per-anong', 'per-prasert', 'per-prasert', 'exceptional', true, false, null);
 
   insert into public.diagnostics (id, enrollment_id, status, completed_at, summary) values
     ('dx-nara', 'enr-nara', 'completed', '2026-07-29T09:00:00+07:00', 'Strongest in customer needs discovery and collaboration. Priority gaps: AI-powered sales, GenAI copilot practice and data storytelling, which map directly to dealer share-of-wallet in the CBM turnaround.'),
@@ -282,21 +282,21 @@ begin
     ('team-c', 'coh-bcd-l1', 'Team Loop', 'cb-pack', 'per-anong'),
     ('team-d', 'coh-bcd-2025', 'Team Sunrise', 'cb-solar', 'per-anong');
 
-  insert into public.concepts (id, team_id, brief_id, cohort_id, title, summary, stage, pipeline_value_thb, validated_value_thb, scale_route, created_at, updated_at) values
-    ('cp-fuel', 'team-a', 'cb-fuel', 'coh-bcd-l1', 'RDF supply marketplace for kilns', 'A managed marketplace that contracts municipal and industrial waste streams into refuse-derived fuel with quality guarantees, lifting substitution to 35% at two kilns.', 'build_case', 45000000, null, null, '2026-07-13T09:00:00+07:00', '2026-09-10T09:00:00+07:00'),
-    ('cp-invoice', 'team-b', 'cb-invoice', 'coh-bcd-l1', 'Touchless invoicing with a supplier portal', 'Supplier self-service portal plus AI exception handling, targeting 80% touchless processing and a 24-hour exception service level.', 'gate2', 18000000, null, null, '2026-07-13T09:00:00+07:00', '2026-09-13T09:00:00+07:00'),
-    ('cp-pack', 'team-c', 'cb-pack', 'coh-bcd-l1', 'Mono-material recyclable pouch for snack brands', 'Field validation showed brands value recyclability but will not absorb a 12% cost premium. Pivoting to a co-branded take-back scheme that lowers net cost.', 'pivot', 25000000, null, null, '2026-07-13T09:00:00+07:00', '2026-08-24T09:00:00+07:00'),
-    ('cp-solar', 'team-d', 'cb-solar', 'coh-bcd-2025', 'Solar rooftop leasing via dealers', 'Dealers sell and install leased rooftop solar for SME customers. Scaled under SCG Start the Dot in March 2026.', 'scaled', 100000000, 120000000, 'start_the_dot', '2025-07-01T09:00:00+07:00', '2026-03-13T09:00:00+07:00');
+  insert into public.concepts (id, team_id, brief_id, cohort_id, title, summary, stage, pipeline_value_thb, validated_value_thb, scale_route, alignment_note, aligned_by, aligned_at, created_at, updated_at) values
+    ('cp-fuel', 'team-a', 'cb-fuel', 'coh-bcd-l1', 'RDF supply marketplace for kilns', 'A managed marketplace that contracts municipal and industrial waste streams into refuse-derived fuel with quality guarantees, lifting substitution to 35% at two kilns.', 'build_case', 45000000, null, null, null, null, null, '2026-07-13T09:00:00+07:00', '2026-09-10T09:00:00+07:00'),
+    ('cp-invoice', 'team-b', 'cb-invoice', 'coh-bcd-l1', 'Touchless invoicing with a supplier portal', 'Supplier self-service portal plus AI exception handling, targeting 80% touchless processing and a 24-hour exception service level.', 'gate2', 18000000, null, null, null, null, null, '2026-07-13T09:00:00+07:00', '2026-09-13T09:00:00+07:00'),
+    ('cp-pack', 'team-c', 'cb-pack', 'coh-bcd-l1', 'Mono-material recyclable pouch for snack brands', 'Field validation showed brands value recyclability but will not absorb a 12% cost premium. Pivoting to a co-branded take-back scheme that lowers net cost.', 'pivot', 25000000, null, null, null, null, null, '2026-07-13T09:00:00+07:00', '2026-08-24T09:00:00+07:00'),
+    ('cp-solar', 'team-d', 'cb-solar', 'coh-bcd-2025', 'Solar rooftop leasing via dealers', 'Dealers sell and install leased rooftop solar for SME customers. Scaled under SCG Start the Dot in March 2026.', 'scaled', 100000000, 120000000, 'start_the_dot', 'Aligned with SCG management on 2 Aug 2025: dealer leasing model approved for field validation.', 'per-prasert', '2025-08-02T09:00:00+07:00', '2025-07-01T09:00:00+07:00', '2026-03-13T09:00:00+07:00');
 
-  insert into public.gate_reviews (id, concept_id, gate_no, scheduled_date, evidence_summary, submitted_at, decision, decided_by_id, decided_at, note, validated_value_thb) values
-    ('gr-fuel-1', 'cp-fuel', 1, '2026-08-24', 'Evidence pack: 14 waste-stream owners interviewed; two pilot contracts signed; RDF quality test passed at kiln 2.', '2026-08-20T09:00:00+07:00', 'go', 'per-chatchai', '2026-08-24T09:00:00+07:00', 'Go. Build the commercial case with a firm supply plan.', null),
-    ('gr-fuel-2', 'cp-fuel', 2, '2026-10-23', null, null, 'pending', null, null, null, null),
-    ('gr-invoice-1', 'cp-invoice', 1, '2026-08-24', 'Evidence pack: 30 suppliers tested the portal prototype; exception model 91% accurate on 2,000 invoices.', '2026-08-20T09:00:00+07:00', 'go', 'per-chatchai', '2026-08-24T09:00:00+07:00', 'Go, with a service-level commitment in the case.', null),
-    ('gr-invoice-2', 'cp-invoice', 2, '2026-10-23', 'Pre-read submitted early: business case THB 18M annual saving, payback 14 months, best / worst case THB 9M–24M; recorded 6-minute pitch attached.', '2026-09-13T09:00:00+07:00', 'pending', null, null, null, null),
-    ('gr-pack-1', 'cp-pack', 1, '2026-08-24', 'Evidence pack: 12 brand interviews; willingness to pay below cost premium.', '2026-08-20T09:00:00+07:00', 'pivot', 'per-chatchai', '2026-08-24T09:00:00+07:00', 'Pivot to the take-back scheme; re-validate with five brands before Gate 2.', null),
-    ('gr-solar-1', 'cp-solar', 1, '2025-07-28', 'Evidence pack: 40 SME customers; 8 dealers committed.', '2025-07-24T09:00:00+07:00', 'go', 'per-chatchai', '2025-07-28T09:00:00+07:00', 'Go.', null),
-    ('gr-solar-2', 'cp-solar', 2, '2025-09-19', 'Business case THB 100M recurring revenue by year 3.', '2025-09-15T09:00:00+07:00', 'invest', 'per-chatchai', '2025-09-19T09:00:00+07:00', 'Invest THB 30M for small-scale roll-out in two provinces.', null),
-    ('gr-solar-3', 'cp-solar', 3, '2026-03-13', 'Two provinces live; THB 120M contracted recurring revenue; 46 dealers activated.', '2026-03-09T09:00:00+07:00', 'scale', 'per-chatchai', '2026-03-13T09:00:00+07:00', 'Scale as a Start the Dot venture.', 120000000);
+  insert into public.gate_reviews (id, concept_id, gate_no, scheduled_date, evidence_summary, submitted_at, decision, decided_by_id, decided_at, note, validated_value_thb, evidence, business_case, attachments) values
+    ('gr-fuel-1', 'cp-fuel', 1, '2026-08-24', 'Evidence pack: 14 waste-stream owners interviewed; two pilot contracts signed; RDF quality test passed at kiln 2.', '2026-08-20T09:00:00+07:00', 'go', 'per-chatchai', '2026-08-24T09:00:00+07:00', 'Go. Build the commercial case with a firm supply plan.', null, '{"customerInterviews":14,"validatedNeeds":"Municipal and industrial waste owners want a guaranteed offtake and a disposal certificate; both rank above price.","prototype":"Two pilot supply contracts signed; RDF batch passed the kiln 2 quality test at 3,900 kcal/kg.","risks":"Moisture in the rainy season; sorting capacity at the transfer station."}'::jsonb, null, '[{"name":"Waste-owner interview log","kind":"evidence_pack","note":"14 interviews, coded by need"},{"name":"Kiln 2 quality test report","kind":"evidence_pack","note":"Batch 2026-08-14"}]'::jsonb),
+    ('gr-fuel-2', 'cp-fuel', 2, '2026-10-23', null, null, 'pending', null, null, null, null, null, null, '[]'::jsonb),
+    ('gr-invoice-1', 'cp-invoice', 1, '2026-08-24', 'Evidence pack: 30 suppliers tested the portal prototype; exception model 91% accurate on 2,000 invoices.', '2026-08-20T09:00:00+07:00', 'go', 'per-chatchai', '2026-08-24T09:00:00+07:00', 'Go, with a service-level commitment in the case.', null, null, null, '[]'::jsonb),
+    ('gr-invoice-2', 'cp-invoice', 2, '2026-10-23', 'Pre-read submitted early: business case THB 18M annual saving, payback 14 months, best / worst case THB 9M–24M; recorded 6-minute pitch attached.', '2026-09-13T09:00:00+07:00', 'pending', null, null, null, null, '{"customerInterviews":30,"validatedNeeds":"Suppliers want status visibility without emailing AP; BU finance wants exceptions resolved inside 24 hours.","prototype":"Portal prototype tested with 30 suppliers; exception model 91% accurate on 2,000 invoices.","risks":"Master-data quality for small suppliers; change effort in two BU finance teams."}'::jsonb, '{"pricing":"No external pricing: internal cost-to-serve model, THB 42 per invoice today against THB 17 at 80% touchless.","paybackMonths":14,"baseCaseThb":18000000,"bestCaseThb":24000000,"worstCaseThb":9000000,"ask":"THB 21M over 18 months for the portal build, integration and two-team roll-out."}'::jsonb, '[{"name":"Gate 2 pre-read (6 pages)","kind":"pre_read","note":"Sent to committee 13 Sep"},{"name":"Recorded pitch, 6 minutes","kind":"recorded_pitch","note":"Team Touchless, Mali presenting"},{"name":"Business case model","kind":"model","note":"Base, best and worst case with assumptions"}]'::jsonb),
+    ('gr-pack-1', 'cp-pack', 1, '2026-08-24', 'Evidence pack: 12 brand interviews; willingness to pay below cost premium.', '2026-08-20T09:00:00+07:00', 'pivot', 'per-chatchai', '2026-08-24T09:00:00+07:00', 'Pivot to the take-back scheme; re-validate with five brands before Gate 2.', null, null, null, '[]'::jsonb),
+    ('gr-solar-1', 'cp-solar', 1, '2025-07-28', 'Evidence pack: 40 SME customers; 8 dealers committed.', '2025-07-24T09:00:00+07:00', 'go', 'per-chatchai', '2025-07-28T09:00:00+07:00', 'Go.', null, null, null, '[]'::jsonb),
+    ('gr-solar-2', 'cp-solar', 2, '2025-09-19', 'Business case THB 100M recurring revenue by year 3.', '2025-09-15T09:00:00+07:00', 'invest', 'per-chatchai', '2025-09-19T09:00:00+07:00', 'Invest THB 30M for small-scale roll-out in two provinces.', null, null, null, '[]'::jsonb),
+    ('gr-solar-3', 'cp-solar', 3, '2026-03-13', 'Two provinces live; THB 120M contracted recurring revenue; 46 dealers activated.', '2026-03-09T09:00:00+07:00', 'scale', 'per-chatchai', '2026-03-13T09:00:00+07:00', 'Scale as a Start the Dot venture.', 120000000, null, null, '[]'::jsonb);
 
   insert into public.coaching_clinics (id, cohort_id, clinic_no, scheduled_at, coach_id, topics, briefing_ready) values
     ('cl-l1-1', 'coh-abc-l1', 1, '2026-09-11T09:00:00+07:00', 'per-anong', 'Baselines and weekly evidence; using the copilot for data stories', true),
@@ -360,30 +360,30 @@ begin
     ('mr-cafi-squad', 'Finance automation squad member', 'bu-cafi', 'project', 'Six-month squad delivering touchless invoicing for two BUs.', '2026-12-15', 'per-wanida', '[{"skillId":"sk-opex","minLevel":2},{"skillId":"sk-genai","minLevel":2},{"skillId":"sk-custneeds","minLevel":2}]'::jsonb),
     ('mr-green-category', 'Category lead · Green materials procurement', 'bu-cbm', 'role', 'Own supplier strategy for low-CBAM-exposure categories.', '2026-10-15', 'per-prasert', '[{"skillId":"sk-green","minLevel":3},{"skillId":"sk-valuechain","minLevel":3},{"skillId":"sk-sustain","minLevel":2}]'::jsonb);
 
-  insert into public.marketplace_interests (id, role_id, persona_id, created_at, status) values
-    ('mi-1', 'mr-green-category', 'per-arisa', '2026-08-15T09:00:00+07:00', 'shortlisted'),
-    ('mi-2', 'mr-incubation', 'per-warit', '2026-09-01T09:00:00+07:00', 'expressed');
+  insert into public.marketplace_interests (id, role_id, persona_id, created_at, status, placed_at) values
+    ('mi-1', 'mr-green-category', 'per-arisa', '2026-08-15T09:00:00+07:00', 'placed', '2026-09-01T09:00:00+07:00'),
+    ('mi-2', 'mr-incubation', 'per-warit', '2026-09-01T09:00:00+07:00', 'expressed', null);
 
   insert into public.notifications (id, persona_id, kind, title, body, link, read_at, created_at) values
-    ('nt-1', 'per-nara', 'update', 'Impact contract approved by sponsor', 'Prasert Vong-anan approved your impact contract. The sprint is active from 17 August.', '/contracts/ic-nara', '2026-08-20T09:00:00+07:00', '2026-08-20T09:00:00+07:00'),
-    ('nt-2', 'per-nara', 'update', 'Clinic 1 note from your coach', 'Anong Thepsiri added a coaching note after clinic 1.', '/contracts/ic-nara', null, '2026-09-11T09:00:00+07:00'),
-    ('nt-3', 'per-nara', 'update', 'Mid-sprint gate on 25 September', 'Submit your evidence pack by 23 September so your manager and sponsor can review.', '/contracts/ic-nara', null, '2026-09-12T09:00:00+07:00'),
-    ('nt-4', 'per-kittipong', 'update', 'Nara logged week 4 evidence', 'Share of wallet is trending at 33.1% against a 36% target.', '/contracts/ic-nara', null, '2026-09-11T09:00:00+07:00'),
-    ('nt-5', 'per-somsak', 'update', 'Tanawat submitted the mid-gate evidence pack', 'Decide scale, pivot or reset before 25 September.', '/contracts/ic-tanawat', null, '2026-09-12T09:00:00+07:00'),
-    ('nt-6', 'per-prasert', 'update', 'Gate 2 pre-read available for Touchless invoicing', 'Team Touchless submitted their Gate 2 case early.', '/concepts/cp-invoice', null, '2026-09-13T09:00:00+07:00'),
-    ('nt-7', 'per-chatchai', 'update', 'Gate 2 pre-read submitted early', 'Team Touchless submitted the Gate 2 business case and recorded pitch.', '/concepts/cp-invoice', null, '2026-09-13T09:00:00+07:00'),
-    ('nt-8', 'per-arisa', 'update', 'Badges minted to your skill passport', 'Three outcome-verified badges were minted after your showcase. Your talent profile is updated.', '/passport', '2026-08-01T09:00:00+07:00', '2026-07-31T09:00:00+07:00'),
-    ('nt-9', 'per-arisa', 'update', 'Shortlisted for Category lead · Green materials', 'Prasert Vong-anan shortlisted you based on verified passport skills.', '/marketplace', null, '2026-08-20T09:00:00+07:00'),
-    ('nt-10', 'per-wanida', 'update', 'Brief returned by the committee', 'The committee returned "Dealer digital ordering" with a request for a THB target.', '/briefs/cb-ordering', null, '2026-09-10T09:00:00+07:00'),
-    ('nt-11', 'per-supattra', 'update', 'Brief approved: Low-carbon cement for CBAM markets', 'Assign the approved brief to BCD Batch 1/2027.', '/briefs/cb-cbam', null, '2026-09-11T09:00:00+07:00'),
-    ('nt-12', 'per-warit', 'update', 'Gate 2 pre-read due 9 October', 'Your coach flagged that the best / worst case model has not started.', '/concepts/cp-fuel', null, '2026-09-09T09:00:00+07:00'),
-    ('nt-13', 'per-anong', 'update', 'AI coach flags for clinic 2', 'Two learners in ABC Lighthouse 1 are flagged for follow-up.', '/coaching', null, '2026-09-12T09:00:00+07:00');
+    ('nt-1', 'per-nara', 'update', 'Impact contract approved by sponsor', '"Prasert Vong-anan approved your impact contract. The sprint is active from 17 August."'::jsonb, '/contracts/ic-nara', '2026-08-20T09:00:00+07:00', '2026-08-20T09:00:00+07:00'),
+    ('nt-2', 'per-nara', 'update', 'Clinic 1 note from your coach', '"Anong Thepsiri added a coaching note after clinic 1."'::jsonb, '/contracts/ic-nara', null, '2026-09-11T09:00:00+07:00'),
+    ('nt-3', 'per-nara', 'update', 'Mid-sprint gate on 25 September', '"Submit your evidence pack by 23 September so your manager and sponsor can review."'::jsonb, '/contracts/ic-nara', null, '2026-09-12T09:00:00+07:00'),
+    ('nt-4', 'per-kittipong', 'update', 'Nara logged week 4 evidence', '"Share of wallet is trending at 33.1% against a 36% target."'::jsonb, '/contracts/ic-nara', null, '2026-09-11T09:00:00+07:00'),
+    ('nt-5', 'per-somsak', 'update', 'Tanawat submitted the mid-gate evidence pack', '"Decide scale, pivot or reset before 25 September."'::jsonb, '/contracts/ic-tanawat', null, '2026-09-12T09:00:00+07:00'),
+    ('nt-6', 'per-prasert', 'update', 'Gate 2 pre-read available for Touchless invoicing', '"Team Touchless submitted their Gate 2 case early."'::jsonb, '/concepts/cp-invoice', null, '2026-09-13T09:00:00+07:00'),
+    ('nt-7', 'per-chatchai', 'update', 'Gate 2 pre-read submitted early', '"Team Touchless submitted the Gate 2 business case and recorded pitch."'::jsonb, '/concepts/cp-invoice', null, '2026-09-13T09:00:00+07:00'),
+    ('nt-8', 'per-arisa', 'update', 'Badges minted to your skill passport', '"Three outcome-verified badges were minted after your showcase. Your talent profile is updated."'::jsonb, '/passport', '2026-08-01T09:00:00+07:00', '2026-07-31T09:00:00+07:00'),
+    ('nt-9', 'per-arisa', 'update', 'Shortlisted for Category lead · Green materials', '"Prasert Vong-anan shortlisted you based on verified passport skills."'::jsonb, '/marketplace', null, '2026-08-20T09:00:00+07:00'),
+    ('nt-10', 'per-wanida', 'update', 'Brief returned by the committee', '"The committee returned \"Dealer digital ordering\" with a request for a THB target."'::jsonb, '/briefs/cb-ordering', null, '2026-09-10T09:00:00+07:00'),
+    ('nt-11', 'per-supattra', 'update', 'Brief approved: Low-carbon cement for CBAM markets', '"Assign the approved brief to BCD Batch 1/2027."'::jsonb, '/briefs/cb-cbam', null, '2026-09-11T09:00:00+07:00'),
+    ('nt-12', 'per-warit', 'update', 'Gate 2 pre-read due 9 October', '"Your coach flagged that the best / worst case model has not started."'::jsonb, '/concepts/cp-fuel', null, '2026-09-09T09:00:00+07:00'),
+    ('nt-13', 'per-anong', 'update', 'AI coach flags for clinic 2', '"Two learners in ABC Lighthouse 1 are flagged for follow-up."'::jsonb, '/coaching', null, '2026-09-12T09:00:00+07:00');
 
   insert into public.coach_messages (id, persona_id, sender, lang, content, cited_module_id, created_at) values
-    ('cm-1', 'per-nara', 'user', 'th', 'สัปดาห์นี้ต้องส่งอะไรบ้างสำหรับ mid-sprint gate?', null, '2026-09-12T09:00:00+07:00'),
-    ('cm-2', 'per-nara', 'coach', 'th', 'สำหรับ Mid-sprint gate วันที่ 25 กันยายน คุณต้องส่ง evidence pack ภายในวันที่ 23 กันยายน ประกอบด้วย 1) ค่า baseline และค่าปัจจุบันของ share of wallet 2) หลักฐานการทำงานรายสัปดาห์ 5 สัปดาห์ 3) ข้อเสนอว่าจะ scale, pivot หรือ reset ดูตัวอย่างได้ในโมดูล CHG-01.2 "Weekly evidence cadence"', 'mod-changeplan-2', '2026-09-12T09:00:00+07:00'),
-    ('cm-3', 'per-nara', 'user', 'en', 'How do I present the baseline so the sponsor trusts it?', null, '2026-09-12T09:00:00+07:00'),
-    ('cm-4', 'per-nara', 'coach', 'en', 'State the data source (CRM export, confirmed with the credit team on 21 August), the period (12 weeks before the sprint), and the calculation. Then show the weekly trend from 31.0% to 33.1% next to the 36% target. Module OPEX-01.3 "Presenting a baseline and target" has a one-slide template.', 'mod-datastory-3', '2026-09-12T09:00:00+07:00');
+    ('cm-1', 'per-nara', 'user', 'th', '"สัปดาห์นี้ต้องส่งอะไรบ้างสำหรับ mid-sprint gate?"'::jsonb, null, '2026-09-12T09:00:00+07:00'),
+    ('cm-2', 'per-nara', 'coach', 'th', '"สำหรับ Mid-sprint gate วันที่ 25 กันยายน คุณต้องส่ง evidence pack ภายในวันที่ 23 กันยายน ประกอบด้วย 1) ค่า baseline และค่าปัจจุบันของ share of wallet 2) หลักฐานการทำงานรายสัปดาห์ 5 สัปดาห์ 3) ข้อเสนอว่าจะ scale, pivot หรือ reset ดูตัวอย่างได้ในโมดูล CHG-01.2 \"Weekly evidence cadence\""'::jsonb, 'mod-changeplan-2', '2026-09-12T09:00:00+07:00'),
+    ('cm-3', 'per-nara', 'user', 'en', '"How do I present the baseline so the sponsor trusts it?"'::jsonb, null, '2026-09-12T09:00:00+07:00'),
+    ('cm-4', 'per-nara', 'coach', 'en', '"State the data source (CRM export, confirmed with the credit team on 21 August), the period (12 weeks before the sprint), and the calculation. Then show the weekly trend from 31.0% to 33.1% next to the 36% target. Module OPEX-01.3 \"Presenting a baseline and target\" has a one-slide template."'::jsonb, 'mod-datastory-3', '2026-09-12T09:00:00+07:00');
 
   insert into public.record_events (id, record_type, record_id, actor_id, action, from_status, to_status, note, created_at) values
     ('rev-1', 'impact_contract', 'ic-nara', 'per-nara', 'submit', 'draft', 'manager_review', null, '2026-08-14T09:00:00+07:00'),
@@ -433,15 +433,69 @@ begin
     ('la-pim-1', 'enr-pim', 1, '2026-08-31T09:00:00+07:00', null);
 
   insert into public.integration_runs (id, system, direction, status, records, summary, payload, triggered_by, started_at, finished_at) values
-    ('ir-1', 'hr_core', 'outbound', 'succeeded', 4, 'Talent profile sync: 4 outcome-verified badges pushed for 2 people.', '[object Object],[object Object],[object Object],[object Object]', 'per-supattra', '2026-08-01T09:00:00+07:00', '2026-08-01T09:00:00+07:00'),
-    ('ir-2', 'finance_actuals', 'inbound', 'succeeded', 2, 'P&L actuals matched against 2 validated ledger entries; no variance above 10%.', '[object Object],[object Object]', 'per-supattra', '2026-09-01T09:00:00+07:00', '2026-09-01T09:00:00+07:00'),
-    ('ir-3', 'notifications', 'outbound', 'failed', 0, 'LINE Official Account delivery failed: token expired. Email fallback delivered 6 of 6.', '[object Object],[object Object]', 'per-supattra', '2026-09-08T09:00:00+07:00', '2026-09-08T09:00:00+07:00');
+    ('ir-1', 'hr_core', 'outbound', 'succeeded', 4, 'Talent profile sync: 4 outcome-verified badges pushed for 2 people.', '[{"person":"Arisa Chaiyaporn","badge":"ABC-A0-COMM-02-L3"},{"person":"Arisa Chaiyaporn","badge":"ABC-A0-COMM-01-L3"},{"person":"Arisa Chaiyaporn","badge":"ABC-A0-CHG-01-L3"},{"person":"Wichai Kongkaew","badge":"BCD-2025-BB-01-L4"}]'::jsonb, 'per-supattra', '2026-08-01T09:00:00+07:00', '2026-08-01T09:00:00+07:00'),
+    ('ir-2', 'finance_actuals', 'inbound', 'succeeded', 2, 'P&L actuals matched against 2 validated ledger entries; no variance above 10%.', '[{"entry":"Packaging category switch (CBAM exposure)","validatedThb":2400000,"actualThb":2310000,"variance":"-3.8%"},{"entry":"Solar rooftop leasing via dealers (Gate 3)","validatedThb":120000000,"actualThb":118500000,"variance":"-1.3%"}]'::jsonb, 'per-supattra', '2026-09-01T09:00:00+07:00', '2026-09-01T09:00:00+07:00'),
+    ('ir-3', 'notifications', 'outbound', 'failed', 0, 'LINE Official Account delivery failed: token expired. Email fallback delivered 6 of 6.', '[{"channel":"LINE","delivered":0,"failed":6},{"channel":"Email","delivered":6,"failed":0}]'::jsonb, 'per-supattra', '2026-09-08T09:00:00+07:00', '2026-09-08T09:00:00+07:00');
+
+  insert into public.cost_lines (id, cohort_id, category, description, amount_thb, recorded_by, recorded_at) values
+    ('cl-a0-1', 'coh-abc-a0', 'design', 'Journey redesign and module authoring (one-off, amortised over 2026 cohorts)', 600000, 'per-supattra', '2026-04-06T09:00:00+07:00'),
+    ('cl-a0-2', 'coh-abc-a0', 'delivery', 'Four lab days, facilitation and materials, 24 learners', 720000, 'per-supattra', '2026-04-20T09:00:00+07:00'),
+    ('cl-a0-3', 'coh-abc-a0', 'coaching', 'Certified coach time, clinics and sprint support', 300000, 'per-supattra', '2026-07-24T09:00:00+07:00'),
+    ('cl-a0-4', 'coh-abc-a0', 'platform', 'AI platform licences and GenAI usage, 24 seats', 180000, 'per-supattra', '2026-07-24T09:00:00+07:00'),
+    ('cl-l1-1', 'coh-abc-l1', 'delivery', 'Four lab days, facilitation and venue, 30 learners', 900000, 'per-supattra', '2026-08-10T09:00:00+07:00'),
+    ('cl-l1-2', 'coh-abc-l1', 'coaching', 'Coach certification and clinic delivery', 420000, 'per-supattra', '2026-08-17T09:00:00+07:00'),
+    ('cl-l1-3', 'coh-abc-l1', 'platform', 'AI platform licences and GenAI usage, 30 seats', 225000, 'per-supattra', '2026-08-17T09:00:00+07:00'),
+    ('cl-l1-4', 'coh-abc-l1', 'travel', 'Travel and accommodation for lab week', 310000, 'per-supattra', '2026-08-13T09:00:00+07:00'),
+    ('cl-l2-1', 'coh-abc-l2', 'delivery', 'Four lab days, CAFI service teams', 840000, 'per-supattra', '2026-08-31T09:00:00+07:00'),
+    ('cl-l2-2', 'coh-abc-l2', 'coaching', 'Coach time and async clinics', 380000, 'per-supattra', '2026-09-07T09:00:00+07:00'),
+    ('cl-l2-3', 'coh-abc-l2', 'platform', 'AI platform licences, 30 seats', 225000, 'per-supattra', '2026-09-07T09:00:00+07:00'),
+    ('cl-bcd-1', 'coh-bcd-l1', 'delivery', 'Immersion camp, concept studio and field validation support', 2400000, 'per-supattra', '2026-07-06T09:00:00+07:00'),
+    ('cl-bcd-2', 'coh-bcd-l1', 'coaching', 'Async certified coaching across five stages', 1100000, 'per-supattra', '2026-08-31T09:00:00+07:00'),
+    ('cl-bcd-3', 'coh-bcd-l1', 'platform', 'AI platform and research tooling', 480000, 'per-supattra', '2026-08-31T09:00:00+07:00'),
+    ('cl-bcd-4', 'coh-bcd-2025', 'delivery', 'Pilot cohort delivery and gates', 3200000, 'per-supattra', '2025-10-17T09:00:00+07:00'),
+    ('cl-bcd-5', 'coh-bcd-2025', 'coaching', 'Coaching spine, pilot cohort', 900000, 'per-supattra', '2025-10-17T09:00:00+07:00');
+
+  insert into public.role_blueprints (id, bu_id, role_title, level, operating_model_change, responsibilities, headcount, status, model, created_by, created_at, adopted_at, generated) values
+    ('rb-cbm-plant', 'bu-cbm', 'Plant Performance Lead (new operating model)', 'L4', 'CBM moves from plant-by-plant reporting to a regional performance cell. The role owns cost per tonne across three plants and runs a daily data-led routine instead of monthly reviews.', 'Own cost per tonne and unplanned downtime across three plants; run the daily performance routine; lead alternative-fuel substitution; coach shift supervisors on data use.', 6, 'adopted', 'claude-opus-5', 'per-supattra', '2026-08-28T09:00:00+07:00', '2026-08-29T09:00:00+07:00', '{"valuePool":"Cement cost per tonne across the Saraburi cluster","summary":"The new role shifts judgement from monthly review to daily data-led decisions across three plants. The binding gaps are data storytelling and OpEx quantification at Level 3, with GenAI copilot practice as the enabler; green economics matters only for the fuel mix decision.","skills":[{"skillCode":"OPEX-02","targetLevel":4,"why":"Owns cost per tonne across three plants and must quantify waste in THB, not hours.","supplyFte":2,"demandFte":6,"thbValueAtRisk":90000000,"decision":"build"},{"skillCode":"OPEX-01","targetLevel":3,"why":"The daily routine only works if the performance story is readable by shift teams.","supplyFte":1,"demandFte":6,"thbValueAtRisk":45000000,"decision":"build"},{"skillCode":"AI-01","targetLevel":3,"why":"Daily cadence is only affordable with copilot-assisted analysis and handover.","supplyFte":1,"demandFte":6,"thbValueAtRisk":30000000,"decision":"build"},{"skillCode":"COMM-02","targetLevel":2,"why":"Fuel mix choices now carry a carbon cost that the role must weigh.","supplyFte":0,"demandFte":6,"thbValueAtRisk":25000000,"decision":"borrow"}],"cohortPlan":{"program":"ABC","seats":6,"startQuarter":"Q1 2027","rationale":"Six holders of one critical role, same gaps: one ABC wave with a shared impact contract theme on cost per tonne."},"risks":["Shift patterns limit lab attendance; run labs in two half-cohorts.","Plant data access must be granted before the sprint or baselines slip."]}'::jsonb);
+
+  insert into public.policy_items (id, name, description, status, effective_from, resolution_ref, owner, decided_by, decided_at, note) values
+    ('pol-roi', 'ROI-tracking policy', 'Targeted objectives are set on day one for every learner and cohort; delivered value is sponsor-validated into the impact ledger and tracked 6–12 months.', 'approved', '2027-01-01', 'PC-2026-11', 'CHR / Capability Development', 'per-chatchai', '2026-08-14T09:00:00+07:00', 'Approved as part of the MTP 2027 policy pack.'),
+    ('pol-promo', 'Skills-based promotion criteria', 'Each role level defines required verified skills; promotion cases must cite skill passport evidence.', 'submitted', '2027-01-01', null, 'Rewards & Career', null, null, 'With the People Committee for the Q2 resolution.'),
+    ('pol-premium', 'Skill premiums for critical skills', 'Verified passport skills on the annual critical-skill list qualify for skill-premium consideration in the merit cycle.', 'submitted', '2027-04-01', null, 'Rewards & Career', null, null, 'Requires the critical-skill list to be refreshed first.'),
+    ('pol-incentive', 'Value-linked incentives', 'Sponsor-validated impact and funded Gate-2 concepts feed recognition and value-linked bonuses.', 'drafted', null, null, 'Rewards & Career', null, null, 'Draft pending finance review of the ledger audit trail.'),
+    ('pol-pdpa', 'Responsible-AI and PDPA standard', 'Retrieval-grounded content only, PDPA-compliant processing, human-in-the-loop for career decisions, full telemetry for re-personalisation.', 'approved', '2026-09-01', 'PC-2026-09', 'CHR digital / Legal', 'per-chatchai', '2026-08-14T09:00:00+07:00', 'Standing operating standard for the AI platform suite.');
+
+  insert into public.pods (id, cohort_id, name, coach_id) values
+    ('pod-l1-a', 'coh-abc-l1', 'Pod A · CBM turnaround', 'per-anong'),
+    ('pod-l2-a', 'coh-abc-l2', 'Pod A · CAFI services', 'per-decha');
+
+  insert into public.practice_sessions (id, persona_id, scenario, overall, model, created_at, transcript, scores) values
+    ('ps-warit-1', 'per-warit', 'Gate 2 investment pitch, six minutes', 3.4, 'claude-opus-5', '2026-09-10T09:00:00+07:00', '[{"role":"partner","text":"You have six minutes with the committee. Start."},{"role":"learner","text":"Our concept builds an RDF supply marketplace so kilns reach 35% substitution..."}]'::jsonb, '[{"criterion":"Problem and value stated first","score":4,"comment":"Clear THB value in the opening line."},{"criterion":"Evidence quality","score":4,"comment":"Interview count and pilot contracts cited."},{"criterion":"Business case and best / worst case","score":2,"comment":"No payback period and no downside case."},{"criterion":"The ask","score":3,"comment":"Amount given, but not what it buys or when."}]'::jsonb);
+
+  insert into public.succession_entries (id, persona_id, pool, basis, entered_by, entered_at, due_by, fulfilled_at) values
+    ('se-wichai', 'per-wichai', 'incubation_lead', 'Gate 3 scale decision on Solar rooftop leasing; leads the venture under SCG Start the Dot.', 'per-chatchai', '2026-03-13T09:00:00+07:00', '2026-09-13', '2026-04-01T09:00:00+07:00'),
+    ('se-arisa', 'per-arisa', 'L3', 'ABC top decile with three outcome-verified badges and THB 2.4M validated impact.', 'per-supattra', '2026-08-05T09:00:00+07:00', null, null);
+
+  insert into public.recognitions (id, persona_id, kind, note, given_by, given_at) values
+    ('rc-arisa', 'per-arisa', 'ceo_showcase', 'CEO recognition at the Alpha pilot showcase for the CBAM-exposure category switch.', 'per-chatchai', '2026-07-31T09:00:00+07:00'),
+    ('rc-wichai', 'per-wichai', 'gate2', 'CEO recognition at Gate 2 for the solar dealer leasing investment case.', 'per-chatchai', '2025-09-19T09:00:00+07:00');
+
+  insert into public.governance_reviews (id, area, cycle, note, items_reviewed, reviewed_by, reviewed_at, next_due) values
+    ('gv-tax-q3', 'taxonomy', 'Q3 2026', 'Quarterly taxonomy review with function experts: level descriptors sharpened for OpEx and GenAI; no skills retired.', 18, 'per-supattra', '2026-07-15T09:00:00+07:00', '2026-10-15'),
+    ('gv-crit-2026', 'critical_skills', '2026 annual', 'People Committee refreshed the critical-skill list: AI, green commercial and business building confirmed as premium-eligible.', 7, 'per-chatchai', '2026-06-20T09:00:00+07:00', '2027-06-20'),
+    ('gv-agenda-2026', 'capability_agenda', 'MTP 2027 cycle', 'Value-to-skills cascade run with CBM and CAFI BU heads; SCGP and SCGC scheduled for Q4.', 9, 'per-supattra', '2026-08-28T09:00:00+07:00', '2027-08-28');
+
+  insert into public.plan_milestones (id, sub_plan, milestone, owner, due_quarter, status, note, updated_by, updated_at) values
+    ('ms-11', '1.1', 'Five components live as one operating system; AI platform suite deployed', 'CHR / IRIS', 'Q1 2027', 'on_track', 'Two lighthouses running; SCGP and SCGC onboarding in Q4 2026.', 'per-supattra', '2026-09-01T09:00:00+07:00'),
+    ('ms-12', '1.2', 'New ABC live from Batch 1/2027; all graduates hold verified skill passports', 'Capability Development', 'Q2 2027', 'on_track', 'Alpha pilot graduated with verified passports; Batch 1/2027 calendar published.', 'per-supattra', '2026-09-01T09:00:00+07:00'),
+    ('ms-13', '1.3', '≥70% of concepts pass Gate 1; funded concepts incubating with P&L owners', 'Capability Dev / BU Sponsors', 'Q3 2027', 'at_risk', 'Gate 1 pass rate is on target, but only one concept is funded and incubating so far.', 'per-chatchai', '2026-09-05T09:00:00+07:00'),
+    ('ms-14', '1.4', 'Capability–career–reward loop operational; impact dashboard live', 'CHR / Rewards & Career', 'Q4 2027', 'at_risk', 'Dashboard is live; promotion criteria and premium policy still with the People Committee.', 'per-supattra', '2026-09-05T09:00:00+07:00');
 
 end $seed$;
 
 create or replace function public.reset_demo() returns void language plpgsql security definer set search_path = public as $$
 begin
-  truncate table public.business_units, public.personas, public.skill_domains, public.skills, public.learning_modules, public.cohorts, public.enrollments, public.diagnostics, public.diagnostic_items, public.learning_plan_items, public.impact_contracts, public.sprint_evidence, public.challenge_themes, public.challenge_briefs, public.teams, public.concepts, public.gate_reviews, public.coaching_clinics, public.coaching_notes, public.coach_scorecards, public.passport_entries, public.ledger_entries, public.marketplace_roles, public.marketplace_interests, public.notifications, public.coach_messages, public.record_events, public.capability_gaps, public.lab_attendance, public.integration_runs, public.assessments, public.guidance_notes restart identity cascade;
+  truncate table public.business_units, public.personas, public.skill_domains, public.skills, public.learning_modules, public.cohorts, public.enrollments, public.diagnostics, public.diagnostic_items, public.learning_plan_items, public.impact_contracts, public.sprint_evidence, public.challenge_themes, public.challenge_briefs, public.teams, public.concepts, public.gate_reviews, public.coaching_clinics, public.coaching_notes, public.coach_scorecards, public.passport_entries, public.ledger_entries, public.marketplace_roles, public.marketplace_interests, public.notifications, public.coach_messages, public.record_events, public.capability_gaps, public.lab_attendance, public.integration_runs, public.cost_lines, public.role_blueprints, public.policy_items, public.pods, public.practice_sessions, public.talent_reviews, public.succession_entries, public.recognitions, public.governance_reviews, public.plan_milestones, public.assessments, public.guidance_notes restart identity cascade;
   perform public.seed_demo();
 end $$;
 

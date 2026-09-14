@@ -45,6 +45,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { key: 'governance', label: 'Impact dashboard', to: '/governance', icon: 'bar-chart-square-02', roles: ['bu_sponsor', 'committee', 'program_office'] },
       { key: 'strategy', label: 'Strategy roadmap', to: '/strategy', icon: 'compass-03', roles: ['bu_sponsor', 'committee', 'program_office'] },
       { key: 'agenda', label: 'Capability agenda', to: '/agenda', icon: 'target-02', roles: ['bu_sponsor', 'committee', 'program_office'] },
+      { key: 'blueprints', label: 'Role blueprints', to: '/blueprints', icon: 'user-square', roles: ['bu_sponsor', 'program_office'] },
       { key: 'taxonomy', label: 'Skills taxonomy', to: '/taxonomy', icon: 'layers-three-01', roles: ['program_office', 'committee', 'coach'] },
       { key: 'integrations', label: 'Integrations', to: '/integrations', icon: 'data', roles: ['program_office', 'committee'] },
     ],

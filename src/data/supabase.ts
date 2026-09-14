@@ -1,7 +1,7 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import type { Snapshot, DataSource, ContractAction, ContractActionPayload, BriefAction, BriefActionPayload, EvidenceInput } from '@/data/datasource'
 import { DomainError } from '@/data/datasource'
-import type { ChallengeBriefInput, ImpactContractInput, GateDecision, AssessmentResponses, DiagnosticResult, GuidanceKind, GapDecision, MarketplaceRoleInput, IntegrationSystem } from '@/domain/types'
+import type { ChallengeBriefInput, ImpactContractInput, GateDecision, AssessmentResponses, DiagnosticResult, GuidanceKind, GapDecision, MarketplaceRoleInput, IntegrationSystem, CostCategory, BlueprintPlan, PolicyStatus, SuccessionPool, RecognitionKind, MilestoneStatus, GateEvidence, GateBusinessCase, GateAttachment, TalentReview, PracticeSession } from '@/domain/types'
 import { simulatedCoachReply } from '@/data/local'
 
 const TABLES: Record<keyof Snapshot, string> = {
@@ -11,6 +11,8 @@ const TABLES: Record<keyof Snapshot, string> = {
   concepts: 'concepts', gateReviews: 'gate_reviews', coachingClinics: 'coaching_clinics', coachingNotes: 'coaching_notes', coachScorecards: 'coach_scorecards',
   passportEntries: 'passport_entries', ledgerEntries: 'ledger_entries', marketplaceRoles: 'marketplace_roles', marketplaceInterests: 'marketplace_interests',
   notifications: 'notifications', coachMessages: 'coach_messages', recordEvents: 'record_events', assessments: 'assessments', guidanceNotes: 'guidance_notes', capabilityGaps: 'capability_gaps', labAttendance: 'lab_attendance', integrationRuns: 'integration_runs',
+  costLines: 'cost_lines', roleBlueprints: 'role_blueprints', policyItems: 'policy_items', pods: 'pods', practiceSessions: 'practice_sessions',
+  talentReviews: 'talent_reviews', successionEntries: 'succession_entries', recognitions: 'recognitions', governanceReviews: 'governance_reviews', planMilestones: 'plan_milestones',
 }
 
 export const toSnake = (s: string) => s.replace(/[A-Z]/g, (m) => `_${m.toLowerCase()}`)
@@ -145,6 +147,27 @@ export class SupabaseDataSource implements DataSource {
   recordIntegrationRun(actorId: string, run: { system: IntegrationSystem; direction: 'outbound' | 'inbound'; status: 'succeeded' | 'failed'; records: number; summary: string; payload: Record<string, unknown>[] }) {
     return this.rpc<string>('record_integration_run', { p_actor: actorId, p_system: run.system, p_direction: run.direction, p_status: run.status, p_records: run.records, p_summary: run.summary, p_payload: run.payload })
   }
+  setCohortBudget(a: string, c: string, b: number) { return this.rpc('set_cohort_budget', { p_actor: a, p_cohort: c, p_budget: b }) }
+  addCostLine(a: string, c: string, cat: CostCategory, d: string, amt: number) { return this.rpc<string>('add_cost_line', { p_actor: a, p_cohort: c, p_category: cat, p_description: d, p_amount: amt }) }
+  saveRoleBlueprint(a: string, i: { buId: string; roleTitle: string; level: string; operatingModelChange: string; responsibilities: string; headcount: number }) { return this.rpc<string>('save_role_blueprint', { p_actor: a, p_input: deepSnake(i) }) }
+  saveBlueprintPlan(a: string, id: string, g: BlueprintPlan, m: string) { return this.rpc('save_blueprint_plan', { p_actor: a, p_blueprint: id, p_generated: deepSnake(g), p_model: m }) }
+  adoptBlueprint(a: string, id: string) { return this.rpc<number>('adopt_blueprint', { p_actor: a, p_blueprint: id }) }
+  setEmploymentStatus(a: string, p: string, s: 'active' | 'left', l: string | null) { return this.rpc('set_employment_status', { p_actor: a, p_persona: p, p_status: s, p_left_at: l }) }
+  markInterestPlaced(a: string, i: string) { return this.rpc('mark_interest_placed', { p_actor: a, p_interest: i }) }
+  packageCaseAsModule(a: string, c: string, i: { title: string; skillCode: string; durationMin: number; body: unknown }) { return this.rpc<string>('package_case_as_module', { p_actor: a, p_contract: c, p_input: deepSnake(i) }) }
+  decidePolicyItem(a: string, id: string, s: PolicyStatus, eff: string | null, ref: string, note: string) { return this.rpc('decide_policy_item', { p_actor: a, p_item: id, p_status: s, p_effective: eff, p_resolution: ref, p_note: note }) }
+  submitGatePack(a: string, g: string, sum: string, ev: GateEvidence | null, bc: GateBusinessCase | null, at: GateAttachment[]) { return this.rpc('submit_gate_pack', { p_actor: a, p_gate: g, p_summary: sum, p_evidence: ev ? deepSnake(ev) : null, p_case: bc ? deepSnake(bc) : null, p_attachments: at.map((x) => deepSnake(x)) }) }
+  createPod(a: string, c: string, n: string, coach: string | null) { return this.rpc<string>('create_pod', { p_actor: a, p_cohort: c, p_name: n, p_coach: coach }) }
+  assignPod(a: string, e: string, pod: string | null) { return this.rpc('assign_pod', { p_actor: a, p_enrollment: e, p_pod: pod }) }
+  savePracticeSession(a: string, s: { scenario: string; transcript: PracticeSession['transcript']; scores: PracticeSession['scores']; overall: number | null; model: string }) { return this.rpc<string>('save_practice_session', { p_actor: a, p_scenario: s.scenario, p_transcript: s.transcript, p_scores: s.scores, p_overall: s.overall, p_model: s.model }) }
+  saveTalentReview(a: string, p: string, cycle: string, content: TalentReview['content'], model: string) { return this.rpc<string>('save_talent_review', { p_actor: a, p_persona: p, p_cycle: cycle, p_content: content, p_model: model }) }
+  addSuccessionEntry(a: string, p: string, pool: SuccessionPool, basis: string, due: string | null) { return this.rpc<string>('add_succession_entry', { p_actor: a, p_persona: p, p_pool: pool, p_basis: basis, p_due: due }) }
+  fulfilSuccession(a: string, id: string) { return this.rpc('fulfil_succession', { p_actor: a, p_entry: id }) }
+  addRecognition(a: string, p: string, kind: RecognitionKind, note: string) { return this.rpc<string>('add_recognition', { p_actor: a, p_persona: p, p_kind: kind, p_note: note }) }
+  recordGovernanceReview(a: string, area: 'taxonomy' | 'critical_skills' | 'capability_agenda', cycle: string, note: string, items: number, next: string | null) { return this.rpc<string>('record_governance_review', { p_actor: a, p_area: area, p_cycle: cycle, p_note: note, p_items: items, p_next: next }) }
+  recordAlignment(a: string, c: string, note: string) { return this.rpc('record_alignment', { p_actor: a, p_concept: c, p_note: note }) }
+  setMilestoneStatus(a: string, id: string, s: MilestoneStatus, note: string) { return this.rpc('set_milestone_status', { p_actor: a, p_milestone: id, p_status: s, p_note: note }) }
+  sendNudges(a: string) { return this.rpc<number>('send_nudges', { p_actor: a }) }
   resetDemo() {
     return this.rpc('reset_demo', {})
   }

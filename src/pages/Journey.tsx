@@ -9,17 +9,19 @@ import { fmtDate } from '@/lib/format'
 import { ENROLLMENT_LABEL, enrollmentTone, contractTone } from '@/domain/status'
 import { CONTRACT_STATUS_LABEL } from '@/domain/types'
 import { Icon } from '@/icons/Icon'
+import { useT } from '@/app/i18n'
 import type { Snapshot } from '@/data/datasource'
 import type { Enrollment } from '@/domain/types'
 
 export function JourneyPage() {
   const { snap, actor, status, error, refetch } = useActor()
+  const t = useT()
   if (status === 'loading') return <LoadingBlock />
   if (status === 'error' || !snap || !actor) return <ErrorBlock message={error ?? ''} onRetry={refetch} />
   const enrollments = snap.enrollments.filter((e) => e.personaId === actor.id)
   return (
     <>
-      <PageHeader title="My journey" description="Where you are in each program, your AI skill diagnostic and the gaps prioritised for you." />
+      <PageHeader title={t('My journey')} description={t('Where you are in each program, your AI skill diagnostic and the gaps prioritised for you.')} />
       {enrollments.length === 0 ? <EmptyState icon="route" title="No program yet" body="The program office invites learners to cohorts. Once invited, your diagnostic and journey appear here." /> : enrollments.map((e) => <JourneyBlock key={e.id} snap={snap} e={e} actorId={actor.id} />)}
     </>
   )

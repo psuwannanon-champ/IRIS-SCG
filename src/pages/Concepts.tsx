@@ -4,7 +4,7 @@ import { useActor } from '@/app/actor'
 import { useAction } from '@/app/data'
 import { visibleConcepts, personaName } from '@/domain/selectors'
 import { GATE_DECISIONS_BY_GATE } from '@/data/rules'
-import { CONCEPT_STAGE_LABEL, GATE_DECISION_LABEL, CHALLENGE_TYPE_LABEL, type Concept, type GateDecision, type GateReview } from '@/domain/types'
+import { CONCEPT_STAGE_LABEL, GATE_DECISION_LABEL, CHALLENGE_TYPE_LABEL, type Concept, type GateDecision, type GateReview, type GateEvidence, type GateBusinessCase, type GateAttachment } from '@/domain/types'
 import { stageTone, gateTone } from '@/domain/status'
 import { PageHeader, Section, LoadingBlock, ErrorBlock, EmptyState, Pagination, paginate, Pill, Button, Dialog, Field, DL, Notice, Avatar } from '@/components/ui'
 import { History, Money } from '@/components/records'
@@ -61,8 +61,13 @@ export function ConceptDetailPage() {
   const [note, setNote] = useState('')
   const [value, setValue] = useState('')
   const [err, setErr] = useState<string | null>(null)
-  const submit = useAction((ds, gateId: string, s: string) => ds.submitGateEvidence(actor!.id, gateId, s), 'Evidence pack submitted. The committee has been notified.')
+  const submit = useAction((ds, gateId: string, s: string, ev: GateEvidence | null, bc: GateBusinessCase | null, at: GateAttachment[]) => ds.submitGatePack(actor!.id, gateId, s, ev, bc, at), 'Evidence pack submitted. The committee has been notified.')
+  const [ev, setEv] = useState<GateEvidence>({ customerInterviews: null, validatedNeeds: '', prototype: '', risks: '' })
+  const [bc, setBc] = useState<GateBusinessCase>({ pricing: '', paybackMonths: null, baseCaseThb: null, bestCaseThb: null, worstCaseThb: null, ask: '' })
+  const [atts, setAtts] = useState<GateAttachment[]>([])
   const [advance, setAdvance] = useState<string | null>(null)
+  const [align, setAlign] = useState<string | null>(null)
+  const recordAlign = useAction((ds, note: string) => ds.recordAlignment(actor!.id, id, note), 'Management alignment recorded.')
   const advanceStage = useAction((ds, n: string) => ds.advanceConceptStage(actor!.id, id, n), 'Concept moved to the next stage.')
   const decide = useAction((ds, gateId: string, d: GateDecision, n: string, v: number | null) => ds.decideGate(actor!.id, gateId, d, n, v), 'Gate decision recorded.')
   if (status === 'loading') return <LoadingBlock />
@@ -103,6 +108,15 @@ export function ConceptDetailPage() {
               )}
             </Section>
           )}
+          <Section title="Management alignment" icon="check-done-01" description="Teams align direction with SCG management before validation (Stage 2 to Stage 3)." >
+            {c.alignmentNote ? (
+              <div className="text-[13px]"><Pill tone="success" icon="check-circle">Aligned {fmtDate(c.alignedAt)}</Pill><p className="mt-1">{c.alignmentNote}</p><p className="text-[12px] text-(--color-faint)">Recorded by {personaName(snap, c.alignedBy)}.</p></div>
+            ) : (() => { const may = brief.sponsorId === actor.id || ['committee', 'program_office'].includes(actor.role); return align === null ? (
+              <div className="flex flex-wrap items-center gap-2 text-[13px]"><Pill tone="warning">Not yet aligned</Pill>{may ? <Button size="sm" onClick={() => setAlign('')}>Record alignment</Button> : <span className="text-(--color-muted)">The sponsor records this before field validation.</span>}</div>
+            ) : (
+              <div className="space-y-2"><Field label="What was agreed with management" required>{(fid) => <textarea id={fid} className="field-input" value={align} onChange={(e) => setAlign(e.target.value)} data-autofocus />}</Field><div className="flex gap-2"><Button variant="ghost" onClick={() => setAlign(null)}>Cancel</Button><Button variant="primary" busy={recordAlign.isPending} disabled={!align.trim()} onClick={async () => { await recordAlign.mutateAsync([align]); setAlign(null) }}>Save</Button></div></div>
+            ) })()}
+          </Section>
           <Section title="Gate reviews" icon="flag-05" description="Each gate needs an evidence pack from the team before the committee decides." id="gates">
             <ol className="space-y-3">
               {gates.map((g) => (
@@ -113,6 +127,9 @@ export function ConceptDetailPage() {
                   </div>
                   <p className="mt-1 text-[12px] text-(--color-muted)">{gateExplain[g.gateNo]}</p>
                   <div className="mt-2 text-[13px]"><span className="font-medium">Evidence pack: </span>{g.evidenceSummary ?? <span className="text-(--color-muted)">Not submitted</span>}{g.submittedAt && <span className="text-(--color-faint)"> · submitted {fmtDate(g.submittedAt)}</span>}</div>
+                  {g.evidence && <div className="mt-1.5 grid gap-1 rounded-md bg-(--color-page) px-2.5 py-2 text-[12px] sm:grid-cols-2"><div><span className="text-(--color-muted)">Customer interviews: </span>{g.evidence.customerInterviews ?? '—'}</div><div><span className="text-(--color-muted)">Prototype: </span>{g.evidence.prototype}</div><div className="sm:col-span-2"><span className="text-(--color-muted)">Validated needs: </span>{g.evidence.validatedNeeds}</div><div className="sm:col-span-2"><span className="text-(--color-muted)">Risks: </span>{g.evidence.risks}</div></div>}
+                  {g.businessCase && <div className="mt-1.5 grid gap-1 rounded-md bg-(--color-page) px-2.5 py-2 text-[12px] sm:grid-cols-2"><div><span className="text-(--color-muted)">Pricing: </span>{g.businessCase.pricing}</div><div><span className="text-(--color-muted)">Payback: </span>{g.businessCase.paybackMonths ?? '—'} months</div><div><span className="text-(--color-muted)">Base / best / worst: </span>{fmtThb(g.businessCase.baseCaseThb, true)} / {fmtThb(g.businessCase.bestCaseThb, true)} / {fmtThb(g.businessCase.worstCaseThb, true)}</div><div><span className="text-(--color-muted)">The ask: </span>{g.businessCase.ask}</div></div>}
+                  {g.attachments?.length > 0 && <div className="mt-1.5 flex flex-wrap gap-1">{g.attachments.map((a, i) => <Pill key={i} tone="neutral" icon={a.kind === 'recorded_pitch' ? 'presentation-chart-01' : 'file-02'} title={a.note}>{a.name}</Pill>)}</div>}
                   {g.decision !== 'pending' && <div className="mt-1 text-[13px]"><span className="font-medium">Decision: </span>{GATE_DECISION_LABEL[g.decision]} by {personaName(snap, g.decidedById)} on {fmtDate(g.decidedAt)}. {g.note}{g.validatedValueThb != null && <> Validated value <Money v={g.validatedValueThb} />.</>}</div>}
                   {g.decision === 'pending' && (
                     <div className="mt-2 flex flex-wrap gap-2">
@@ -135,12 +152,55 @@ export function ConceptDetailPage() {
           <Section title="History" icon="clock"><History snap={snap} events={events} /></Section>
         </div>
       </div>
-      <Dialog open={dialog?.kind === 'submit'} onClose={() => setDialog(null)} title={`Submit Gate ${dialog?.gate.gateNo} evidence pack`} subtitle={c.title}
-        footer={<><Button variant="ghost" onClick={() => setDialog(null)}>Cancel</Button><Button variant="primary" busy={submit.isPending} onClick={async () => { if (!summary.trim()) { setErr('Summarise the evidence pack.'); return } await submit.mutateAsync([dialog!.gate.id, summary]); setDialog(null) }}>Submit evidence pack</Button></>}>
+      <Dialog open={dialog?.kind === 'submit'} onClose={() => setDialog(null)} title={`Submit Gate ${dialog?.gate.gateNo} pack`} subtitle={c.title} width={820}
+        footer={<><Button variant="ghost" onClick={() => setDialog(null)}>Cancel</Button><Button variant="primary" busy={submit.isPending} onClick={async () => { if (!summary.trim()) { setErr('Summarise the evidence pack.'); return } if (dialog!.gate.gateNo === 2 && !bc.paybackMonths) { setErr('Gate 2 needs the payback period and the best / worst case.'); return } await submit.mutateAsync([dialog!.gate.id, summary, dialog!.gate.gateNo === 3 ? null : ev, dialog!.gate.gateNo === 1 ? null : bc, atts]); setDialog(null); setAtts([]) }}>Submit pack</Button></>}>
+        {dialog && (
         <div className="space-y-3">
-          <Notice tone="info" icon="info-circle"><strong>What happens next:</strong> the concept moves to the gate stage and committee members are notified to decide.</Notice>
-          <Field label="Evidence pack summary" required hint={dialog?.gate.gateNo === 1 ? 'Customer interviews, prototypes, validated needs.' : dialog?.gate.gateNo === 2 ? 'Business case, payback, best / worst case, recorded pitch.' : 'Implementation results, contracted value, readiness to scale.'} error={err ?? undefined}>{(id) => <textarea id={id} className="field-input" rows={5} value={summary} onChange={(e) => { setErr(null); setSummary(e.target.value) }} data-autofocus />}</Field>
+          <Notice tone="info" icon="info-circle"><strong>What happens next:</strong> the concept moves to the gate stage and committee members get the pre-read. Pre-reads and recorded pitches cut man-days at the gate itself.</Notice>
+          <Field label="Summary" required hint="One paragraph the committee reads first." error={err ?? undefined}>{(fid) => <textarea id={fid} className="field-input" rows={3} value={summary} onChange={(e) => { setErr(null); setSummary(e.target.value) }} data-autofocus />}</Field>
+          {dialog.gate.gateNo !== 3 && (
+            <div className="rounded-md border border-(--color-border) p-3">
+              <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-(--color-faint)">Field evidence</div>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <Field label="Customer interviews">{(fid) => <input id={fid} type="number" min={0} className="field-input" value={ev.customerInterviews ?? ''} onChange={(e) => setEv({ ...ev, customerInterviews: e.target.value === '' ? null : Number(e.target.value) })} />}</Field>
+                <Field label="Prototype or test">{(fid) => <input id={fid} className="field-input" value={ev.prototype} onChange={(e) => setEv({ ...ev, prototype: e.target.value })} />}</Field>
+              </div>
+              <div className="mt-3 grid gap-3">
+                <Field label="Validated needs" hint="What customers confirmed, not what you hoped.">{(fid) => <textarea id={fid} className="field-input" rows={2} value={ev.validatedNeeds} onChange={(e) => setEv({ ...ev, validatedNeeds: e.target.value })} />}</Field>
+                <Field label="Risks and open questions">{(fid) => <textarea id={fid} className="field-input" rows={2} value={ev.risks} onChange={(e) => setEv({ ...ev, risks: e.target.value })} />}</Field>
+              </div>
+            </div>
+          )}
+          {dialog.gate.gateNo !== 1 && (
+            <div className="rounded-md border border-(--color-border) p-3">
+              <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-(--color-faint)">Business case {dialog.gate.gateNo === 2 && <span className="text-(--color-primary)">· required</span>}</div>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <Field label="Pricing and unit economics">{(fid) => <input id={fid} className="field-input" value={bc.pricing} onChange={(e) => setBc({ ...bc, pricing: e.target.value })} />}</Field>
+                <Field label="Payback (months)">{(fid) => <input id={fid} type="number" min={1} className="field-input" value={bc.paybackMonths ?? ''} onChange={(e) => setBc({ ...bc, paybackMonths: e.target.value === '' ? null : Number(e.target.value) })} />}</Field>
+                <Field label="Base case (THB)">{(fid) => <input id={fid} type="number" step="100000" className="field-input" value={bc.baseCaseThb ?? ''} onChange={(e) => setBc({ ...bc, baseCaseThb: e.target.value === '' ? null : Number(e.target.value) })} />}</Field>
+                <Field label="Best case (THB)">{(fid) => <input id={fid} type="number" step="100000" className="field-input" value={bc.bestCaseThb ?? ''} onChange={(e) => setBc({ ...bc, bestCaseThb: e.target.value === '' ? null : Number(e.target.value) })} />}</Field>
+                <Field label="Worst case (THB)">{(fid) => <input id={fid} type="number" step="100000" className="field-input" value={bc.worstCaseThb ?? ''} onChange={(e) => setBc({ ...bc, worstCaseThb: e.target.value === '' ? null : Number(e.target.value) })} />}</Field>
+                <Field label="The ask">{(fid) => <input id={fid} className="field-input" placeholder="THB 21M over 18 months for..." value={bc.ask} onChange={(e) => setBc({ ...bc, ask: e.target.value })} />}</Field>
+              </div>
+            </div>
+          )}
+          <div className="rounded-md border border-(--color-border) p-3">
+            <div className="mb-2 flex items-center justify-between gap-2"><span className="text-xs font-semibold uppercase tracking-wide text-(--color-faint)">Pre-read and attachments</span><Button size="sm" icon="plus" onClick={() => setAtts([...atts, { name: '', kind: 'pre_read', note: '' }])}>Add</Button></div>
+            {atts.length === 0 ? <p className="text-[12px] text-(--color-muted)">Register the pre-read, the recorded pitch and the model so the committee knows what exists. Files live in the team workspace; the platform records the reference.</p> : (
+              <ul className="space-y-2">
+                {atts.map((a, i) => (
+                  <li key={i} className="grid gap-2 sm:grid-cols-[minmax(0,1.4fr)_150px_minmax(0,1.4fr)_40px]">
+                    <input aria-label="Name" className="field-input" placeholder="Gate 2 pre-read (6 pages)" value={a.name} onChange={(e) => setAtts(atts.map((x, j) => j === i ? { ...x, name: e.target.value } : x))} />
+                    <select aria-label="Kind" className="field-input" value={a.kind} onChange={(e) => setAtts(atts.map((x, j) => j === i ? { ...x, kind: e.target.value as GateAttachment['kind'] } : x))}><option value="pre_read">Pre-read</option><option value="recorded_pitch">Recorded pitch</option><option value="evidence_pack">Evidence pack</option><option value="model">Model</option><option value="other">Other</option></select>
+                    <input aria-label="Note" className="field-input" placeholder="Where it lives / who presents" value={a.note} onChange={(e) => setAtts(atts.map((x, j) => j === i ? { ...x, note: e.target.value } : x))} />
+                    <Button size="sm" variant="ghost" onClick={() => setAtts(atts.filter((_, j) => j !== i))}>Remove</Button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
         </div>
+        )}
       </Dialog>
       <Dialog open={dialog?.kind === 'decide'} onClose={() => setDialog(null)} title={`Record Gate ${dialog?.gate.gateNo} decision`} subtitle={c.title}
         footer={<><Button variant="ghost" onClick={() => setDialog(null)}>Cancel</Button><Button variant={['stop', 'pivot'].includes(decision) ? 'danger' : 'primary'} busy={decide.isPending} onClick={async () => { if (!note.trim()) { setErr('Record the reasoning for the decision.'); return } if (dialog!.gate.gateNo === 3 && decision === 'scale' && !value) { setErr('Enter the validated value.'); return } await decide.mutateAsync([dialog!.gate.id, decision, note, value ? Number(value) : null]); setDialog(null) }}>Record decision</Button></>}>

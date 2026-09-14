@@ -44,3 +44,23 @@ export const ROLE_LADDERS: RoleLadder[] = [
   { family: 'Shared services and finance', match: (_t, f) => f === 'enabling', levels: { L3: [{ skillId: 'sk-genai', minLevel: 2 }, { skillId: 'sk-opex', minLevel: 2 }, { skillId: 'sk-custneeds', minLevel: 2 }], L4: [{ skillId: 'sk-opex', minLevel: 3 }, { skillId: 'sk-datastory', minLevel: 3 }, { skillId: 'sk-changeplan', minLevel: 3 }, { skillId: 'sk-sustain', minLevel: 2 }] } },
 ]
 export const nextLevel = (level: string) => `L${Math.min(5, (parseInt(level.replace('L', ''), 10) || 3) + 1)}`
+
+/** The transformation story from the deck (pages 6 and 8). */
+export interface FromTo { from: string; to: string }
+export const ABC_FROM_TO: FromTo[] = [
+  { from: 'Same 4-day agenda for all', to: 'AI skill diagnostic personalises each journey to critical future skills' },
+  { from: 'Lecture-led coverage of 6 domains', to: 'Flipped micro-learning frees class time for applied labs with AI copilots' },
+  { from: 'Learning ends on Day 4', to: '90-day sprint delivering agreed practical improvements in the current role' },
+  { from: 'Attendance certificate, smile sheets', to: 'Verified skill passport and a measured business-impact target per learner' },
+]
+export const BCD_FROM_TO: FromTo[] = [
+  { from: 'Project assigned mid-journey', to: 'Sponsor-owned briefs (growth, cost, service, productivity) chosen before Day 1; the project is the journey' },
+  { from: 'Two coaching days near the end', to: 'Async certified and AI coaching across all stages: fewer man-days, quality on a scorecard' },
+  { from: 'Final day: share and learn', to: 'Three gates: proof of concept, then investment or small-scale implementation, then scale-up' },
+  { from: 'Program ends at graduation', to: 'Gate-3 winners scale as startups under SCG Start the Dot or internal high-impact initiatives' },
+]
+export const WHY_IT_FITS: { title: string; icon: string; body: string; evidence: string }[] = [
+  { title: 'Scalable', icon: 'layers-three-01', body: 'One strategy and three platforms deploy to any BU without redesign.', evidence: 'Cohorts are created from the ABC / BCD playbook: calendar, clinics and gates generated automatically.' },
+  { title: 'Simple', icon: 'check-done-01', body: 'Ready-to-run journeys; management approves rather than co-designs.', evidence: 'Role blueprints generate the capability plan; managers approve contracts and decide gates in a few clicks.' },
+  { title: 'Self-funding', icon: 'coins-hand', body: 'Targeted objectives are set from day one, so ROI is measured on everything and capability pays for itself.', evidence: 'Every cohort carries a cost base; validated THB in the ledger is compared against it on the impact dashboard.' },
+]

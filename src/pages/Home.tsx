@@ -9,10 +9,12 @@ import { fmtDate, fmtThb } from '@/lib/format'
 import { contractTone, stageTone, ENROLLMENT_LABEL, enrollmentTone } from '@/domain/status'
 import { useAction } from '@/app/data'
 import { Icon } from '@/icons/Icon'
+import { useT } from '@/app/i18n'
 
 export function HomePage() {
   const { snap, actor, status, error, refetch } = useActor()
   const nav = useNavigate()
+  const t = useT()
   const tasks = useMemo(() => (snap && actor ? selectTasks(snap, actor) : []), [snap, actor])
   const markRead = useAction((ds, id: string) => ds.markNotificationRead(actor!.id, id))
   if (status === 'loading') return <LoadingBlock label="Loading your home" />
@@ -24,24 +26,24 @@ export function HomePage() {
 
   return (
     <>
-      <PageHeader kicker={`${ROLE_LABEL[actor.role]} · ${bu?.code ?? ''}`} title={`Good day, ${actor.fullName.split(' ')[0]}`}
+      <PageHeader kicker={`${ROLE_LABEL[actor.role]} · ${bu?.code ?? ''}`} title={`${t('Good day')}, ${actor.fullName.split(' ')[0]}`}
         description={tasks.length ? `You have ${tasks.length} action${tasks.length === 1 ? '' : 's'} to take${overdue ? `, ${overdue} overdue` : ''}${dueSoon ? `, ${dueSoon} due within seven days` : ''}. Open a task to act on the record; it clears once the action is saved.` : 'Nothing is waiting for you right now. Updates from other roles appear below.'} />
 
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4" data-tour="home-stats">
-        <Stat label="Actionable tasks" value={tasks.length} hint="Only actions you can take now" onClick={() => nav({ to: '/tasks' })} tone={tasks.length ? 'primary' : undefined} />
-        <Stat label="Unread updates" value={unread.length} hint="Informational, separate from tasks" onClick={() => nav({ to: '/notifications' })} />
+        <Stat label={t('Actionable tasks')} value={tasks.length} hint="Only actions you can take now" onClick={() => nav({ to: '/tasks' })} tone={tasks.length ? 'primary' : undefined} />
+        <Stat label={t('Unread updates')} value={unread.length} hint="Informational, separate from tasks" onClick={() => nav({ to: '/notifications' })} />
         <RoleStats />
       </div>
 
       <div className="mt-4 grid gap-4 xl:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
-        <Section title="Your tasks" icon="check-done-01" description="Ordered by urgency: overdue, due within seven days, then by due date." actions={tasks.length > 5 && <Link to="/tasks" className="btn btn-secondary btn-sm">All {tasks.length} tasks</Link>} id="home-tasks">
+        <Section title={t('Your tasks')} icon="check-done-01" description="Ordered by urgency: overdue, due within seven days, then by due date." actions={tasks.length > 5 && <Link to="/tasks" className="btn btn-secondary btn-sm">All {tasks.length} tasks</Link>} id="home-tasks">
           <div data-tour="home-tasks">
             {tasks.length === 0 ? <EmptyState icon="check-circle" title="No actions waiting" body="When a record needs your decision or input it appears here and in the sidebar badge." /> : (
               <ul className="divide-y divide-(--color-border)">{tasks.slice(0, 5).map((t) => <TaskRow key={t.key} t={t} />)}</ul>
             )}
           </div>
         </Section>
-        <Section title="Recent updates" icon="bell-01" description="What other roles did on records connected to you." actions={<Link to="/notifications" className="btn btn-ghost btn-sm">All updates</Link>}>
+        <Section title={t('Recent updates')} icon="bell-01" description="What other roles did on records connected to you." actions={<Link to="/notifications" className="btn btn-ghost btn-sm">All updates</Link>}>
           {unread.length === 0 ? <EmptyState icon="bell-01" title="You are up to date" /> : (
             <ul className="divide-y divide-(--color-border)">
               {unread.slice(0, 5).map((n) => (
@@ -99,11 +101,12 @@ function RoleStats() {
 
 function RolePanel() {
   const { snap, actor } = useActor()
+  const t = useT()
   if (!snap || !actor) return null
   if (actor.role === 'learner') {
     const enr = snap.enrollments.filter((e) => e.personaId === actor.id)
     return (
-      <Section title="Your programs" icon="route" actions={<Link to="/journey" className="btn btn-secondary btn-sm">Open my journey</Link>}>
+      <Section title={t('Your programs')} icon="route" actions={<Link to="/journey" className="btn btn-secondary btn-sm">Open my journey</Link>}>
         {enr.length === 0 ? <EmptyState title="You are not enrolled in a program yet" body="The program office invites learners to cohorts. Your diagnostic and journey appear here once invited." /> : (
           <ul className="divide-y divide-(--color-border)">
             {enr.map((e) => { const c = snap.cohorts.find((x) => x.id === e.cohortId)!; const next = c.keyDates.find((k) => k.date >= new Date().toISOString().slice(0, 10)); return (

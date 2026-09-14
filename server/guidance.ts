@@ -6,7 +6,7 @@ import { zodOutputFormat } from '@anthropic-ai/sdk/helpers/zod'
 
 export const MODEL = 'claude-opus-5'
 /** Sonnet handles the short, highly-constrained dashboard summary; Opus does the reasoning-heavy kinds. */
-export const MODEL_BY_KIND: Record<string, string> = { performance: 'claude-sonnet-5' }
+export const MODEL_BY_KIND: Record<string, string> = { performance: 'claude-sonnet-5', practice: 'claude-sonnet-5' }
 
 const SYSTEM = `You are Expert Guidance, the personalisation and coaching engine inside the SCG Capability Suite, the platform for SCG's "Modernize Capability Development 2027" strategy (skills-first, project-based, AI-powered).
 
@@ -62,13 +62,45 @@ const performanceSchema = z.object({
   nextSteps: z.array(z.string()).length(2).describe('Exactly two items, covering context.focus[0] then context.focus[1] in that order. Each is one sentence starting with a verb, naming the measure or unit with its number from the context, and saying what to do or what to investigate.'),
 })
 
+const blueprintSchema = z.object({
+  valuePool: z.string().describe('The P&L value pool this role protects or creates, in one phrase with a THB scale if the context gives one'),
+  summary: z.string().describe('3-4 sentences: what the new operating model demands of this role, and which gaps actually bind'),
+  skills: z.array(z.object({
+    skillCode: z.string().describe('A skill code from the provided taxonomy only'),
+    targetLevel: z.number().int().min(1).max(4),
+    why: z.string().describe('One sentence tying the skill to a named responsibility of this role'),
+    supplyFte: z.number().int().min(0).describe('People in this BU plausibly at target level today, from the evidence given; 0 if none'),
+    demandFte: z.number().int().min(1),
+    thbValueAtRisk: z.number().describe('Share of the value pool at risk if this skill stays short, in THB'),
+    decision: z.enum(['build', 'buy', 'borrow', 'bot']).describe('build for internal development, buy for hiring, borrow for partner or contractor, bot for automation'),
+  })).min(3).max(6),
+  cohortPlan: z.object({ program: z.enum(['ABC', 'BCD']), seats: z.number().int().min(1), startQuarter: z.string(), rationale: z.string() }),
+  risks: z.array(z.string()).min(2).max(4).describe('Practical risks to closing these gaps, each one sentence'),
+})
+
+const practiceSchema = z.object({
+  reply: z.string().describe('Your next turn in the role-play, in character, 2-4 sentences. Push realistically: ask the hard question an executive or customer would ask.'),
+  scores: z.array(z.object({ criterion: z.string(), score: z.number().int().min(1).max(5), comment: z.string() })).min(3).max(5).describe('Score the learner so far against the rubric criteria given in the context. One short comment each.'),
+  overall: z.number().min(1).max(5),
+  advice: z.string().describe('One sentence on the single thing to change next time'),
+  done: z.boolean().describe('true when the learner has completed the scenario well enough to stop'),
+})
+
+const talentReviewSchema = z.object({
+  headline: z.string().describe('One sentence a talent committee can read aloud'),
+  evidence: z.array(z.string()).min(2).max(5).describe('Factual lines from the record: verified badges, validated THB, gate outcomes, ratings. No speculation.'),
+  strengths: z.array(z.string()).min(2).max(3),
+  development: z.array(z.string()).min(1).max(3),
+  recommendation: z.string().describe('A recommendation on succession or stretch assignment, phrased as an input to a human decision'),
+})
+
 const briefingSchema = z.object({
   headline: z.string(),
   learners: z.array(z.object({ personaName: z.string(), status: z.string(), focus: z.string(), suggestedQuestion: z.string() })),
   agenda: z.array(z.string()).describe('4-6 agenda points for the clinic'),
 })
 
-export type GuidanceKind = 'diagnostic' | 'journey' | 'contract' | 'coach' | 'clinic_briefing' | 'performance'
+export type GuidanceKind = 'diagnostic' | 'journey' | 'contract' | 'coach' | 'clinic_briefing' | 'performance' | 'role_blueprint' | 'practice' | 'talent_review'
 export interface GuidanceRequest { kind: GuidanceKind; context: unknown; question?: string; lang?: 'th' | 'en' }
 
 const PROMPTS: Record<GuidanceKind, string> = {
@@ -77,19 +109,22 @@ const PROMPTS: Record<GuidanceKind, string> = {
   contract: 'Review this impact contract and its sprint evidence like an experienced sponsor-side coach. Focus on evidence quality, baseline credibility, the trend against target, and what must be true before the next gate or showcase.',
   coach: 'Answer the learner\'s question as the always-on AI coach (Program navigator, Activity guide, Content expert, Practice partner, Progress mirror). Keep it easy to read: where they are, the next step with its date, then at most three short verb-first bullets. Cite the module code you relied on when relevant.',
   clinic_briefing: 'Prepare the human coach\'s briefing for this clinic: for each learner, status, what to focus on and one good question to ask. Then propose the clinic agenda.',
+  role_blueprint: 'A business unit has defined a new or changed role under a new operating model. Read it and produce the capability plan: the value pool at stake, the critical future skills with target levels from the taxonomy provided, three-year supply versus demand, THB value at risk per gap, a build / buy / borrow / bot decision each, and the cohort plan. Use only skill codes from the taxonomy given. This replaces weeks of co-design, so be specific and decisive.',
+  practice: 'You are the Practice Partner. Play the counterpart in the scenario (executive committee member, customer, or the person receiving coaching) and score the learner against the rubric after every turn. Stay in character in the reply; be direct but fair in the scores.',
+  talent_review: 'Produce the talent-review pack entry for this person from their programme record. Every line in evidence must be traceable to the data given. The recommendation is an input to a human decision, never a decision.',
   performance: 'Read this capability-programme scorecard and write the dashboard summary. Use only the numbers given. The strength and weakness in sentence 2 are already chosen for you in "highlight" and the two next steps are already chosen in "focus" - keep to them and write them in plain words for a leader.',
 }
 
 export async function runGuidance(req: GuidanceRequest, apiKey?: string) {
   const client = new Anthropic(apiKey ? { apiKey } : undefined)
-  const format = req.kind === 'diagnostic' ? diagnosticSchema : req.kind === 'coach' ? coachSchema : req.kind === 'clinic_briefing' ? briefingSchema : req.kind === 'performance' ? performanceSchema : adviceSchema
+  const format = req.kind === 'diagnostic' ? diagnosticSchema : req.kind === 'coach' ? coachSchema : req.kind === 'clinic_briefing' ? briefingSchema : req.kind === 'performance' ? performanceSchema : req.kind === 'role_blueprint' ? blueprintSchema : req.kind === 'practice' ? practiceSchema : req.kind === 'talent_review' ? talentReviewSchema : adviceSchema
   const userText = `${PROMPTS[req.kind]}\n\n<context>\n${JSON.stringify(req.context, null, 1)}\n</context>${req.question ? `\n\n<question lang="${req.lang ?? 'en'}">\n${req.question}\n</question>` : ''}`
   const response = await client.messages.parse({
     model: MODEL_BY_KIND[req.kind] ?? MODEL,
-    max_tokens: req.kind === 'performance' ? 1500 : 8000,
+    max_tokens: req.kind === 'performance' ? 1500 : req.kind === 'practice' ? 2000 : 8000,
     system: [{ type: 'text', text: SYSTEM, cache_control: { type: 'ephemeral' } }],
     messages: [{ role: 'user', content: userText }],
-    output_config: { format: zodOutputFormat(format), effort: req.kind === 'coach' ? 'medium' : req.kind === 'performance' ? 'low' : 'high' },
+    output_config: { format: zodOutputFormat(format), effort: req.kind === 'coach' || req.kind === 'practice' ? 'medium' : req.kind === 'performance' ? 'low' : 'high' },
   })
   if (response.stop_reason === 'refusal') throw new Error('The guidance request was declined by the model safety layer.')
   if (!response.parsed_output) throw new Error('The model returned an unreadable answer. Try again.')

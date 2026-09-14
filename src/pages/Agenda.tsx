@@ -17,6 +17,8 @@ export function AgendaPage() {
   const [decision, setDecision] = useState<GapDecision>('build')
   const [funded, setFunded] = useState(false)
   const save = useAction((ds, id: string, d: GapDecision, f: boolean) => ds.setGapDecision(actor!.id, id, d, f), 'Decision recorded.')
+  const [refresh, setRefresh] = useState<{ cycle: string; note: string; next: string } | null>(null)
+  const record = useAction((ds, cycle: string, note: string, next: string | null) => ds.recordGovernanceReview(actor!.id, 'capability_agenda', cycle, note, 0, next), 'Cascade refresh recorded.')
   if (status === 'loading') return <LoadingBlock />
   if (status === 'error' || !snap || !actor) return <ErrorBlock message={error ?? ''} onRetry={refetch} />
   const bu = search.bu ?? ''
@@ -29,7 +31,7 @@ export function AgendaPage() {
   const supply = rows.reduce((a, g) => a + g.supplyFte, 0), demand = rows.reduce((a, g) => a + g.demandFte, 0)
   return (
     <>
-      <PageHeader title="Capability agenda" kicker="Value-led · component 01" description="The value-to-skills cascade run with each BU head: value pools → critical roles → P&L-driven future skills, with three-year skill supply versus demand and THB value at stake per gap. The biggest value-at-risk gaps are funded first and decided as build, buy, borrow or bot, governed like capex. Refreshed annually within the MTP cycle." />
+      <PageHeader actions={canDecide && <Button icon="refresh-cw-01" onClick={() => setRefresh({ cycle: `MTP ${new Date().getFullYear() + 1} cycle`, note: '', next: '' })}>Record annual refresh</Button>} title="Capability agenda" kicker="Value-led · component 01" description="The value-to-skills cascade run with each BU head: value pools → critical roles → P&L-driven future skills, with three-year skill supply versus demand and THB value at stake per gap. The biggest value-at-risk gaps are funded first and decided as build, buy, borrow or bot, governed like capex. Refreshed annually within the MTP cycle." />
       <div className="mb-3 flex flex-wrap gap-1.5" role="tablist">
         {[['', 'All BUs'], ...snap.businessUnits.filter((b) => b.id !== 'bu-corp').map((b) => [b.id, b.code])].map(([k, l]) => <Button key={k} size="sm" role="tab" aria-selected={bu === k} variant={bu === k ? 'primary' : 'secondary'} onClick={() => nav({ to: '/agenda', search: { bu: k } as never })}>{l}</Button>)}
       </div>
@@ -67,6 +69,16 @@ export function AgendaPage() {
             <fieldset><legend className="mb-1 text-[13px] font-medium">Decision</legend><div className="flex flex-wrap gap-2">{(['build', 'buy', 'borrow', 'bot'] as GapDecision[]).map((d) => <label key={d} className={`surface brand-ring cursor-pointer rounded-md px-3 py-2 text-[13px] ${decision === d ? 'bg-(--color-primary-soft)' : ''}`} data-selected={decision === d}><input type="radio" name="gd" className="mr-1.5" checked={decision === d} onChange={() => setDecision(d)} />{GAP_DECISION_LABEL[d]}</label>)}</div></fieldset>
             <Field label="Funding">{(id) => <label htmlFor={id} className="flex items-center gap-2 text-[13px]"><input id={id} type="checkbox" checked={funded} onChange={(e) => setFunded(e.target.checked)} />Funded in the 2027 capability budget (governed like capex)</label>}</Field>
             {open.decidedById && <p className="text-[12px] text-(--color-faint)">Last decided by {personaName(snap, open.decidedById)} on {fmtDate(open.decidedAt)}.</p>}
+          </div>
+        </Dialog>
+      )}
+      {refresh && (
+        <Dialog open onClose={() => setRefresh(null)} title="Record the annual cascade refresh" subtitle="The agenda refreshes annually within the MTP cycle so it tracks strategy."
+          footer={<><Button variant="ghost" onClick={() => setRefresh(null)}>Cancel</Button><Button variant="primary" busy={record.isPending} disabled={!refresh.note.trim()} onClick={async () => { await record.mutateAsync([refresh.cycle, refresh.note, refresh.next || null]); setRefresh(null) }}>Record refresh</Button></>}>
+          <div className="space-y-3">
+            <Field label="Cycle" required>{(id) => <input id={id} className="field-input" value={refresh.cycle} onChange={(e) => setRefresh({ ...refresh, cycle: e.target.value })} />}</Field>
+            <Field label="What changed in the cascade" required hint="Which BU heads were run through, what moved.">{(id) => <textarea id={id} className="field-input" rows={3} value={refresh.note} onChange={(e) => setRefresh({ ...refresh, note: e.target.value })} data-autofocus />}</Field>
+            <Field label="Next refresh due">{(id) => <input id={id} type="date" className="field-input max-w-[220px]" value={refresh.next} onChange={(e) => setRefresh({ ...refresh, next: e.target.value })} />}</Field>
           </div>
         </Dialog>
       )}

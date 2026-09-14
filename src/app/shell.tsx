@@ -3,6 +3,7 @@ import { Link, Outlet, useLocation, useNavigate } from '@tanstack/react-router'
 import { useSession } from '@/app/session'
 import { useData, useSnapshot } from '@/app/data'
 import { navForRole } from '@/app/nav'
+import { useT, useLang } from '@/app/i18n'
 import { selectTasks, taskNavKey, unreadNotifications } from '@/domain/selectors'
 import { ROLE_LABEL } from '@/domain/types'
 import { Icon } from '@/icons/Icon'
@@ -18,6 +19,8 @@ export function AppShell() {
   const nav = useNavigate()
   const [switching, setSwitching] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
+  const t = useT()
+  const { lang, setLang } = useLang()
 
   const persona = snap.data?.personas.find((p) => p.id === personaId) ?? null
   const tasks = useMemo(() => (snap.data && persona ? selectTasks(snap.data, persona) : []), [snap.data, persona])
@@ -50,7 +53,7 @@ export function AppShell() {
           return (
             <div key={g.label} className="mt-2">
               <div className="flex h-6 items-center justify-between px-2">
-                {!sidebarCollapsed && <span className="text-[11px] font-semibold uppercase tracking-wide text-(--color-faint)">{g.label}</span>}
+                {!sidebarCollapsed && <span className="text-[11px] font-semibold uppercase tracking-wide text-(--color-faint)">{t(g.label)}</span>}
                 {sidebarCollapsed && <span className="sr-only">{g.label}{groupCount ? `, ${groupCount} tasks` : ''}</span>}
               </div>
               <ul className="mt-0.5 space-y-0.5">
@@ -64,7 +67,7 @@ export function AppShell() {
                         style={active ? { ['--icon-accent' as string]: 'var(--color-accent)' } : undefined} title={sidebarCollapsed ? `${it.label}${count ? ` · ${count} task${count === 1 ? '' : 's'}` : ''}` : undefined}
                         aria-label={sidebarCollapsed ? `${it.label}${count ? `, ${count} actionable task${count === 1 ? '' : 's'}` : ''}` : undefined}>
                         <Icon name={it.icon} size={18} />
-                        {!sidebarCollapsed && <span className="truncate">{it.label}</span>}
+                        {!sidebarCollapsed && <span className="truncate">{t(it.label)}</span>}
                         {sidebarCollapsed && count > 0 && <span aria-hidden="true" className="absolute right-1 top-1 grid h-4 min-w-4 place-items-center rounded-full bg-(--color-primary) px-1 text-[10px] font-semibold text-white">{count}</span>}
                       </Link>
                       {!sidebarCollapsed && <span className="flex w-9 shrink-0 justify-center">{count > 0 && <BadgeLink count={count} to={it.key === 'tasks' ? '/tasks' : `/tasks?group=${it.badgeKeys?.[0]}`} label={`${count} actionable ${it.label} task${count === 1 ? '' : 's'}`} />}</span>}
@@ -98,6 +101,7 @@ export function AppShell() {
           <div className="min-w-0 flex-1" data-tour="backend-status">
             {backend === 'local' && <Pill tone="warning" icon="database-01" title={reason ?? undefined}>Local demo fixtures</Pill>}
           </div>
+          <button type="button" className="btn btn-ghost btn-sm px-2 text-[12px] font-semibold" onClick={() => setLang(lang === 'en' ? 'th' : 'en')} aria-label={lang === 'en' ? 'เปลี่ยนเป็นภาษาไทย' : 'Switch to English'} title={lang === 'en' ? 'เปลี่ยนเป็นภาษาไทย (หน้าสำหรับผู้เรียน)' : 'Switch to English'}>{lang === 'en' ? 'ไทย' : 'EN'}</button>
           <Link to="/notifications" className="btn btn-ghost btn-sm relative px-2" aria-label={`Updates, ${unread} unread`} data-tour="updates">
             <Icon name="bell-01" size={18} />
             {unread > 0 && <span className="absolute -right-0.5 -top-0.5 grid h-4 min-w-4 place-items-center rounded-full bg-(--color-accent) px-1 text-[10px] font-semibold text-white">{unread}</span>}

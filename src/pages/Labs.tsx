@@ -6,9 +6,11 @@ import { ABC_LAB_DAYS, BCD_LAB_DAYS } from '@/data/labs-content'
 import { PageHeader, Section, LoadingBlock, ErrorBlock, EmptyState, Pill, Button, Dialog, Field, Notice } from '@/components/ui'
 import { fmtDate } from '@/lib/format'
 import { Icon } from '@/icons/Icon'
+import { useT } from '@/app/i18n'
 
 export function LabsPage() {
   const { snap, actor, status, error, refetch } = useActor()
+  const t = useT()
   const [open, setOpen] = useState<{ enrollmentId: string; day: number } | null>(null)
   const [reflection, setReflection] = useState('')
   const checkIn = useAction((ds, enrollmentId: string, day: number, r: string) => ds.checkInLab(actor!.id, enrollmentId, day, r), 'Lab day recorded.')
@@ -17,7 +19,7 @@ export function LabsPage() {
   const enrollments = snap.enrollments.filter((e) => e.personaId === actor.id && e.status !== 'withdrawn')
   return (
     <>
-      <PageHeader title="Applied capability labs" description="Phase 1: four in-person lab days (ABC) or the three-day immersion camp (BCD). Class time is 70% practice on live SCG cases with real AI tools. Check in each day and note what you take back to work; Lab Day 4 ends with your impact contract." />
+      <PageHeader title={t('Applied capability labs')} description="Phase 1: four in-person lab days (ABC) or the three-day immersion camp (BCD). Class time is 70% practice on live SCG cases with real AI tools. Check in each day and note what you take back to work; Lab Day 4 ends with your impact contract." />
       {enrollments.length === 0 && <EmptyState icon="users-01" title="No labs scheduled" body="Labs appear once you are enrolled in a cohort." />}
       {enrollments.map((e) => {
         const cohort = snap.cohorts.find((c) => c.id === e.cohortId)!

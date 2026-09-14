@@ -6,11 +6,13 @@ import { MODULE_FORMAT_GUIDE } from '@/data/labs-content'
 import { moduleContent } from '@/data/module-content'
 import { PageHeader, Section, LoadingBlock, ErrorBlock, EmptyState, Pill, Button, Dialog, Field, Notice } from '@/components/ui'
 import type { LearningPlanItem } from '@/domain/types'
+import { useT } from '@/app/i18n'
 
 const FORMAT: Record<string, string> = { micro_video: 'Micro video', reading: 'Reading', exercise: 'Exercise', simulation: 'Simulation' }
 
 export function LearningPage() {
   const { snap, actor, status, error, refetch } = useActor()
+  const t = useT()
   const [open, setOpen] = useState<LearningPlanItem | null>(null)
   const [answer, setAnswer] = useState('')
   const [quiz, setQuiz] = useState<Record<number, number>>({})
@@ -21,7 +23,7 @@ export function LearningPage() {
   const enrollments = snap.enrollments.filter((e) => e.personaId === actor.id)
   return (
     <>
-      <PageHeader title="Learning plan" description="Your personal micro-learning path, selected by Expert Guidance from your diagnostic: which modules, in what order, and what to skip. Open a module to study it and mark it complete; finish the pre-work before each lab day." actions={<Link to="/labs" className="btn btn-secondary">Lab days</Link>} />
+      <PageHeader title={t('Learning plan')} description={t('Your personal micro-learning path, selected by Expert Guidance from your diagnostic: which modules, in what order, and what to skip. Open a module to study it and mark it complete; finish the pre-work before each lab day.')} actions={<Link to="/labs" className="btn btn-secondary">{t('Lab days')}</Link>} />
       {enrollments.length === 0 && <EmptyState icon="book-open-01" title="No learning plan" body="A plan is built after your diagnostic." />}
       {enrollments.map((e) => {
         const cohort = snap.cohorts.find((c) => c.id === e.cohortId)!
@@ -35,11 +37,11 @@ export function LearningPage() {
                 {plan.map((p) => { const m = snap.learningModules.find((x) => x.id === p.moduleId)!; const sk = snap.skills.find((s) => s.id === m.skillId)!; return (
                   <li key={p.id} className="table-grid grid-cols-[28px_minmax(0,1fr)_auto] py-2.5 sm:grid-cols-[28px_minmax(0,2fr)_minmax(0,1.4fr)_120px_190px]">
                     <div className="text-[13px] text-(--color-faint)">{p.sequence}</div>
-                    <div className="min-w-0"><button type="button" className="block max-w-full truncate text-left font-medium text-(--color-accent) hover:text-(--color-primary)" onClick={() => { setAnswer(''); setQuiz({}); setChecked(false); setOpen(p) }}>{m.code} · {m.title}</button><div className="truncate text-[12px] text-(--color-muted)">{sk.name}{m.variant ? ` · ${m.variant}` : ''} · {FORMAT[m.format]} · {m.durationMin} min</div></div>
+                    <div className="min-w-0"><button type="button" className="block max-w-full truncate text-left font-medium text-(--color-accent) hover:text-(--color-primary)" onClick={() => { setAnswer(''); setQuiz({}); setChecked(false); setOpen(p) }}>{m.code} · {m.title}</button><div className="truncate text-[12px] text-(--color-muted)">{sk.name}{m.variant ? ` · ${m.variant}` : ''} · {FORMAT[m.format]} · {m.durationMin} min{m.origin === 'success_case' ? ' · from a proven SCG case' : ''}</div></div>
                     <div className="hidden truncate text-[12px] text-(--color-muted) sm:block" title={p.reason ?? ''}>{p.reason ?? 'Selected by Expert Guidance'}</div>
-                    <div><Pill tone={p.status === 'completed' ? 'success' : p.status === 'in_progress' ? 'info' : p.status === 'skipped' ? 'neutral' : 'warning'}>{p.status.replace('_', ' ')}</Pill></div>
+                    <div><Pill tone={p.status === 'completed' ? 'success' : p.status === 'in_progress' ? 'info' : p.status === 'skipped' ? 'neutral' : 'warning'}>{t(p.status.replace('_', ' '))}</Pill></div>
                     <div className="col-span-3 flex flex-wrap gap-1 sm:col-span-1 sm:justify-end">
-                      {['planned', 'in_progress'].includes(p.status) && <Button size="sm" variant="primary" onClick={() => { setAnswer(''); setQuiz({}); setChecked(false); setOpen(p) }}>Open module</Button>}
+                      {['planned', 'in_progress'].includes(p.status) && <Button size="sm" variant="primary" onClick={() => { setAnswer(''); setQuiz({}); setChecked(false); setOpen(p) }}>{t('Open module')}</Button>}
                       {['planned', 'in_progress'].includes(p.status) && <Button size="sm" variant="ghost" onClick={() => update.mutate([p.id, 'skipped'])}>Skip</Button>}
                       {p.status === 'skipped' && <Button size="sm" variant="ghost" onClick={() => update.mutate([p.id, 'planned'])}>Restore</Button>}
                       {p.status === 'completed' && <Button size="sm" variant="ghost" onClick={() => { setAnswer(''); setQuiz({}); setChecked(false); setOpen(p) }}>Review</Button>}
@@ -55,6 +57,9 @@ export function LearningPage() {
           footer={<><Button variant="ghost" onClick={() => setOpen(null)}>Close</Button>{open.status !== 'completed' && <>{open.status === 'planned' && <Button onClick={async () => { await update.mutateAsync([open.id, 'in_progress']); setOpen({ ...open, status: 'in_progress' }) }}>Start</Button>}<Button variant="primary" busy={update.isPending} disabled={!canComplete} title={!canComplete ? 'Answer the quick check (at least half correct) and the reflection first' : undefined} onClick={async () => { await update.mutateAsync([open.id, 'completed']); setOpen(null) }}>Mark completed</Button></>}</>}>
           <div className="space-y-4 text-[13px]">
             <Notice tone="accent" icon="target-04"><strong>Why this module is in your path:</strong> {open.reason ?? 'Selected by Expert Guidance.'}{item ? ` Your diagnostic: ${item.currentLevel ? `Level ${item.currentLevel}` : 'not assessed'} → target Level ${item.targetLevel}${item.priorityRank ? ` (priority ${item.priorityRank})` : ''}.` : ''}</Notice>
+            {m.origin === 'success_case' && m.body && (
+              <div className="surface p-3"><div className="text-xs font-semibold uppercase tracking-wide text-(--color-faint)">Proven improvement, packaged for reuse</div><p className="mt-1">{m.body.whatChanged}</p><div className="mt-2 text-xs font-semibold uppercase tracking-wide text-(--color-faint)">How to repeat it here</div><ol className="list-decimal pl-4">{m.body.howToRepeat.map((x, i) => <li key={i}>{x}</li>)}</ol><p className="mt-2 text-[12px] text-(--color-muted)">Result at the origin team: {m.body.provenResult}</p></div>
+            )}
             {mc ? (
               <>
                 <p>{mc.summary}</p>

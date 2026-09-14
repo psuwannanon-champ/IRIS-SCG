@@ -7,12 +7,14 @@ import { skillsForProgram } from '@/domain/selectors'
 import { requestGuidance, buildDiagnosticContext, toDiagnosticResult, type DiagnosticOutput } from '@/features/guidance/api'
 import { PageHeader, Section, LoadingBlock, ErrorBlock, EmptyState, Button, Field, Notice, Pill } from '@/components/ui'
 import type { AssessmentResponses, DiagnosticResult } from '@/domain/types'
+import { useT } from '@/app/i18n'
 
 const STEPS = ['Self-rating', 'Knowledge check', 'Your role context', 'Expert Guidance result']
 
 export function AssessmentPage() {
   const { snap, actor, status, error, refetch } = useActor()
   const nav = useNavigate()
+  const t = useT()
   const [step, setStep] = useState(0)
   const [selfRatings, setSelfRatings] = useState<Record<string, number | null>>({})
   const [knowledge, setKnowledge] = useState<Record<string, number>>({})
@@ -60,7 +62,7 @@ export function AssessmentPage() {
 
   return (
     <>
-      <PageHeader kicker={cohort.name} title="AI skill diagnostic" description="About 20 minutes. Rate yourself on the critical skills, answer a short knowledge check and describe your role context. Expert Guidance then maps your gaps, ranks priorities by skill gap × role relevance × project need, and builds your personal micro-learning path." />
+      <PageHeader kicker={cohort.name} title={t('AI skill diagnostic')} description="About 20 minutes. Rate yourself on the critical skills, answer a short knowledge check and describe your role context. Expert Guidance then maps your gaps, ranks priorities by skill gap × role relevance × project need, and builds your personal micro-learning path." />
       <ol className="mb-4 flex flex-wrap gap-1.5" aria-label="Steps">{STEPS.map((s, i) => <li key={s}><Pill tone={i === step ? 'primary' : i < step ? 'success' : 'neutral'}>{i + 1}. {s}</Pill></li>)}</ol>
 
       {step === 0 && (

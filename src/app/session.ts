@@ -9,6 +9,8 @@ interface SessionState {
   toggleSidebar: () => void
   tourSeen: boolean
   setTourSeen: (v: boolean) => void
+  lang: 'en' | 'th'
+  setLang: (v: 'en' | 'th') => void
 }
 
 /** Persisted client preferences only. Server data lives in TanStack Query. */
@@ -22,6 +24,8 @@ export const useSession = create<SessionState>()(
       toggleSidebar: () => set((s) => ({ sidebarCollapsed: !s.sidebarCollapsed })),
       tourSeen: false,
       setTourSeen: (v) => set({ tourSeen: v }),
+      lang: 'en',
+      setLang: (v) => set({ lang: v }),
     }),
     { name: 'scg-capability-suite.session.v1' },
   ),

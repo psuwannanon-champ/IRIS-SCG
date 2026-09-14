@@ -2,8 +2,8 @@ import { useEffect, useRef, useState } from 'react'
 import { Link } from '@tanstack/react-router'
 import { useActor } from '@/app/actor'
 import { useAction } from '@/app/data'
-import { requestGuidance, buildCoachContext, GuidanceUnavailable, type CoachOutput } from '@/features/guidance/api'
-import { PageHeader, Section, LoadingBlock, ErrorBlock, Button, Notice, Pill } from '@/components/ui'
+import { requestGuidance, buildCoachContext, buildPracticeContext, PRACTICE_SCENARIOS, GuidanceUnavailable, type CoachOutput, type PracticeOutput } from '@/features/guidance/api'
+import { PageHeader, Section, LoadingBlock, ErrorBlock, Button, Notice, Pill, EmptyState } from '@/components/ui'
 import { Icon } from '@/icons/Icon'
 import { fmtDate } from '@/lib/format'
 
@@ -15,6 +15,16 @@ export function AiCoachPage() {
   const [lang, setLang] = useState<'th' | 'en'>('en')
   const [pending, setPending] = useState(false)
   const [notice, setNotice] = useState<string | null>(null)
+  const [tab, setTab] = useState<'chat' | 'practice'>('chat')
+  const [scenario, setScenario] = useState<string>('')
+  const [turns, setTurns] = useState<{ role: 'learner' | 'partner'; text: string }[]>([])
+  const [pScores, setPScores] = useState<PracticeOutput['scores']>([])
+  const [pOverall, setPOverall] = useState<number | null>(null)
+  const [pAdvice, setPAdvice] = useState<string | null>(null)
+  const [pText, setPText] = useState('')
+  const [pBusy, setPBusy] = useState(false)
+  const [pModel, setPModel] = useState('')
+  const savePractice = useAction((ds, s: { scenario: string; transcript: { role: 'learner' | 'partner'; text: string }[]; scores: PracticeOutput['scores']; overall: number | null; model: string }) => ds.savePracticeSession(actor!.id, s), 'Practice session saved.')
   const append = useAction((ds, content: string, l: 'th' | 'en', reply: string, moduleId: string | null) => ds.appendCoachExchange(actor!.id, content, l, reply, moduleId))
   const fallback = useAction((ds, content: string, l: 'th' | 'en') => ds.sendCoachMessage(actor!.id, content, l))
   const raiseFlag = useAction((ds, flag: string) => ds.raiseAiFlag(actor!.id, flag))
@@ -23,6 +33,71 @@ export function AiCoachPage() {
   useEffect(() => { endRef.current?.scrollIntoView({ block: 'end' }) }, [msgs.length, pending])
   if (status === 'loading') return <LoadingBlock />
   if (status === 'error' || !snap || !actor) return <ErrorBlock message={error ?? ''} onRetry={refetch} />
+  const runPractice = async (learnerText: string) => {
+    if (!scenario) return
+    const next = [...turns, { role: 'learner' as const, text: learnerText }]
+    setTurns(next); setPText(''); setPBusy(true)
+    try {
+      const r = await requestGuidance<PracticeOutput>({ kind: 'practice', context: buildPracticeContext(snap!, actor!.id, scenario, next) })
+      setTurns([...next, { role: 'partner', text: r.output.reply }])
+      setPScores(r.output.scores); setPOverall(r.output.overall); setPAdvice(r.output.advice); setPModel(r.model)
+    } catch (e) { setNotice((e as Error).message) } finally { setPBusy(false) }
+  }
+  const PracticePanel = () => {
+    const sc = PRACTICE_SCENARIOS.find((x) => x.id === scenario)
+    const past = snap!.practiceSessions.filter((x) => x.personaId === actor!.id).sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+    return (
+      <div className="grid gap-4 xl:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
+        <Section className="flex min-h-[420px] flex-col p-0" tour="practice-panel">
+          <div className="border-b border-(--color-border) px-4 py-3">
+            <label className="mb-1 block text-[13px] font-medium" htmlFor="scenario">Scenario</label>
+            <select id="scenario" className="field-input" value={scenario} onChange={(e) => { setScenario(e.target.value); setTurns([]); setPScores([]); setPOverall(null); setPAdvice(null) }}>
+              <option value="">Choose what to rehearse</option>
+              {PRACTICE_SCENARIOS.map((x) => <option key={x.id} value={x.id}>{x.title}</option>)}
+            </select>
+            {sc && <p className="mt-1.5 text-[13px] text-(--color-muted)">{sc.brief}</p>}
+          </div>
+          <div className="scroll-y flex-1 space-y-3 px-4 py-4" style={{ maxHeight: 380 }}>
+            {!sc && <EmptyState icon="message-chat-circle" title="Pick a scenario to start" body="The partner plays the counterpart and scores you against the program rubric after each turn." />}
+            {sc && turns.length === 0 && <p className="text-[13px] text-(--color-muted)">Open however you would in the room. The partner responds in character.</p>}
+            {turns.map((t, i) => (
+              <div key={i} className={`flex ${t.role === 'learner' ? 'justify-end' : 'justify-start'}`}>
+                <div className={`max-w-[85%] rounded-lg px-3 py-2 text-[13px] ${t.role === 'learner' ? 'bg-(--color-accent-soft)' : 'border border-(--color-border) bg-(--color-surface)'}`}>
+                  {t.role === 'partner' && <div className="mb-1 flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wide text-(--color-primary)"><Icon name="users-01" size={12} />Practice partner</div>}
+                  {t.text}
+                </div>
+              </div>
+            ))}
+            {pBusy && <div className="text-[13px] text-(--color-muted)">Partner is responding and scoring…</div>}
+          </div>
+          <form className="flex items-end gap-2 border-t border-(--color-border) px-3 py-3" onSubmit={(e) => { e.preventDefault(); if (pText.trim()) runPractice(pText.trim()) }}>
+            <label className="sr-only" htmlFor="pmsg">Your turn</label>
+            <input id="pmsg" className="field-input flex-1" placeholder={sc ? 'Your turn…' : 'Choose a scenario first'} disabled={!sc || pBusy} value={pText} onChange={(e) => setPText(e.target.value)} />
+            <Button type="submit" variant="primary" busy={pBusy} disabled={!sc || !pText.trim()} icon="send-01">Send</Button>
+          </form>
+        </Section>
+        <div className="space-y-4">
+          <Section title="Rubric score" icon="speedometer-03" description={sc ? `Scored against the ${sc.title.toLowerCase()} rubric.` : 'Scores appear after your first turn.'}>
+            {pScores.length === 0 ? <p className="text-[13px] text-(--color-muted)">No score yet.</p> : (
+              <div className="space-y-2">
+                <div className="flex items-center gap-2"><span className="text-2xl font-semibold" style={{ color: (pOverall ?? 0) >= 4 ? 'var(--color-success)' : (pOverall ?? 0) >= 3 ? 'var(--color-text)' : 'var(--color-warning)' }}>{pOverall}</span><span className="text-[13px] text-(--color-muted)">of 5 overall</span></div>
+                <ul className="space-y-1.5 text-[13px]">{pScores.map((x, i) => <li key={i} className="flex items-start justify-between gap-2"><div><div className="font-medium">{x.criterion}</div><div className="text-[12px] text-(--color-muted)">{x.comment}</div></div><Pill tone={x.score >= 4 ? 'success' : x.score >= 3 ? 'info' : 'warning'}>{x.score}/5</Pill></li>)}</ul>
+                {pAdvice && <Notice tone="accent" icon="stars-02"><strong>Change next time:</strong> {pAdvice}</Notice>}
+                <Button size="sm" variant="primary" busy={savePractice.isPending} onClick={async () => { await savePractice.mutateAsync([{ scenario: sc?.title ?? scenario, transcript: turns, scores: pScores, overall: pOverall, model: pModel }]); }}>Save session</Button>
+                <p className="text-[12px] text-(--color-faint)">A session below 3 out of 5 is flagged to your certified coach so the next clinic covers it.</p>
+              </div>
+            )}
+          </Section>
+          <Section title="Past sessions" icon="clock">
+            {past.length === 0 ? <p className="text-[13px] text-(--color-muted)">No saved sessions yet.</p> : (
+              <ul className="space-y-2 text-[13px]">{past.map((x) => <li key={x.id} className="flex items-start justify-between gap-2"><div><div className="font-medium">{x.scenario}</div><div className="text-[12px] text-(--color-faint)">{fmtDate(x.createdAt, true)}</div></div><Pill tone={(x.overall ?? 0) >= 4 ? 'success' : (x.overall ?? 0) >= 3 ? 'info' : 'warning'}>{x.overall}/5</Pill></li>)}</ul>
+            )}
+          </Section>
+        </div>
+      </div>
+    )
+  }
+
   const submit = async () => {
     const t = text.trim(); if (!t || pending) return
     setText(''); setPending(true); setNotice(null)
@@ -39,6 +114,7 @@ export function AiCoachPage() {
   return (
     <>
       <PageHeader title="Expert Guidance" description="Always-on coach in Thai and English, grounded in the program content and your own records: it navigates the program, guides each activity, answers content questions with the source module, rehearses pitches and mirrors your progress." state={<Pill tone="accent" icon="stars-02">Powered by Claude</Pill>} />
+      {tab === 'practice' ? <PracticePanel /> : (
       <div className="grid gap-4 xl:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
         <Section className="flex min-h-[420px] flex-col p-0">
           <div className="scroll-y flex-1 space-y-3 px-4 py-4" style={{ maxHeight: 460 }} data-tour="ai-coach-thread">
@@ -71,6 +147,7 @@ export function AiCoachPage() {
           <Section title="Guardrails" icon="shield-tick"><ul className="list-disc space-y-1 pl-4 text-[13px]"><li>Answers only from the approved program content and your own records; every answer cites the module it relied on.</li><li>Career, reward and promotion decisions stay with people; guidance is advisory.</li><li>The model key stays on the server; the browser never holds it. PDPA review is required before production data is used.</li></ul></Section>
         </div>
       </div>
+      )}
     </>
   )
 }

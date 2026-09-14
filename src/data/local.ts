@@ -4,7 +4,7 @@ import { fixtureBundle } from '@/data/fixtures'
 import type { Snapshot, DataSource, ContractAction, ContractActionPayload, BriefAction, BriefActionPayload, EvidenceInput } from '@/data/datasource'
 import { DomainError } from '@/data/datasource'
 import { CONTRACT_TRANSITIONS, BRIEF_TRANSITIONS, contractRelation, briefRelation, GATE_DECISIONS_BY_GATE } from '@/data/rules'
-import type { ChallengeBriefInput, ImpactContractInput, GateDecision, PassportEntry, Notification, RecordEvent, AssessmentResponses, DiagnosticResult, GuidanceKind, GapDecision, MarketplaceRoleInput, IntegrationSystem } from '@/domain/types'
+import type { ChallengeBriefInput, ImpactContractInput, GateDecision, PassportEntry, Notification, RecordEvent, AssessmentResponses, DiagnosticResult, GuidanceKind, GapDecision, MarketplaceRoleInput, IntegrationSystem, CostCategory, BlueprintPlan, PolicyStatus, SuccessionPool, RecognitionKind, MilestoneStatus, GateEvidence, GateBusinessCase, GateAttachment, TalentReview, PracticeSession } from '@/domain/types'
 
 const STORAGE_KEY = 'scg-capability-suite.local-snapshot.v1'
 
@@ -317,7 +317,7 @@ export class LocalDataSource implements DataSource {
     else if (g.gateNo === 1) concept.stage = 'build_case'
     else if (g.gateNo === 2) {
       concept.stage = 'incubating'
-      this.snap.gateReviews.push({ id: uid('gr'), conceptId: concept.id, gateNo: 3, scheduledDate: addMonths(6).slice(0, 10), evidenceSummary: null, submittedAt: null, decision: 'pending', decidedById: null, decidedAt: null, note: null, validatedValueThb: null })
+      this.snap.gateReviews.push({ id: uid('gr'), conceptId: concept.id, gateNo: 3, scheduledDate: addMonths(6).slice(0, 10), evidenceSummary: null, submittedAt: null, decision: 'pending', decidedById: null, decidedAt: null, note: null, validatedValueThb: null, evidence: null, businessCase: null, attachments: [] })
     } else if (g.gateNo === 3) {
       concept.stage = 'scaled'; concept.validatedValueThb = validatedValueThb; concept.scaleRoute = concept.scaleRoute ?? 'internal_high_impact'
     }
@@ -416,6 +416,14 @@ export class LocalDataSource implements DataSource {
     if (!cl) throw new DomainError('Clinic not found.')
     if (cl.coachId !== actorId) throw new DomainError('Only the assigned coach can mark the briefing ready.')
     cl.briefingReady = true
+    // The Progress Mirror briefs the human coach and the manager before each clinic.
+    const learners = this.snap.enrollments.filter((e) => e.cohortId === cl.cohortId && e.coachId === actorId)
+    const managers = Array.from(new Set(learners.map((e) => e.managerId).filter(Boolean))) as string[]
+    const cohort = this.snap.cohorts.find((c) => c.id === cl.cohortId)
+    for (const m of managers) {
+      const mine = learners.filter((e) => e.managerId === m)
+      this.notify(m, `Clinic ${cl.clinicNo} briefing ready · ${cohort?.code ?? ''}`, `${this.persona(actorId).fullName} prepared the briefing for ${mine.map((e) => this.persona(e.personaId).fullName).join(', ')}. Topics: ${cl.topics}`, '/team')
+    }
     this.write()
   }
 
@@ -437,7 +445,7 @@ export class LocalDataSource implements DataSource {
     if (this.snap.marketplaceInterests.some((i) => i.roleId === roleId && i.personaId === actorId)) throw new DomainError('You already expressed interest.')
     const role = this.snap.marketplaceRoles.find((r) => r.id === roleId)
     if (!role) throw new DomainError('Role not found.')
-    this.snap.marketplaceInterests.push({ id: uid('mi'), roleId, personaId: actorId, createdAt: nowIso(), status: 'expressed' })
+    this.snap.marketplaceInterests.push({ id: uid('mi'), roleId, personaId: actorId, createdAt: nowIso(), status: 'expressed', placedAt: null })
     const actor = this.persona(actorId)
     this.notify(role.ownerId, 'New interest in your marketplace posting', `${actor.fullName} expressed interest in "${role.title}".`, '/marketplace')
     this.write()
@@ -574,7 +582,7 @@ export class LocalDataSource implements DataSource {
       ? [['AI skill diagnostic', 0], ['Flipped micro-learning', 0], ['Applied capability labs (4 days)', 14], ['Impact sprint starts', 21], ['Coaching clinic 1', 49], ['Mid-sprint gate', 63], ['Coaching clinic 2', 84], ['Impact showcase', 105]]
       : [['Challenge sourcing', 0], ['Onboard, diagnose & team up', 28], ['Immersion camp (3 days)', 35], ['Concept studio sprint', 42], ['Field validation', 63], ['Gate 1 · Proof of concept', 84], ['Commercial build', 91], ['Prototype & stress-test', 119], ['Gate 2 · CEO investment pitch', 140]]
     const id = uid('coh')
-    this.snap.cohorts.push({ id, program: i.program, code: i.code, name: i.name, buId: i.buId, status: 'planned', startDate: i.startDate, endDate: add(i.program === 'ABC' ? 105 : 140), keyDates: keyDates.map(([label, n]) => ({ label: label as string, date: add(n as number) })), pipelineTargetThb: i.pipelineTargetThb, seats: i.seats })
+    this.snap.cohorts.push({ id, program: i.program, code: i.code, name: i.name, buId: i.buId, status: 'planned', startDate: i.startDate, endDate: add(i.program === 'ABC' ? 105 : 140), keyDates: keyDates.map(([label, n]) => ({ label: label as string, date: add(n as number) })), pipelineTargetThb: i.pipelineTargetThb, seats: i.seats, budgetThb: null })
     if (i.program === 'ABC' && i.coachId) {
       this.snap.coachingClinics.push({ id: uid('cl'), cohortId: id, clinicNo: 1, scheduledAt: `${add(49)}T09:00:00+07:00`, coachId: i.coachId, topics: 'Baselines and weekly evidence', briefingReady: false })
       this.snap.coachingClinics.push({ id: uid('cl'), cohortId: id, clinicNo: 2, scheduledAt: `${add(84)}T09:00:00+07:00`, coachId: i.coachId, topics: 'Showcase preparation and sustaining change', briefingReady: false })
@@ -591,7 +599,7 @@ export class LocalDataSource implements DataSource {
     if (this.snap.enrollments.some((e) => e.cohortId === cohortId && e.personaId === personaId)) throw new DomainError('This person is already enrolled in the cohort.')
     if (this.snap.enrollments.filter((e) => e.cohortId === cohortId).length >= c.seats) throw new DomainError('The cohort is full.')
     const id = uid('enr')
-    this.snap.enrollments.push({ id, cohortId, personaId, status: 'invited', teamId: null, coachId, sponsorId, managerId: l.managerId, impactRating: null, topDecile: false, fastTrackBcd: false })
+    this.snap.enrollments.push({ id, cohortId, personaId, status: 'invited', teamId: null, coachId, sponsorId, managerId: l.managerId, impactRating: null, topDecile: false, fastTrackBcd: false, podId: null })
     this.snap.diagnostics.push({ id: uid('dx'), enrollmentId: id, status: 'pending', completedAt: null, summary: null })
     this.notify(personaId, `You are invited to ${c.name}`, 'Complete your AI skill diagnostic to build your personal path before the labs.', '/assessment')
     this.write(); return id
@@ -607,10 +615,10 @@ export class LocalDataSource implements DataSource {
     const c = this.snap.cohorts.find((x) => x.id === b.cohortId)!
     const teamId = uid('team'), conceptId = uid('cp')
     this.snap.teams.push({ id: teamId, cohortId: c.id, name, briefId: b.id, coachId })
-    this.snap.concepts.push({ id: conceptId, teamId, briefId: b.id, cohortId: c.id, title: b.title, summary: `Concept framing in progress: ${b.problemStatement}`, stage: 'frame', pipelineValueThb: b.targetValueThb, validatedValueThb: null, scaleRoute: null, createdAt: nowIso(), updatedAt: nowIso() })
+    this.snap.concepts.push({ id: conceptId, teamId, briefId: b.id, cohortId: c.id, title: b.title, summary: `Concept framing in progress: ${b.problemStatement}`, stage: 'frame', pipelineValueThb: b.targetValueThb, validatedValueThb: null, scaleRoute: null, alignmentNote: null, alignedBy: null, alignedAt: null, createdAt: nowIso(), updatedAt: nowIso() })
     const g1 = c.keyDates.find((k) => /^Gate 1/i.test(k.label))?.date ?? c.startDate, g2 = c.keyDates.find((k) => /^Gate 2/i.test(k.label))?.date ?? c.endDate
-    this.snap.gateReviews.push({ id: uid('gr'), conceptId, gateNo: 1, scheduledDate: g1, evidenceSummary: null, submittedAt: null, decision: 'pending', decidedById: null, decidedAt: null, note: null, validatedValueThb: null })
-    this.snap.gateReviews.push({ id: uid('gr'), conceptId, gateNo: 2, scheduledDate: g2, evidenceSummary: null, submittedAt: null, decision: 'pending', decidedById: null, decidedAt: null, note: null, validatedValueThb: null })
+    this.snap.gateReviews.push({ id: uid('gr'), conceptId, gateNo: 1, scheduledDate: g1, evidenceSummary: null, submittedAt: null, decision: 'pending', decidedById: null, decidedAt: null, note: null, validatedValueThb: null, evidence: null, businessCase: null, attachments: [] })
+    this.snap.gateReviews.push({ id: uid('gr'), conceptId, gateNo: 2, scheduledDate: g2, evidenceSummary: null, submittedAt: null, decision: 'pending', decidedById: null, decidedAt: null, note: null, validatedValueThb: null, evidence: null, businessCase: null, attachments: [] })
     for (const m of memberEnrollmentIds) {
       const e = this.snap.enrollments.find((x) => x.id === m && x.cohortId === c.id && !x.teamId)
       if (!e) throw new DomainError('Every member must be enrolled in the cohort and not already in a team.')
@@ -670,6 +678,195 @@ export class LocalDataSource implements DataSource {
     const id = uid('ir')
     this.snap.integrationRuns.push({ id, ...run, triggeredBy: actorId, startedAt: nowIso(), finishedAt: nowIso() })
     this.write(); return id
+  }
+
+  /* ---------- Deck closure ---------- */
+  private requireRole(actorId: string, roles: string[]) {
+    const a = this.persona(actorId)
+    if (!roles.includes(a.role)) throw new DomainError('Your role cannot perform this action.')
+    return a
+  }
+
+  async setCohortBudget(actorId: string, cohortId: string, budgetThb: number) {
+    await delay(120); this.requireRole(actorId, ['program_office'])
+    const c = this.snap.cohorts.find((x) => x.id === cohortId); if (!c) throw new DomainError('Cohort not found.')
+    c.budgetThb = budgetThb; this.write()
+  }
+  async addCostLine(actorId: string, cohortId: string, category: CostCategory, description: string, amountThb: number) {
+    await delay(150); this.requireRole(actorId, ['program_office'])
+    if (!(amountThb >= 0)) throw new DomainError('Enter an amount of zero or more.')
+    if (!description.trim()) throw new DomainError('Describe the cost line.')
+    const id = uid('cl')
+    this.snap.costLines.push({ id, cohortId, category, description, amountThb, recordedBy: actorId, recordedAt: nowIso() })
+    const c = this.snap.cohorts.find((x) => x.id === cohortId); if (c && c.budgetThb == null) c.budgetThb = 0
+    this.write(); return id
+  }
+  async saveRoleBlueprint(actorId: string, input: { buId: string; roleTitle: string; level: string; operatingModelChange: string; responsibilities: string; headcount: number }) {
+    await delay(150); this.requireRole(actorId, ['program_office', 'bu_sponsor'])
+    if (!input.roleTitle.trim()) throw new DomainError('Name the role.')
+    const id = uid('rb')
+    this.snap.roleBlueprints.push({ id, ...input, status: 'draft', generated: null, model: null, createdBy: actorId, createdAt: nowIso(), adoptedAt: null })
+    this.write(); return id
+  }
+  async saveBlueprintPlan(actorId: string, blueprintId: string, generated: BlueprintPlan, model: string) {
+    this.requireRole(actorId, ['program_office', 'bu_sponsor'])
+    const b = this.snap.roleBlueprints.find((x) => x.id === blueprintId); if (!b) throw new DomainError('Blueprint not found.')
+    b.generated = generated; b.model = model; b.status = 'generated'; this.write()
+  }
+  async adoptBlueprint(actorId: string, blueprintId: string) {
+    await delay(200); this.requireRole(actorId, ['program_office'])
+    const b = this.snap.roleBlueprints.find((x) => x.id === blueprintId); if (!b) throw new DomainError('Blueprint not found.')
+    if (b.status !== 'generated') throw new DomainError('Generate the capability plan before adopting it.')
+    let n = 0
+    for (const s of b.generated?.skills ?? []) {
+      const skill = this.snap.skills.find((k) => k.code === s.skillCode); if (!skill) continue
+      if (this.snap.capabilityGaps.some((g) => g.buId === b.buId && g.skillId === skill.id && g.criticalRole === b.roleTitle)) continue
+      this.snap.capabilityGaps.push({ id: uid('gap'), buId: b.buId, valuePool: b.generated?.valuePool ?? b.operatingModelChange, criticalRole: b.roleTitle, skillId: skill.id, futureSkillNote: s.why, supplyFte: s.supplyFte, demandFte: s.demandFte, thbValueAtRisk: s.thbValueAtRisk, decision: 'undecided', funded: false, decidedById: null, decidedAt: null })
+      n++
+    }
+    b.status = 'adopted'; b.adoptedAt = nowIso(); this.write(); return n
+  }
+  async setEmploymentStatus(actorId: string, personaId: string, status: 'active' | 'left', leftAt: string | null) {
+    await delay(120); this.requireRole(actorId, ['program_office'])
+    const p = this.snap.personas.find((x) => x.id === personaId); if (!p) throw new DomainError('Person not found.')
+    p.employmentStatus = status; p.leftAt = status === 'left' ? (leftAt ?? nowIso().slice(0, 10)) : null; this.write()
+  }
+  async markInterestPlaced(actorId: string, interestId: string) {
+    await delay(120)
+    const i = this.snap.marketplaceInterests.find((x) => x.id === interestId); if (!i) throw new DomainError('Interest not found.')
+    const r = this.snap.marketplaceRoles.find((x) => x.id === i.roleId)!
+    if (r.ownerId !== actorId) throw new DomainError('Only the posting owner records a placement.')
+    i.status = 'placed'; i.placedAt = nowIso()
+    this.notify(i.personaId, 'You were placed', `You were placed into "${r.title}" on verified skills. Internal mobility is recorded on the impact dashboard.`, '/marketplace')
+    this.write()
+  }
+  async packageCaseAsModule(actorId: string, contractId: string, input: { title: string; skillCode: string; durationMin: number; body: { whatChanged: string; howToRepeat: string[]; provenResult: string } }) {
+    await delay(200); this.requireRole(actorId, ['program_office', 'coach'])
+    const c = this.snap.impactContracts.find((x) => x.id === contractId); if (!c) throw new DomainError('Impact contract not found.')
+    if (c.status !== 'validated') throw new DomainError('Only validated cases can be packaged.')
+    if (this.snap.learningModules.some((m) => m.sourceContractId === c.id)) throw new DomainError('This case is already packaged as a module.')
+    const skill = this.snap.skills.find((k) => k.code === input.skillCode); if (!skill) throw new DomainError('Choose a skill from the taxonomy.')
+    const learner = this.persona(c.learnerId)
+    const n = this.snap.learningModules.filter((m) => m.origin === 'success_case').length + 1
+    const id = uid('mod')
+    this.snap.learningModules.push({ id, skillId: skill.id, code: `${skill.code}.C${n}`, title: input.title, durationMin: input.durationMin, format: 'exercise', variant: `Proven at ${this.snap.businessUnits.find((b) => b.id === learner.buId)?.code}`, origin: 'success_case', sourceContractId: c.id, buId: learner.buId, body: input.body })
+    this.notify(c.learnerId, 'Your improvement is now a micro-module', `The program office packaged "${c.title}" as a reusable module for other service teams.`, '/learning')
+    this.write(); return id
+  }
+  async decidePolicyItem(actorId: string, itemId: string, status: PolicyStatus, effectiveFrom: string | null, resolutionRef: string, note: string) {
+    await delay(150); this.requireRole(actorId, ['committee', 'program_office'])
+    const i = this.snap.policyItems.find((x) => x.id === itemId); if (!i) throw new DomainError('Policy item not found.')
+    i.status = status; i.effectiveFrom = effectiveFrom; i.resolutionRef = resolutionRef || null; i.note = note || null; i.decidedBy = actorId; i.decidedAt = nowIso(); this.write()
+  }
+  async submitGatePack(actorId: string, gateId: string, summary: string, evidence: GateEvidence | null, businessCase: GateBusinessCase | null, attachments: GateAttachment[]) {
+    await delay(200)
+    const g = this.snap.gateReviews.find((x) => x.id === gateId); if (!g) throw new DomainError('Gate review not found.')
+    const concept = this.snap.concepts.find((c) => c.id === g.conceptId)!
+    if (!this.snap.enrollments.some((e) => e.personaId === actorId && e.teamId === concept.teamId)) throw new DomainError('Only a member of the concept team can submit the evidence pack.')
+    if (g.decision !== 'pending' || g.submittedAt) throw new DomainError('This gate already has an evidence pack.')
+    if (!summary.trim()) throw new DomainError('Summarise the evidence pack.')
+    if (g.gateNo === 2 && !businessCase?.paybackMonths) throw new DomainError('Gate 2 needs the business case: pricing, payback and best / worst case.')
+    g.evidenceSummary = summary; g.evidence = evidence; g.businessCase = businessCase; g.attachments = attachments; g.submittedAt = nowIso()
+    const from = concept.stage
+    concept.stage = (`gate${g.gateNo}` as typeof concept.stage); concept.updatedAt = nowIso()
+    this.snap.personas.filter((p) => p.role === 'committee').forEach((m) => this.notify(m.id, `Gate ${g.gateNo} pack submitted`, `${concept.title} · pre-read ready for review.`, `/concepts/${concept.id}`))
+    this.event({ recordType: 'concept', recordId: concept.id, actorId, action: 'submit_gate_evidence', fromStatus: from, toStatus: concept.stage, note: `Gate ${g.gateNo} pack submitted.` })
+    this.write()
+  }
+  async createPod(actorId: string, cohortId: string, name: string, coachId: string | null) {
+    await delay(120); this.requireRole(actorId, ['program_office', 'coach'])
+    if (!name.trim()) throw new DomainError('Name the pod.')
+    const id = uid('pod'); this.snap.pods.push({ id, cohortId, name, coachId }); this.write(); return id
+  }
+  async assignPod(actorId: string, enrollmentId: string, podId: string | null) {
+    await delay(120); this.requireRole(actorId, ['program_office', 'coach'])
+    const e = this.snap.enrollments.find((x) => x.id === enrollmentId); if (!e) throw new DomainError('Enrollment not found.')
+    e.podId = podId
+    if (podId) this.notify(e.personaId, 'You joined a peer pod', `Your sprint pod is ${this.snap.pods.find((p) => p.id === podId)?.name}. Pods review each other's weekly evidence.`, '/journey')
+    this.write()
+  }
+  async savePracticeSession(actorId: string, session: { scenario: string; transcript: PracticeSession['transcript']; scores: PracticeSession['scores']; overall: number | null; model: string }) {
+    await delay(120); this.persona(actorId)
+    const id = uid('ps')
+    this.snap.practiceSessions.push({ id, personaId: actorId, ...session, createdAt: nowIso() })
+    const e = this.snap.enrollments.find((x) => x.personaId === actorId && x.coachId && !['graduated', 'withdrawn'].includes(x.status))
+    if (e && session.overall != null && session.overall < 3) {
+      this.snap.coachingNotes.push({ id: uid('cn'), enrollmentId: e.id, coachId: e.coachId!, clinicId: null, note: `Practice session scored below the rubric threshold: ${session.scenario}`, aiFlag: `Practice partner: overall ${session.overall}/5 on ${session.scenario}`, createdAt: nowIso() })
+      this.notify(e.coachId!, 'Practice session needs follow-up', `${this.persona(actorId).fullName} scored ${session.overall}/5 on ${session.scenario}.`, '/coaching')
+    }
+    this.write(); return id
+  }
+  async saveTalentReview(actorId: string, personaId: string, cycle: string, content: TalentReview['content'], model: string) {
+    this.requireRole(actorId, ['program_office', 'committee', 'bu_sponsor', 'line_manager'])
+    const id = uid('tr')
+    this.snap.talentReviews.push({ id, personaId, cycle, content, model, createdBy: actorId, createdAt: nowIso() })
+    this.write(); return id
+  }
+  async addSuccessionEntry(actorId: string, personaId: string, pool: SuccessionPool, basis: string, dueBy: string | null) {
+    await delay(150); this.requireRole(actorId, ['program_office', 'committee', 'bu_sponsor'])
+    if (this.snap.successionEntries.some((s) => s.personaId === personaId && s.pool === pool)) throw new DomainError('This person is already in that pool.')
+    const id = uid('se')
+    this.snap.successionEntries.push({ id, personaId, pool, basis, enteredBy: actorId, enteredAt: nowIso(), dueBy, fulfilledAt: null })
+    this.notify(personaId, pool === 'incubation_lead' ? 'Nominated for an incubation leadership role' : `Added to the ${pool} succession pool`, basis, '/passport')
+    this.write(); return id
+  }
+  async fulfilSuccession(actorId: string, entryId: string) {
+    this.requireRole(actorId, ['program_office', 'committee', 'bu_sponsor'])
+    const s = this.snap.successionEntries.find((x) => x.id === entryId); if (!s) throw new DomainError('Entry not found.')
+    s.fulfilledAt = nowIso(); this.write()
+  }
+  async addRecognition(actorId: string, personaId: string, kind: RecognitionKind, note: string) {
+    await delay(150); this.requireRole(actorId, ['program_office', 'committee', 'bu_sponsor'])
+    if (!note.trim()) throw new DomainError('Say what the recognition is for.')
+    const id = uid('rc')
+    this.snap.recognitions.push({ id, personaId, kind, note, givenBy: actorId, givenAt: nowIso() })
+    this.notify(personaId, 'Recognition awarded', note, '/passport')
+    this.write(); return id
+  }
+  async recordGovernanceReview(actorId: string, area: 'taxonomy' | 'critical_skills' | 'capability_agenda', cycle: string, note: string, itemsReviewed: number, nextDue: string | null) {
+    await delay(150); this.requireRole(actorId, ['program_office', 'committee'])
+    if (!note.trim()) throw new DomainError('Record what the review concluded.')
+    const id = uid('gv')
+    this.snap.governanceReviews.push({ id, area, cycle, note, itemsReviewed, reviewedBy: actorId, reviewedAt: nowIso(), nextDue })
+    this.write(); return id
+  }
+  async recordAlignment(actorId: string, conceptId: string, note: string) {
+    await delay(150)
+    const cp = this.snap.concepts.find((c) => c.id === conceptId); if (!cp) throw new DomainError('Concept not found.')
+    const b = this.snap.challengeBriefs.find((x) => x.id === cp.briefId)!
+    const actor = this.persona(actorId)
+    if (!(b.sponsorId === actorId || ['committee', 'program_office'].includes(actor.role))) throw new DomainError('Only the sponsor, committee or program office records management alignment.')
+    if (!note.trim()) throw new DomainError('Record what was agreed.')
+    cp.alignmentNote = note; cp.alignedBy = actorId; cp.alignedAt = nowIso(); cp.updatedAt = nowIso()
+    this.event({ recordType: 'concept', recordId: cp.id, actorId, action: 'management_alignment', fromStatus: cp.stage, toStatus: cp.stage, note })
+    this.write()
+  }
+  async setMilestoneStatus(actorId: string, milestoneId: string, status: MilestoneStatus, note: string) {
+    await delay(120); this.requireRole(actorId, ['program_office', 'committee'])
+    const m = this.snap.planMilestones.find((x) => x.id === milestoneId); if (!m) throw new DomainError('Milestone not found.')
+    m.status = status; m.note = note || null; m.updatedBy = actorId; m.updatedAt = nowIso(); this.write()
+  }
+  async sendNudges(actorId: string) {
+    await delay(400); this.requireRole(actorId, ['program_office', 'coach'])
+    const today = new Date(); const days = (iso: string) => Math.round((new Date(iso).getTime() - today.getTime()) / 86400000)
+    let n = 0
+    for (const c of this.snap.impactContracts.filter((x) => x.status === 'active')) {
+      const enr = this.snap.enrollments.find((e) => e.id === c.enrollmentId); const cohort = this.snap.cohorts.find((k) => k.id === enr?.cohortId)
+      for (const [label, title, body] of [['Mid-sprint gate', 'Mid-sprint gate', 'Submit the evidence pack'], ['Impact showcase', 'Impact showcase', 'Prepare the showcase claim']]) {
+        const date = cohort?.keyDates.find((k) => k.label.toLowerCase().startsWith(label.toLowerCase()))?.date
+        if (date && days(date) >= 0 && days(date) <= 14) { this.notify(c.learnerId, `${title} in ${days(date)} days`, `${body} for "${c.title}".`, `/contracts/${c.id}`); n++ }
+      }
+    }
+    for (const g of this.snap.gateReviews.filter((x) => x.decision === 'pending' && !x.submittedAt)) {
+      const d = days(g.scheduledDate); if (d < 0 || d > 21) continue
+      const cp = this.snap.concepts.find((c) => c.id === g.conceptId)!
+      for (const e of this.snap.enrollments.filter((x) => x.teamId === cp.teamId)) { this.notify(e.personaId, `Gate ${g.gateNo} in ${d} days`, `Submit the evidence pack for "${cp.title}".`, `/concepts/${cp.id}`); n++ }
+    }
+    for (const d of this.snap.diagnostics.filter((x) => x.status === 'pending')) {
+      const e = this.snap.enrollments.find((x) => x.id === d.enrollmentId); if (!e || ['withdrawn', 'graduated'].includes(e.status)) continue
+      this.notify(e.personaId, 'Your diagnostic is still open', `Complete the assessment for ${this.snap.cohorts.find((c) => c.id === e.cohortId)?.name} so your personal path is ready.`, '/assessment'); n++
+    }
+    this.write(); return n
   }
 
   async resetDemo() {

@@ -1,6 +1,6 @@
 // Client for the server-side Expert Guidance endpoint plus context builders that gather what Claude needs from the snapshot.
 import type { Snapshot } from '@/data/datasource'
-import type { Persona, Enrollment, ImpactContract, AssessmentResponses, CoachingClinic, GuidanceKind, DiagnosticResult } from '@/domain/types'
+import type { Persona, Enrollment, ImpactContract, AssessmentResponses, CoachingClinic, GuidanceKind, DiagnosticResult, BlueprintPlan, RoleBlueprint } from '@/domain/types'
 import { knowledgeQuestions } from '@/data/assessment-content'
 import { skillsForProgram, personaName } from '@/domain/selectors'
 
@@ -130,5 +130,62 @@ export function buildPerformanceContext(input: {
     focus: input.focus,
     leaderboard: input.leaderboard ?? null,
     note: 'Percentages are shares of the unit\'s own learners, so they compare fairly. THB figures are absolute totals, so a small unit is naturally below the company total; never call that a weakness. Decision time is in days and lower is better.',
+  }
+}
+
+/* ---------- Role blueprint, practice partner, talent review ---------- */
+export interface PracticeOutput { reply: string; scores: { criterion: string; score: number; comment: string }[]; overall: number; advice: string; done: boolean }
+export interface TalentReviewOutput { headline: string; evidence: string[]; strengths: string[]; development: string[]; recommendation: string }
+export type BlueprintOutput = BlueprintPlan
+
+export function buildBlueprintContext(s: Snapshot, b: RoleBlueprint) {
+  const bu = s.businessUnits.find((x) => x.id === b.buId)
+  const existing = s.capabilityGaps.filter((g) => g.buId === b.buId).map((g) => ({ valuePool: g.valuePool, role: g.criticalRole, skill: s.skills.find((k) => k.id === g.skillId)?.code, supplyFte: g.supplyFte, demandFte: g.demandFte, thbValueAtRisk: g.thbValueAtRisk, decision: g.decision }))
+  const passportInBu = s.personas.filter((p) => p.buId === b.buId).flatMap((p) => s.passportEntries.filter((e) => e.personaId === p.id && e.tier === 'outcome_verified').map((e) => ({ skill: s.skills.find((k) => k.id === e.skillId)?.code, level: e.level })))
+  return {
+    role: { title: b.roleTitle, level: b.level, headcount: b.headcount, operatingModelChange: b.operatingModelChange, responsibilities: b.responsibilities },
+    businessUnit: { code: bu?.code, name: bu?.name, kind: bu?.kind },
+    buThemes: s.challengeThemes.filter((t) => t.buId === b.buId).map((t) => `${t.title}: ${t.description}`),
+    existingAgenda: existing,
+    verifiedSupplyInBu: passportInBu,
+    taxonomy: s.skills.map((k) => ({ code: k.code, name: k.name, domain: s.skillDomains.find((d) => d.id === k.domainId)?.name, description: k.description, critical: k.critical, levels: k.levelDescriptors })),
+    cohortOptions: s.cohorts.filter((c) => c.status === 'planned' || c.status === 'framing').map((c) => ({ code: c.code, program: c.program, start: c.startDate, seats: c.seats })),
+  }
+}
+
+export const PRACTICE_SCENARIOS: { id: string; title: string; brief: string; rubric: string[] }[] = [
+  { id: 'gate2', title: 'Gate 2 · CEO investment pitch', brief: 'You have six minutes with the Capability Investment Committee to ask for funding for your concept.', rubric: ['Problem and value stated first', 'Customer evidence quality', 'Business case with best / worst case', 'The ask: amount, what it buys, by when', 'Handles the hard question'] },
+  { id: 'customer', title: 'Customer discovery interview', brief: 'You are interviewing a dealer or an internal customer to validate a need, not to sell.', rubric: ['Asks about the last real occurrence', 'Quantifies the cost of the problem', 'Avoids leading and pitching', 'Captures a testable need'] },
+  { id: 'sponsor', title: 'Impact contract conversation with your sponsor', brief: 'You are agreeing the targeted objective, baseline and THB value for your 90-day sprint.', rubric: ['States a confirmed baseline and source', 'Target is specific and time-bound', 'THB value is defensible', 'Agrees the evidence cadence'] },
+  { id: 'midgate', title: 'Mid-sprint gate: scale, pivot or reset', brief: 'You are presenting week-6 evidence to your manager and sponsor and recommending a call.', rubric: ['Baseline versus current with the trend', 'Honest about what is not working', 'Clear recommendation with reasoning', 'Names what changes next week'] },
+]
+
+export function buildPracticeContext(s: Snapshot, personaId: string, scenarioId: string, transcript: { role: 'learner' | 'partner'; text: string }[]) {
+  const sc = PRACTICE_SCENARIOS.find((x) => x.id === scenarioId)!
+  const p = s.personas.find((x) => x.id === personaId)!
+  const enr = s.enrollments.filter((e) => e.personaId === personaId)
+  const contract = s.impactContracts.find((c) => c.learnerId === personaId && c.status !== 'withdrawn')
+  const concept = enr.find((e) => e.teamId) ? s.concepts.find((c) => c.teamId === enr.find((e) => e.teamId)!.teamId) : null
+  return {
+    scenario: { id: sc.id, title: sc.title, brief: sc.brief, rubric: sc.rubric },
+    learner: { name: p.fullName, role: p.jobTitle, bu: s.businessUnits.find((b) => b.id === p.buId)?.code, functionType: p.functionType },
+    theirContract: contract ? { title: contract.title, objectiveType: contract.objectiveType, baseline: contract.baselineValue, target: contract.targetValue, unit: contract.unit, targetThb: contract.targetThb } : null,
+    theirConcept: concept ? { title: concept.title, summary: concept.summary, stage: concept.stage, pipelineThb: concept.pipelineValueThb } : null,
+    transcript,
+  }
+}
+
+export function buildTalentReviewContext(s: Snapshot, personaId: string) {
+  const p = s.personas.find((x) => x.id === personaId)!
+  const enr = s.enrollments.filter((e) => e.personaId === personaId)
+  return {
+    person: { name: p.fullName, role: p.jobTitle, level: p.level, bu: s.businessUnits.find((b) => b.id === p.buId)?.code, aspiration: p.careerAspiration, kpis: p.kpis },
+    programmes: enr.map((e) => { const c = s.cohorts.find((k) => k.id === e.cohortId)!; return { cohort: c.name, program: c.program, status: e.status, impactRating: e.impactRating, topDecile: e.topDecile, fastTrackBcd: e.fastTrackBcd } }),
+    verifiedSkills: s.passportEntries.filter((x) => x.personaId === personaId && x.tier === 'outcome_verified').map((x) => ({ skill: s.skills.find((k) => k.id === x.skillId)?.name, code: s.skills.find((k) => k.id === x.skillId)?.code, level: x.level, badge: x.badgeCode, mintedAt: x.mintedAt.slice(0, 10) })),
+    validatedImpact: s.ledgerEntries.filter((l) => l.personaId === personaId).map((l) => ({ title: l.title, claimedThb: l.claimedValueThb, validatedThb: l.validatedValueThb, status: l.status })),
+    gateOutcomes: s.concepts.filter((c) => enr.some((e) => e.teamId === c.teamId)).flatMap((c) => s.gateReviews.filter((g) => g.conceptId === c.id && g.decision !== 'pending').map((g) => ({ concept: c.title, gate: g.gateNo, decision: g.decision }))),
+    recognition: s.recognitions.filter((r) => r.personaId === personaId).map((r) => r.note),
+    succession: s.successionEntries.filter((x) => x.personaId === personaId).map((x) => ({ pool: x.pool, basis: x.basis, fulfilled: !!x.fulfilledAt })),
+    marketplace: s.marketplaceInterests.filter((i) => i.personaId === personaId).map((i) => ({ role: s.marketplaceRoles.find((r) => r.id === i.roleId)?.title, status: i.status })),
   }
 }
