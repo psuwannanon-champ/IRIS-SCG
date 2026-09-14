@@ -25,11 +25,15 @@ export async function requestGuidance<T>(req: { kind: GuidanceKind; context: unk
 }
 
 /** The engine inputs the deck names on p10: role and level, KPIs, verified skills already held,
- * live projects, career aspiration and BU context. Shared by every personalisation context. */
+ * interests, live projects, career aspiration and BU context. Shared by every personalisation context. */
 const learnerCard = (s: Snapshot, p: Persona) => ({
   name: p.fullName, jobTitle: p.jobTitle, level: p.level, functionType: p.functionType,
   businessUnit: s.businessUnits.find((b) => b.id === p.buId)?.name, careerAspiration: p.careerAspiration,
   roleKpis: p.kpis ?? null,
+  // "interests" in the deck's input list: what this person has actually put their hand up for.
+  statedInterests: s.marketplaceInterests.filter((i) => i.personaId === p.id && i.status !== 'declined')
+    .map((i) => { const r = s.marketplaceRoles.find((x) => x.id === i.roleId); return r ? `${r.title} (${r.kind}, ${i.status})` : null })
+    .filter(Boolean),
   verifiedSkills: s.passportEntries.filter((e) => e.personaId === p.id)
     .map((e) => ({ skillCode: s.skills.find((k) => k.id === e.skillId)?.code, level: e.level, tier: e.tier }))
     .filter((e) => e.skillCode)

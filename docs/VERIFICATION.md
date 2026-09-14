@@ -149,6 +149,15 @@ owned, and the Assessment page turned a non-enrolled employee away. The deck sel
 | Expert Guidance built its context entirely from the person's enrolments. For an employee with no cohort seat it sent an empty payload, so the always-on coach the deck sells for every employee had nothing to answer from | Fallback context: the baseline, the self-paced path, marketplace invitations, BU priorities, the critical-skill catalogue and the shared history card, plus an instruction not to invent cohort dates, labs, clinics or a coach | Somchai asked what to work on next and when he gets a coach. The reply cited his baseline date and top gap, named a module with a deadline, gave three actions, said plainly that a coach comes with a cohort seat, cited the module, and flagged a human coach for the enrolment decision |
 | Question and reply carried the same timestamp, so the coach transcript could render the reply above the question | Tie-break the sort on sender | Question now renders first |
 
+### Fifth re-audit finding (deck p10)
+
+The deck's learner-profile input list also names **interests**. The learner card carried everything
+else but not what the person had put their hand up for. It now carries their marketplace interests
+with the posting kind and status. Verified by intercepting the guidance request on Mali's journey:
+the payload carries "Finance automation squad member (project, placed)".
+
+A sixth read of the deck against the platform found nothing further.
+
 ### Bugs found and fixed during this sweep
 
 | Bug | Fix |

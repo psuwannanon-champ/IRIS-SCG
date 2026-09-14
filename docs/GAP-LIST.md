@@ -3,7 +3,7 @@
 Source: *People Strategic Plan Formulation for MTP 2027 — Modernize SCG Capability Development* (IRIS, 2 Aug 2026, 14 pages).
 Status set 14 Sep 2026, re-checked in the browser against the live Supabase backend. `[x]` = implemented and verified end to end.
 
-**31 of 32 closed.** Item 20 stays open: it needs promotion events from the HR core, which the demo dataset does not contain. Items 25 to 32 were found in four further full reads of the deck after the first sweep, and are all closed.
+**32 of 33 closed.** Item 20 stays open: it needs promotion events from the HR core, which the demo dataset does not contain. Items 25 to 33 were found in five further full reads of the deck after the first sweep, and are all closed. A sixth read found nothing further.
 
 ## Tier 1 · Features the deck sells that the platform could not show
 
@@ -61,3 +61,4 @@ Status set 14 Sep 2026, re-checked in the browser against the live Supabase back
 | 30 | Engine Input 02: "learning history, AI-coach interactions" (p10) | [x] No personalisation context carried them, so a re-assessment could not see what the person had already studied. A shared history card now carries completed, in-progress and skipped modules, labs attended, the last eight coach questions and recent practice scores into the diagnostic, the baseline and re-personalisation. |
 | 31 | "The marketplace **allocates key talent** to roles, projects and gigs by verified skills" (p4, p12) | [x] The marketplace ran one direction only: a person volunteered and the owner sorted whoever turned up. A posting owner (or the program office) can now search the whole workforce ranked by verified-skill match and invite a person; the invitation reaches them as a notification and they accept or decline. |
 | 32 | "Always-on… learning continues after every program"; Progress Mirror "tracks progress, flags where a learner is stuck", for every employee (p10, p11) | [x] Expert Guidance built its whole context from the person's enrolments, so for an employee with no cohort seat it sent an empty payload and answered from nothing. It now falls back to the baseline, the self-paced path, marketplace invitations, BU priorities and the critical-skill catalogue, and is told not to invent cohort dates, labs, clinics or a coach the person does not have. |
+| 33 | Engine Input 01 also names **interests** (p10) | [x] The learner card carried role, level, KPIs, verified skills, live projects, aspiration and BU context, but not what the person had actually put their hand up for. It now carries their marketplace interests with the posting kind and status, so every personalisation context sees them. |
