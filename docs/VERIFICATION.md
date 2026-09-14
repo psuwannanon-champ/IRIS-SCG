@@ -142,6 +142,13 @@ owned, and the Assessment page turned a non-enrolled employee away. The deck sel
 | No personalisation context carried learning history or coach interactions, so a re-assessment was blind to what the person had already studied | Shared history card into the diagnostic, the baseline and re-personalisation | Intercepted payload carries completed, in-progress and skipped modules, labs attended, recent coach questions and practice scores |
 | The marketplace ran one direction: a person volunteered, the owner sorted the volunteers. Nobody could search the workforce and invite a match | Owner-side workforce search ranked by verified-skill match, an invite that notifies the person, and accept / decline | Wanida searched the Finance automation squad posting: Somchai ranked first at 3 of 3 on his baseline levels alone. Invited, notified, accepted, and he now appears as a candidate |
 
+### Fourth re-audit finding (deck p10, p11)
+
+| Finding | Fix | Verified |
+| --- | --- | --- |
+| Expert Guidance built its context entirely from the person's enrolments. For an employee with no cohort seat it sent an empty payload, so the always-on coach the deck sells for every employee had nothing to answer from | Fallback context: the baseline, the self-paced path, marketplace invitations, BU priorities, the critical-skill catalogue and the shared history card, plus an instruction not to invent cohort dates, labs, clinics or a coach | Somchai asked what to work on next and when he gets a coach. The reply cited his baseline date and top gap, named a module with a deadline, gave three actions, said plainly that a coach comes with a cohort seat, cited the module, and flagged a human coach for the enrolment decision |
+| Question and reply carried the same timestamp, so the coach transcript could render the reply above the question | Tie-break the sort on sender | Question now renders first |
+
 ### Bugs found and fixed during this sweep
 
 | Bug | Fix |

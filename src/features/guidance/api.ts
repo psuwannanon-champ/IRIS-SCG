@@ -140,10 +140,33 @@ export function buildContractContext(s: Snapshot, contract: ImpactContract) {
   return { ...journeyBundle(s, learner, enrollment), reviewers: { manager: personaName(s, contract.managerId), sponsor: personaName(s, contract.sponsorId) } }
 }
 
+/** Deck p10 and p11: the coach is always on for every employee, not only cohort members. An employee
+ * with no enrolment still has a baseline, a self-paced path and a passport for the coach to read. */
 export function buildCoachContext(s: Snapshot, actor: Persona) {
   const enr = s.enrollments.filter((e) => e.personaId === actor.id)
   const history = s.coachMessages.filter((m) => m.personaId === actor.id).sort((a, b) => a.createdAt.localeCompare(b.createdAt)).slice(-8).map((m) => ({ from: m.sender, text: m.content }))
-  return { journeys: enr.map((e) => journeyBundle(s, actor, e)), recentConversation: history }
+  const journeys = enr.map((e) => journeyBundle(s, actor, e))
+  if (journeys.length > 0) return { learner: learnerCard(s, actor), journeys, recentConversation: history, history: historyCard(s, actor) }
+  // No cohort seat: answer from the baseline, the self-paced path and the critical-skill catalogue.
+  const dx = s.diagnostics.find((d) => d.enrollmentId === null && d.personaId === actor.id) ?? null
+  const path = s.learningPlanItems.filter((p) => p.enrollmentId === null && p.personaId === actor.id).sort((a, b) => a.sequence - b.sequence)
+  const code = (id: string) => s.learningModules.find((m) => m.id === id)?.code
+  return {
+    learner: learnerCard(s, actor),
+    journeys: [],
+    mode: 'no_cohort_seat',
+    note: 'This person is not enrolled in a cohort. Answer from their baseline, their self-paced path and the catalogue below. Do not invent cohort dates, labs, clinics, sprints or a coach they do not have. If they ask about something that needs a cohort, say plainly that it opens when they join an ABC or BCD cohort.',
+    baseline: dx ? { status: dx.status, completedAt: dx.completedAt, summary: dx.summary, items: s.diagnosticItems.filter((i) => i.diagnosticId === dx.id).map((i) => ({ skillCode: s.skills.find((k) => k.id === i.skillId)?.code, current: i.currentLevel, target: i.targetLevel, priority: i.priorityRank, rationale: i.rationale })) } : null,
+    selfPacedPath: path.map((p) => ({ moduleCode: code(p.moduleId), status: p.status, reason: p.reason })).filter((x) => x.moduleCode),
+    marketplaceInvitations: s.marketplaceInterests.filter((i) => i.personaId === actor.id).map((i) => ({ posting: s.marketplaceRoles.find((r) => r.id === i.roleId)?.title, status: i.status })),
+    buPriorities: buPriority(s, actor.buId),
+    history: historyCard(s, actor),
+    recentConversation: history,
+    catalogue: {
+      skills: s.skills.filter((k) => k.critical).map((k) => ({ code: k.code, name: k.name, description: k.description, levels: k.levelDescriptors })),
+      modules: s.learningModules.filter((m) => s.skills.some((k) => k.id === m.skillId && k.critical)).map((m) => ({ code: m.code, title: m.title, skillCode: s.skills.find((k) => k.id === m.skillId)?.code, minutes: m.durationMin, format: m.format })),
+    },
+  }
 }
 
 export function buildClinicContext(s: Snapshot, clinic: CoachingClinic) {

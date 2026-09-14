@@ -29,7 +29,8 @@ export function AiCoachPage() {
   const fallback = useAction((ds, content: string, l: 'th' | 'en') => ds.sendCoachMessage(actor!.id, content, l))
   const raiseFlag = useAction((ds, flag: string) => ds.raiseAiFlag(actor!.id, flag))
   const endRef = useRef<HTMLDivElement>(null)
-  const msgs = snap && actor ? snap.coachMessages.filter((m) => m.personaId === actor.id).sort((a, b) => a.createdAt.localeCompare(b.createdAt)) : []
+  // Question and reply are written in the same second, so tie-break on sender to keep the order readable.
+  const msgs = snap && actor ? snap.coachMessages.filter((m) => m.personaId === actor.id).sort((a, b) => a.createdAt.localeCompare(b.createdAt) || (a.sender === 'user' ? -1 : 1)) : []
   useEffect(() => { endRef.current?.scrollIntoView({ block: 'end' }) }, [msgs.length, pending])
   if (status === 'loading') return <LoadingBlock />
   if (status === 'error' || !snap || !actor) return <ErrorBlock message={error ?? ''} onRetry={refetch} />

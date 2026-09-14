@@ -60,6 +60,7 @@ Everything the deck sells is executable in the platform, not just displayed. `do
 - **Peer pods and clinics** are visible on the learner's journey, with named pod peers, the pod coach, and the next clinic's topics and briefing state.
 - **Personal path for everyone, re-personalised as you go**: the baseline builds a self-paced path without a cohort seat, and Re-personalise rewrites what is still ahead from completed modules, labs, sprint evidence, coach questions and practice scores. Completed and started modules are kept and each plan carries a revision.
 - **Marketplace in both directions**: a posting owner searches the whole workforce ranked by verified-skill match and invites a person, who accepts or declines. Talent is allocated, not only self-selected.
+- **The coach works without a cohort seat**: Expert Guidance answers a non-enrolled employee from their baseline, self-paced path and invitations, and says plainly which things wait for a cohort rather than inventing dates or a coach.
 - Still open: **% promotions citing verified skills**. It needs promotion events from the HR core, which the demo dataset does not contain.
 
 ## Hosting
