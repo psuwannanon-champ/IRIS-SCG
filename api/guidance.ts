@@ -1,6 +1,6 @@
 // Vercel serverless function: POST /api/guidance
 import type { IncomingMessage, ServerResponse } from 'node:http'
-import { handleGuidance } from '../server/guidance'
+import { handleGuidance } from '../server/guidance.js'
 
 export const config = { maxDuration: 120 }
 
