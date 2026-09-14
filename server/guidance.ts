@@ -100,7 +100,14 @@ const briefingSchema = z.object({
   agenda: z.array(z.string()).describe('4-6 agenda points for the clinic'),
 })
 
-export type GuidanceKind = 'diagnostic' | 'journey' | 'contract' | 'coach' | 'clinic_briefing' | 'performance' | 'role_blueprint' | 'practice' | 'talent_review'
+const repersonaliseSchema = z.object({
+  whatChanged: z.string().describe('One sentence for the learner on what moved since the last path and why the order changed. Plain words, no jargon.'),
+  plan: z.array(z.object({ moduleCode: z.string(), reason: z.string().describe('One short sentence tying the module to what they just did or still need') }))
+    .min(1).max(8).describe('The modules still ahead of them, in the order to do them. Use only codes from the catalogue. Never list a module they already completed or started.'),
+  dropped: z.array(z.object({ moduleCode: z.string(), reason: z.string() })).max(5).describe('Modules from the previous path no longer worth doing, with why'),
+})
+
+export type GuidanceKind = 'diagnostic' | 'journey' | 'contract' | 'coach' | 'clinic_briefing' | 'performance' | 'role_blueprint' | 'practice' | 'talent_review' | 'repersonalise'
 export interface GuidanceRequest { kind: GuidanceKind; context: unknown; question?: string; lang?: 'th' | 'en' }
 
 const PROMPTS: Record<GuidanceKind, string> = {
@@ -112,12 +119,13 @@ const PROMPTS: Record<GuidanceKind, string> = {
   role_blueprint: 'A business unit has defined a new or changed role under a new operating model. Read it and produce the capability plan: the value pool at stake, the critical future skills with target levels from the taxonomy provided, three-year supply versus demand, THB value at risk per gap, a build / buy / borrow / bot decision each, and the cohort plan. Use only skill codes from the taxonomy given. This replaces weeks of co-design, so be specific and decisive.',
   practice: 'You are the Practice Partner. Play the counterpart in the scenario (executive committee member, customer, or the person receiving coaching) and score the learner against the rubric after every turn. Stay in character in the reply; be direct but fair in the scores.',
   talent_review: 'Produce the talent-review pack entry for this person from their programme record. Every line in evidence must be traceable to the data given. The recommendation is an input to a human decision, never a decision.',
+  repersonalise: 'Re-personalise this learner\'s micro-learning path from what they have actually done since it was written: modules completed or skipped, lab attendance, sprint evidence, coach questions, practice scores and any new diagnostic levels. Re-sequence only what is still ahead of them; never repeat a module they completed or started. Drop modules the evidence shows they no longer need and say why. Use only module codes from the catalogue given.',
   performance: 'Read this capability-programme scorecard and write the dashboard summary. Use only the numbers given. The strength and weakness in sentence 2 are already chosen for you in "highlight" and the two next steps are already chosen in "focus" - keep to them and write them in plain words for a leader.',
 }
 
 export async function runGuidance(req: GuidanceRequest, apiKey?: string) {
   const client = new Anthropic(apiKey ? { apiKey } : undefined)
-  const format = req.kind === 'diagnostic' ? diagnosticSchema : req.kind === 'coach' ? coachSchema : req.kind === 'clinic_briefing' ? briefingSchema : req.kind === 'performance' ? performanceSchema : req.kind === 'role_blueprint' ? blueprintSchema : req.kind === 'practice' ? practiceSchema : req.kind === 'talent_review' ? talentReviewSchema : adviceSchema
+  const format = req.kind === 'diagnostic' ? diagnosticSchema : req.kind === 'coach' ? coachSchema : req.kind === 'clinic_briefing' ? briefingSchema : req.kind === 'performance' ? performanceSchema : req.kind === 'role_blueprint' ? blueprintSchema : req.kind === 'practice' ? practiceSchema : req.kind === 'talent_review' ? talentReviewSchema : req.kind === 'repersonalise' ? repersonaliseSchema : adviceSchema
   const userText = `${PROMPTS[req.kind]}\n\n<context>\n${JSON.stringify(req.context, null, 1)}\n</context>${req.question ? `\n\n<question lang="${req.lang ?? 'en'}">\n${req.question}\n</question>` : ''}`
   const response = await client.messages.parse({
     model: MODEL_BY_KIND[req.kind] ?? MODEL,

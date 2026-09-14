@@ -7,6 +7,7 @@ import { moduleContent } from '@/data/module-content'
 import { PageHeader, Section, LoadingBlock, ErrorBlock, EmptyState, Pill, Button, Dialog, Field, Notice } from '@/components/ui'
 import type { LearningPlanItem } from '@/domain/types'
 import { useT } from '@/app/i18n'
+import { requestGuidance, buildRepersonaliseContext, type RepersonaliseOutput } from '@/features/guidance/api'
 
 const FORMAT: Record<string, string> = { micro_video: 'Micro video', reading: 'Reading', exercise: 'Exercise', simulation: 'Simulation' }
 
@@ -18,13 +19,64 @@ export function LearningPage() {
   const [quiz, setQuiz] = useState<Record<number, number>>({})
   const [checked, setChecked] = useState(false)
   const update = useAction((ds, id: string, s: LearningPlanItem['status']) => ds.updateLearningItem(actor!.id, id, s))
+  const savePath = useAction((ds, enrollmentId: string | null, plan: { moduleId: string; reason: string }[], reason: string) => ds.saveLearningPath(actor!.id, enrollmentId, plan, reason), 'Path re-personalised from your latest progress.')
+  const [rpBusy, setRpBusy] = useState<string | null>(null)
+  const [rpErr, setRpErr] = useState<string | null>(null)
   if (status === 'loading') return <LoadingBlock />
   if (status === 'error' || !snap || !actor) return <ErrorBlock message={error ?? ''} onRetry={refetch} />
   const enrollments = snap.enrollments.filter((e) => e.personaId === actor.id)
+  const ownPath = snap.learningPlanItems.filter((p) => p.enrollmentId === null && p.personaId === actor.id).sort((a, b) => a.sequence - b.sequence)
+  // Deck p10: the path is re-personalised after every activity, not written once at diagnostic time.
+  const repersonalise = async (key: string, enrollmentId: string | null) => {
+    setRpBusy(key); setRpErr(null)
+    try {
+      const r = await requestGuidance<RepersonaliseOutput>({ kind: 'repersonalise', context: buildRepersonaliseContext(snap, actor, enrollmentId) })
+      const byCode = new Map(snap.learningModules.map((m) => [m.code, m.id]))
+      await savePath.mutateAsync([enrollmentId, r.output.plan.filter((x) => byCode.has(x.moduleCode)).map((x) => ({ moduleId: byCode.get(x.moduleCode)!, reason: x.reason })), r.output.whatChanged])
+    } catch (e) { setRpErr((e as Error).message) } finally { setRpBusy(null) }
+  }
+  const planRow = (plan: LearningPlanItem[]) => (
+    <ol className="divide-y divide-(--color-border)" data-tour="learning-plan">
+      {plan.map((p) => { const m = snap.learningModules.find((x) => x.id === p.moduleId)!; const sk = snap.skills.find((s) => s.id === m.skillId)!; return (
+        <li key={p.id} className="table-grid grid-cols-[28px_minmax(0,1fr)_auto] py-2.5 sm:grid-cols-[28px_minmax(0,2fr)_minmax(0,1.4fr)_120px_190px]">
+          <div className="text-[13px] text-(--color-faint)">{p.sequence}</div>
+          <div className="min-w-0"><button type="button" className="block max-w-full truncate text-left font-medium text-(--color-accent) hover:text-(--color-primary)" onClick={() => { setAnswer(''); setQuiz({}); setChecked(false); setOpen(p) }}>{m.code} · {m.title}</button><div className="truncate text-[12px] text-(--color-muted)">{sk.name}{m.variant ? ` · ${m.variant}` : ''} · {FORMAT[m.format]} · {m.durationMin} min{m.origin === 'success_case' ? ' · from a proven SCG case' : ''}</div></div>
+          <div className="hidden truncate text-[12px] text-(--color-muted) sm:block" title={p.reason ?? ''}>{p.reason ?? 'Selected by Expert Guidance'}</div>
+          <div><Pill tone={p.status === 'completed' ? 'success' : p.status === 'in_progress' ? 'info' : p.status === 'skipped' ? 'neutral' : 'warning'}>{t(p.status.replace('_', ' '))}</Pill></div>
+          <div className="col-span-3 flex flex-wrap gap-1 sm:col-span-1 sm:justify-end">
+            {['planned', 'in_progress'].includes(p.status) && <Button size="sm" variant="primary" onClick={() => { setAnswer(''); setQuiz({}); setChecked(false); setOpen(p) }}>{t('Open module')}</Button>}
+            {['planned', 'in_progress'].includes(p.status) && <Button size="sm" variant="ghost" onClick={() => update.mutate([p.id, 'skipped'])}>Skip</Button>}
+            {p.status === 'skipped' && <Button size="sm" variant="ghost" onClick={() => update.mutate([p.id, 'planned'])}>Restore</Button>}
+            {p.status === 'completed' && <Button size="sm" variant="ghost" onClick={() => { setAnswer(''); setQuiz({}); setChecked(false); setOpen(p) }}>Review</Button>}
+          </div>
+        </li>) })}
+    </ol>
+  )
+  const repersonaliseBar = (key: string, enrollmentId: string | null, plan: LearningPlanItem[]) => {
+    const done = plan.filter((p) => p.status === 'completed').length
+    const rev = Math.max(1, ...plan.map((p) => p.revision ?? 1))
+    return (
+      <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-(--color-border) pt-3">
+        <div className="text-[12px] text-(--color-muted)">Path revision {rev}. Expert Guidance re-sequences what is still ahead from your completed modules, lab attendance, sprint evidence and coach questions. Finished and started modules are kept.</div>
+        <Button size="sm" variant="secondary" icon="stars-02" busy={rpBusy === key} disabled={done === 0 && rev === 1} title={done === 0 && rev === 1 ? 'Complete a module first, so there is progress to re-personalise from' : undefined} onClick={() => repersonalise(key, enrollmentId)}>Re-personalise my path</Button>
+      </div>
+    )
+  }
   return (
     <>
       <PageHeader title={t('Learning plan')} description={t('Your personal micro-learning path, selected by Expert Guidance from your diagnostic: which modules, in what order, and what to skip. Open a module to study it and mark it complete; finish the pre-work before each lab day.')} actions={<Link to="/labs" className="btn btn-secondary">{t('Lab days')}</Link>} />
-      {enrollments.length === 0 && <EmptyState icon="book-open-01" title="No learning plan" body="A plan is built after your diagnostic." />}
+      {enrollments.length === 0 && ownPath.length === 0 && <EmptyState icon="book-open-01" title="No learning plan" body="A plan is built after your diagnostic. Anyone can run the assessment, cohort seat or not." action={<Link to="/assessment" className="btn btn-primary btn-sm">Start assessment</Link>} />}
+      {rpErr && <div className="mb-3"><Notice tone="error" icon="alert-circle">{rpErr}</Notice></div>}
+      {ownPath.length > 0 && (() => {
+        const done = ownPath.filter((p) => p.status === 'completed').length
+        const minutes = ownPath.filter((p) => p.status !== 'skipped').reduce((a, p) => a + (snap.learningModules.find((m) => m.id === p.moduleId)?.durationMin ?? 0), 0)
+        return (
+          <Section title="Your self-paced path" icon="book-open-01" description={`Built from your org-wide skill baseline, no cohort seat needed · ${done} of ${ownPath.length} modules completed · about ${Math.round(minutes / 60 * 10) / 10} hours in total`} className="mb-4">
+            {planRow(ownPath)}
+            {repersonaliseBar('own', null, ownPath)}
+          </Section>
+        )
+      })()}
       {enrollments.map((e) => {
         const cohort = snap.cohorts.find((c) => c.id === e.cohortId)!
         const plan = snap.learningPlanItems.filter((p) => p.enrollmentId === e.id).sort((a, b) => a.sequence - b.sequence)
@@ -32,7 +84,7 @@ export function LearningPage() {
         const minutes = plan.filter((p) => p.status !== 'skipped').reduce((a, p) => a + (snap.learningModules.find((m) => m.id === p.moduleId)?.durationMin ?? 0), 0)
         return (
           <Section key={e.id} title={cohort.name} icon="book-open-01" description={`${done} of ${plan.length} modules completed · about ${Math.round(minutes / 60 * 10) / 10} hours in total`} className="mb-4">
-            {plan.length === 0 ? <EmptyState icon="target-04" title="Path not built yet" body="Complete the assessment to build your personal path." action={<Link to="/assessment" className="btn btn-primary btn-sm">Start assessment</Link>} /> : (
+            {plan.length === 0 ? <EmptyState icon="target-04" title="Path not built yet" body="Complete the assessment to build your personal path." action={<Link to="/assessment" className="btn btn-primary btn-sm">Start assessment</Link>} /> : (<>
               <ol className="divide-y divide-(--color-border)" data-tour="learning-plan">
                 {plan.map((p) => { const m = snap.learningModules.find((x) => x.id === p.moduleId)!; const sk = snap.skills.find((s) => s.id === m.skillId)!; return (
                   <li key={p.id} className="table-grid grid-cols-[28px_minmax(0,1fr)_auto] py-2.5 sm:grid-cols-[28px_minmax(0,2fr)_minmax(0,1.4fr)_120px_190px]">
@@ -48,11 +100,12 @@ export function LearningPage() {
                     </div>
                   </li>) })}
               </ol>
-            )}
+              {repersonaliseBar(e.id, e.id, plan)}
+            </>)}
           </Section>
         )
       })}
-      {open && (() => { const m = snap.learningModules.find((x) => x.id === open.moduleId)!; const sk = snap.skills.find((s) => s.id === m.skillId)!; const dom = snap.skillDomains.find((d) => d.id === sk.domainId); const guide = MODULE_FORMAT_GUIDE[m.format]; const dx = snap.diagnostics.find((d) => d.enrollmentId === open.enrollmentId); const item = dx ? snap.diagnosticItems.find((i) => i.diagnosticId === dx.id && i.skillId === sk.id) : null; const mc = moduleContent(m.code); const score = mc ? mc.quickCheck.filter((q, i) => quiz[i] === q.correct).length : 0; const allAnswered = mc ? mc.quickCheck.every((_, i) => quiz[i] != null) : true; const canComplete = answer.trim().length > 0 && (!mc || (checked && score >= Math.ceil(mc.quickCheck.length / 2))); return (
+      {open && (() => { const m = snap.learningModules.find((x) => x.id === open.moduleId)!; const sk = snap.skills.find((s) => s.id === m.skillId)!; const dom = snap.skillDomains.find((d) => d.id === sk.domainId); const guide = MODULE_FORMAT_GUIDE[m.format]; const dx = open.enrollmentId ? snap.diagnostics.find((d) => d.enrollmentId === open.enrollmentId) : snap.diagnostics.find((d) => d.enrollmentId === null && d.personaId === actor.id); const item = dx ? snap.diagnosticItems.find((i) => i.diagnosticId === dx.id && i.skillId === sk.id) : null; const mc = moduleContent(m.code); const score = mc ? mc.quickCheck.filter((q, i) => quiz[i] === q.correct).length : 0; const allAnswered = mc ? mc.quickCheck.every((_, i) => quiz[i] != null) : true; const canComplete = answer.trim().length > 0 && (!mc || (checked && score >= Math.ceil(mc.quickCheck.length / 2))); return (
         <Dialog open onClose={() => setOpen(null)} title={`${m.code} · ${m.title}`} subtitle={`${dom?.name} · ${FORMAT[m.format]} · ${m.durationMin} min${m.variant ? ` · ${m.variant}` : ''}`} width={820}
           footer={<><Button variant="ghost" onClick={() => setOpen(null)}>Close</Button>{open.status !== 'completed' && <>{open.status === 'planned' && <Button onClick={async () => { await update.mutateAsync([open.id, 'in_progress']); setOpen({ ...open, status: 'in_progress' }) }}>Start</Button>}<Button variant="primary" busy={update.isPending} disabled={!canComplete} title={!canComplete ? 'Answer the quick check (at least half correct) and the reflection first' : undefined} onClick={async () => { await update.mutateAsync([open.id, 'completed']); setOpen(null) }}>Mark completed</Button></>}</>}>
           <div className="space-y-4 text-[13px]">

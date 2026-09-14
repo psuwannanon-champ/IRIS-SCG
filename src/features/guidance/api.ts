@@ -49,6 +49,21 @@ const catalogue = (s: Snapshot, program: 'ABC' | 'BCD') => {
 const buPriority = (s: Snapshot, buId: string) => s.challengeThemes.filter((t) => t.buId === buId).map((t) => `${t.title}: ${t.description}`)
 const cohortDates = (s: Snapshot, cohortId: string) => { const c = s.cohorts.find((x) => x.id === cohortId); return c ? { cohort: c.name, program: c.program, keyDates: c.keyDates, today: new Date().toISOString().slice(0, 10) } : null }
 
+/** Deck p10, Input 02: learning history and AI-coach interactions. Shared so a re-assessment,
+ * a re-personalisation and the baseline all see what the person has already studied and asked. */
+const historyCard = (s: Snapshot, p: Persona) => {
+  const mine = s.learningPlanItems.filter((i) => i.personaId === p.id || s.enrollments.some((e) => e.id === i.enrollmentId && e.personaId === p.id))
+  const title = (id: string) => s.learningModules.find((m) => m.id === id)
+  return {
+    modulesCompleted: mine.filter((i) => i.status === 'completed').map((i) => ({ code: title(i.moduleId)?.code, title: title(i.moduleId)?.title })).filter((m) => m.code),
+    modulesInProgress: mine.filter((i) => i.status === 'in_progress').map((i) => title(i.moduleId)?.code).filter(Boolean),
+    modulesSkipped: mine.filter((i) => i.status === 'skipped').map((i) => ({ code: title(i.moduleId)?.code, reason: i.reason })).filter((m) => m.code),
+    labsAttended: s.labAttendance.filter((a) => s.enrollments.some((e) => e.id === a.enrollmentId && e.personaId === p.id)).length,
+    coachQuestions: s.coachMessages.filter((m) => m.personaId === p.id && m.sender === 'user').slice(-8).map((m) => m.content),
+    practiceScores: s.practiceSessions.filter((x) => x.personaId === p.id).slice(-3).map((x) => ({ scenario: x.scenario, overall: x.overall })),
+  }
+}
+
 export function buildDiagnosticContext(s: Snapshot, actor: Persona, enrollment: Enrollment, responses: AssessmentResponses) {
   const cohort = s.cohorts.find((c) => c.id === enrollment.cohortId)!
   const program = cohort.program
@@ -58,6 +73,7 @@ export function buildDiagnosticContext(s: Snapshot, actor: Persona, enrollment: 
     learner: learnerCard(s, actor),
     program, cohort: cohortDates(s, cohort.id), buPriorities: buPriority(s, actor.buId),
     managerInput: s.coachingNotes.filter((n) => n.enrollmentId === enrollment.id).map((n) => n.note),
+    history: historyCard(s, actor),
     selfRatings: Object.fromEntries(Object.entries(responses.selfRatings).map(([id, v]) => [skillById.get(id) ?? id, v === null ? 'not sure' : v])),
     knowledgeCheck: knowledgeQuestions.filter((q) => q.program === program).map((q) => ({ id: q.id, skillCode: q.skillCode, question: q.question, chosen: responses.knowledge[q.id] != null ? q.options[responses.knowledge[q.id]] : 'not answered', correct: q.options[q.correct], isCorrect: responses.knowledge[q.id] === q.correct })),
     roleContext: { roleFocus: responses.roleFocus, currentInitiatives: responses.currentInitiatives, biggestChallenge: responses.biggestChallenge, preferredFormat: responses.preferredFormat },
@@ -73,15 +89,16 @@ export function buildBaselineContext(s: Snapshot, actor: Persona, responses: Ass
   const criticalCodes = new Set(critical.map((k) => k.code))
   return {
     mode: 'org_wide_baseline',
-    note: 'This person is not enrolled in a cohort. Infer current levels only and rank the gaps. Do not propose a learning plan: leave plan and skipped empty.',
+    note: 'This person is not enrolled in a cohort, so there is no sprint to build against. Still infer current levels, rank the gaps, and select a short self-paced path from the catalogue below that they can work through at their desk. Keep it to at most six modules.',
     learner: learnerCard(s, actor),
     cohort: null, program: null, buPriorities: buPriority(s, actor.buId), managerInput: [],
+    history: historyCard(s, actor),
     selfRatings: Object.fromEntries(Object.entries(responses.selfRatings).map(([id, v]) => [skillById.get(id) ?? id, v === null ? 'not sure' : v])),
     knowledgeCheck: knowledgeQuestions.filter((q) => criticalCodes.has(q.skillCode)).map((q) => ({ id: q.id, skillCode: q.skillCode, question: q.question, chosen: responses.knowledge[q.id] != null ? q.options[responses.knowledge[q.id]] : 'not answered', correct: q.options[q.correct], isCorrect: responses.knowledge[q.id] === q.correct })),
     roleContext: { roleFocus: responses.roleFocus, currentInitiatives: responses.currentInitiatives, biggestChallenge: responses.biggestChallenge, preferredFormat: responses.preferredFormat },
     catalogue: {
       skills: critical.map((k) => ({ code: k.code, name: k.name, domain: s.skillDomains.find((d) => d.id === k.domainId)?.name, description: k.description, critical: k.critical, premiumEligible: k.premiumEligible, levels: k.levelDescriptors })),
-      modules: [],
+      modules: s.learningModules.filter((m) => critical.some((k) => k.id === m.skillId)).map((m) => ({ code: m.code, title: m.title, skillCode: critical.find((k) => k.id === m.skillId)?.code, minutes: m.durationMin, format: m.format, variant: m.variant })),
     },
   }
 }
@@ -169,6 +186,35 @@ export function buildPerformanceContext(input: {
 }
 
 /* ---------- Role blueprint, practice partner, talent review ---------- */
+export interface RepersonaliseOutput { whatChanged: string; plan: { moduleCode: string; reason: string }[]; dropped: { moduleCode: string; reason: string }[] }
+
+/** Deck p10: "re-personalized after every activity". Sends what the learner has actually done since
+ * the path was written, plus the modules still ahead, and the catalogue to re-sequence from. */
+export function buildRepersonaliseContext(s: Snapshot, actor: Persona, enrollmentId: string | null) {
+  const e = enrollmentId ? s.enrollments.find((x) => x.id === enrollmentId) ?? null : null
+  const cohort = e ? s.cohorts.find((c) => c.id === e.cohortId) ?? null : null
+  const mine = s.learningPlanItems.filter((p) => enrollmentId ? p.enrollmentId === enrollmentId : p.enrollmentId === null && p.personaId === actor.id)
+  const code = (id: string) => s.learningModules.find((m) => m.id === id)?.code
+  const dx = enrollmentId ? s.diagnostics.find((d) => d.enrollmentId === enrollmentId) : s.diagnostics.find((d) => d.enrollmentId === null && d.personaId === actor.id)
+  const gaps = dx ? s.diagnosticItems.filter((i) => i.diagnosticId === dx.id).map((i) => ({ skillCode: s.skills.find((k) => k.id === i.skillId)?.code, current: i.currentLevel, target: i.targetLevel, priority: i.priorityRank })) : []
+  const contract = e ? s.impactContracts.find((c) => c.enrollmentId === e.id) ?? null : null
+  return {
+    learner: learnerCard(s, actor),
+    cohort: cohort ? cohortDates(s, cohort.id) : null,
+    mode: cohort ? 'cohort_path' : 'self_paced_path',
+    history: historyCard(s, actor),
+    diagnosticGaps: gaps,
+    stillAhead: mine.filter((p) => p.status === 'planned').map((p) => ({ moduleCode: code(p.moduleId), reason: p.reason })).filter((x) => x.moduleCode),
+    alreadyDoneOrStarted: mine.filter((p) => ['completed', 'in_progress'].includes(p.status)).map((p) => code(p.moduleId)).filter(Boolean),
+    sprintEvidence: contract ? s.sprintEvidence.filter((x) => x.contractId === contract.id).map((x) => `Week ${x.weekNo}: ${x.title} — ${x.note}`) : [],
+    contract: contract ? { title: contract.title, objective: contract.objectiveType, status: contract.status, midGateDecision: contract.midGateDecision } : null,
+    catalogue: cohort ? catalogue(s, cohort.program) : {
+      skills: s.skills.filter((k) => k.critical).map((k) => ({ code: k.code, name: k.name, description: k.description, critical: k.critical, premiumEligible: k.premiumEligible, levels: k.levelDescriptors })),
+      modules: s.learningModules.filter((m) => s.skills.some((k) => k.id === m.skillId && k.critical)).map((m) => ({ code: m.code, title: m.title, skillCode: s.skills.find((k) => k.id === m.skillId)?.code, minutes: m.durationMin, format: m.format, variant: m.variant })),
+    },
+  }
+}
+
 export interface PracticeOutput { reply: string; scores: { criterion: string; score: number; comment: string }[]; overall: number; advice: string; done: boolean }
 export interface TalentReviewOutput { headline: string; evidence: string[]; strengths: string[]; development: string[]; recommendation: string }
 export type BlueprintOutput = BlueprintPlan

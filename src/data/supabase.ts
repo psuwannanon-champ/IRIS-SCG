@@ -156,6 +156,9 @@ export class SupabaseDataSource implements DataSource {
   markInterestPlaced(a: string, i: string) { return this.rpc('mark_interest_placed', { p_actor: a, p_interest: i }) }
   packageCaseAsModule(a: string, c: string, i: { title: string; skillCode: string; durationMin: number; body: unknown }) { return this.rpc<string>('package_case_as_module', { p_actor: a, p_contract: c, p_input: snakeObj(i) }) }
   decidePolicyItem(a: string, id: string, s: PolicyStatus, eff: string | null, ref: string, note: string) { return this.rpc('decide_policy_item', { p_actor: a, p_item: id, p_status: s, p_effective: eff, p_resolution: ref, p_note: note }) }
+  inviteToRole(a: string, r: string, p: string, n: string) { return this.rpc('invite_to_role', { p_actor: a, p_role: r, p_persona: p, p_note: n }) }
+  respondToInvite(a: string, i: string, accept: boolean) { return this.rpc('respond_to_invite', { p_actor: a, p_interest: i, p_accept: accept }) }
+  saveLearningPath(a: string, e: string | null, plan: { moduleId: string; reason: string }[], reason: string) { return this.rpc<number>('save_learning_path', { p_actor: a, p_enrollment: e, p_plan: plan, p_reason: reason }) }
   submitBaselineAssessment(a: string, r: AssessmentResponses) { return this.rpc<string>('submit_baseline_assessment', { p_actor: a, p_responses: r }) }
   completeBaselineDiagnostic(a: string, r: DiagnosticResult) { return this.rpc('complete_baseline_diagnostic', { p_actor: a, p_result: deepSnake(r) }) }
   submitGatePack(a: string, g: string, sum: string, ev: GateEvidence | null, bc: GateBusinessCase | null, at: GateAttachment[]) { return this.rpc('submit_gate_pack', { p_actor: a, p_gate: g, p_summary: sum, p_evidence: ev, p_case: bc, p_attachments: at }) }

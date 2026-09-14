@@ -162,11 +162,15 @@ export interface LearningModule {
 
 export interface LearningPlanItem {
   id: string
-  enrollmentId: string
+  /** null for the org-wide personal path: the plan belongs to the person, not a programme. */
+  enrollmentId: string | null
+  personaId?: string | null
   moduleId: string
   sequence: number
   status: 'planned' | 'in_progress' | 'completed' | 'skipped'
   reason: string | null
+  /** Bumped each time the path is re-personalised. */
+  revision?: number
 }
 
 export type ObjectiveType =
@@ -502,8 +506,9 @@ export interface MarketplaceInterest {
   roleId: string
   personaId: string
   createdAt: string
-  status: 'expressed' | 'shortlisted' | 'declined' | 'placed'
+  status: 'expressed' | 'shortlisted' | 'declined' | 'placed' | 'invited'
   placedAt: string | null
+  invitedBy?: string | null
 }
 
 export interface Notification {
@@ -579,7 +584,7 @@ export interface Assessment {
   responses: AssessmentResponses
   submittedAt: string
 }
-export type GuidanceKind = 'diagnostic' | 'journey' | 'contract' | 'coach' | 'clinic_briefing' | 'performance' | 'role_blueprint' | 'practice' | 'talent_review'
+export type GuidanceKind = 'diagnostic' | 'journey' | 'contract' | 'coach' | 'clinic_briefing' | 'performance' | 'role_blueprint' | 'practice' | 'talent_review' | 'repersonalise'
 export interface GuidanceNote {
   id: string
   personaId: string

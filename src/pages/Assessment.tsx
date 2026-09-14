@@ -28,6 +28,7 @@ export function AssessmentPage() {
   const simulated = useAction((ds, enrollmentId: string) => ds.runDiagnostic(actor!.id, enrollmentId), 'Simulated diagnostic completed.')
   const submitBaseline = useAction((ds, responses: AssessmentResponses) => ds.submitBaselineAssessment(actor!.id, responses))
   const completeBaseline = useAction((ds, r: DiagnosticResult) => ds.completeBaselineDiagnostic(actor!.id, r), 'Baseline complete. Your passport now holds AI-inferred levels.')
+  const savePath = useAction((ds, plan: { moduleId: string; reason: string }[]) => ds.saveLearningPath(actor!.id, null, plan, 'Built from your skill baseline.'))
 
   const enrollment = useMemo(() => snap && actor ? snap.enrollments.find((e) => e.personaId === actor.id && !['graduated', 'withdrawn'].includes(e.status) && (snap.diagnostics.find((d) => d.enrollmentId === e.id)?.status ?? 'pending') === 'pending') ?? null : null, [snap, actor])
   if (status === 'loading') return <LoadingBlock />
@@ -61,7 +62,7 @@ export function AssessmentPage() {
     setBusy(true)
     try {
       if (enrollment) await complete.mutateAsync([enrollment.id, result.mapped])
-      else await completeBaseline.mutateAsync([result.mapped])
+      else { await completeBaseline.mutateAsync([result.mapped]); if (result.mapped.plan.length) await savePath.mutateAsync([result.mapped.plan]) }
       await saveGuidance.mutateAsync([result.output, result.model])
       nav({ to: enrollment ? '/journey' : '/passport' })
     } finally { setBusy(false) }
@@ -142,8 +143,15 @@ export function AssessmentPage() {
             {result.mapped.skipped.length > 0 && <div className="mt-2 text-[12px] text-(--color-muted)">Skipped: {result.mapped.skipped.map((p) => `${snap.learningModules.find((x) => x.id === p.moduleId)?.code} (${p.reason})`).join('; ')}</div>}
             {result.output.coachingPoints?.length > 0 && <div className="mt-3"><div className="text-xs font-semibold uppercase tracking-wide text-(--color-faint)">Pushed to your coach before clinic 1</div><ul className="list-disc pl-4 text-[13px]">{result.output.coachingPoints.map((c, i) => <li key={i}>{c}</li>)}</ul></div>}
           </Section>
-          ) : <Notice tone="info" icon="info-circle">No learning path yet: a personal path is built inside a cohort. Accepting writes these AI-inferred levels to your passport, where the marketplace and your next talent review can already read them.</Notice>}
-          <div className="flex items-center justify-between gap-2"><Button variant="ghost" onClick={() => setStep(2)}>Back to answers</Button><Button variant="primary" busy={busy} onClick={accept}>{enrollment ? 'Accept and build my path' : 'Accept and update my passport'}</Button></div>
+          ) : (
+          <Section title="Self-paced learning path" icon="book-open-01" description="Personalised learning without waiting for a cohort seat. Work through it at your desk; a cohort adds the labs, the sprint and a coach.">
+            {result.mapped.plan.length > 0
+              ? <ol className="space-y-1.5 text-[13px]">{result.mapped.plan.map((p, i) => { const m = snap.learningModules.find((x) => x.id === p.moduleId)!; return <li key={p.moduleId}><span className="font-medium">{i + 1}. {m.code} · {m.title}</span> <span className="text-(--color-muted)">· {p.reason}</span></li> })}</ol>
+              : <p className="text-[13px] text-(--color-muted)">Expert Guidance selected no modules: your levels already meet the target on the critical skills it assessed.</p>}
+            <div className="mt-3"><Notice tone="info" icon="info-circle">Accepting also writes these AI-inferred levels to your passport, where the marketplace and your next talent review can read them.</Notice></div>
+          </Section>
+          )}
+          <div className="flex items-center justify-between gap-2"><Button variant="ghost" onClick={() => setStep(2)}>Back to answers</Button><Button variant="primary" busy={busy} onClick={accept}>Accept and build my path</Button></div>
         </div>
       )}
     </>

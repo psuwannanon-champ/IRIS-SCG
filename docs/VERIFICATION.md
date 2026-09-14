@@ -133,6 +133,15 @@ owned, and the Assessment page turned a non-enrolled employee away. The deck sel
 | The passport showed role KPIs labelled "engine input", but no prompt received them. Verified passport levels and live projects were likewise missing, so the diagnostic re-inferred levels blind to badges already minted | The shared learner card now carries role KPIs, every passport entry with level and tier, and the person's live impact contracts and concepts | Intercepted the guidance request on My journey: the payload carries all six named inputs, including nine passport entries and the active impact contract |
 | Peer pods were invisible to learners. The cohort page is not in the learner navigation, so a learner saw their pod once in a notification and never again | My journey shows the pod with its named peers and coach, and the next coaching clinic with topics and briefing state | Nara's journey shows "Pod A · CBM turnaround, with Boonchu Rakdee, Tanawat Srisuk · coach Anong Thepsiri" and clinic 2 on 16 Oct |
 
+### Third re-audit findings (deck p4, p10, p12)
+
+| Finding | Fix | Verified |
+| --- | --- | --- |
+| The baseline gave an employee a passport but no path, so only half of "mass assessment and personalized learning for every employee" was true | A plan can belong to the person; the baseline now selects a self-paced path of at most six modules | Somchai's baseline produced a path shown under "Your self-paced path" on the learning plan |
+| The path was written once at diagnostic time. Nothing re-sequenced it after a module, a lab, sprint evidence or the mid-sprint gate | `save_learning_path` plus a `repersonalise` guidance kind; completed and started modules are kept, the rest is re-sequenced, and the plan carries a revision | Nara's path went to revision 2: the six completed and started modules stayed in place and the tail was re-ordered with different modules |
+| No personalisation context carried learning history or coach interactions, so a re-assessment was blind to what the person had already studied | Shared history card into the diagnostic, the baseline and re-personalisation | Intercepted payload carries completed, in-progress and skipped modules, labs attended, recent coach questions and practice scores |
+| The marketplace ran one direction: a person volunteered, the owner sorted the volunteers. Nobody could search the workforce and invite a match | Owner-side workforce search ranked by verified-skill match, an invite that notifies the person, and accept / decline | Wanida searched the Finance automation squad posting: Somchai ranked first at 3 of 3 on his baseline levels alone. Invited, notified, accepted, and he now appears as a candidate |
+
 ### Bugs found and fixed during this sweep
 
 | Bug | Fix |

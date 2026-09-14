@@ -4,7 +4,7 @@ import { fixtureBundle } from '@/data/fixtures'
 import type { Snapshot, DataSource, ContractAction, ContractActionPayload, BriefAction, BriefActionPayload, EvidenceInput } from '@/data/datasource'
 import { DomainError } from '@/data/datasource'
 import { CONTRACT_TRANSITIONS, BRIEF_TRANSITIONS, contractRelation, briefRelation, GATE_DECISIONS_BY_GATE } from '@/data/rules'
-import type { ChallengeBriefInput, ImpactContractInput, GateDecision, PassportEntry, Notification, RecordEvent, AssessmentResponses, DiagnosticResult, GuidanceKind, GapDecision, MarketplaceRoleInput, IntegrationSystem, CostCategory, BlueprintPlan, PolicyStatus, SuccessionPool, RecognitionKind, MilestoneStatus, GateEvidence, GateBusinessCase, GateAttachment, TalentReview, PracticeSession } from '@/domain/types'
+import type { ChallengeBriefInput, ImpactContractInput, GateDecision, PassportEntry, Notification, RecordEvent, AssessmentResponses, DiagnosticResult, GuidanceKind, GapDecision, MarketplaceRoleInput, IntegrationSystem, CostCategory, BlueprintPlan, PolicyStatus, SuccessionPool, RecognitionKind, MilestoneStatus, GateEvidence, GateBusinessCase, GateAttachment, TalentReview, PracticeSession, LearningPlanItem } from '@/domain/types'
 
 const STORAGE_KEY = 'scg-capability-suite.local-snapshot.v1'
 
@@ -470,6 +470,51 @@ export class LocalDataSource implements DataSource {
     this.snap.coachMessages.push({ id: uid('cm'), personaId: actorId, sender: 'user', lang, content, citedModuleId: null, createdAt: nowIso() })
     this.snap.coachMessages.push({ id: uid('cm'), personaId: actorId, sender: 'coach', lang, content: reply, citedModuleId, createdAt: nowIso() })
     this.write()
+  }
+
+  async inviteToRole(actorId: string, roleId: string, personaId: string, note: string) {
+    await delay(150)
+    const r = this.snap.marketplaceRoles.find((x) => x.id === roleId); if (!r) throw new DomainError('Role not found.')
+    const actor = this.persona(actorId)
+    if (r.ownerId !== actorId && actor.role !== 'program_office') throw new DomainError('Only the posting owner or the program office can invite someone.')
+    const t = this.persona(personaId)
+    if (t.employmentStatus === 'left') throw new DomainError('That person has left SCG.')
+    if (this.snap.marketplaceInterests.some((x) => x.roleId === roleId && x.personaId === personaId)) throw new DomainError('That person is already on this posting.')
+    this.snap.marketplaceInterests.push({ id: uid('mi'), roleId, personaId, createdAt: nowIso(), status: 'invited', placedAt: null, invitedBy: actorId })
+    this.notify(personaId, 'You were invited to a marketplace posting', `${actor.fullName} invited you to "${r.title}" on your verified skills.${note ? ` ${note}` : ''} Open the marketplace to accept or decline.`, '/marketplace')
+    this.write()
+  }
+
+  async respondToInvite(actorId: string, interestId: string, accept: boolean) {
+    await delay(150)
+    const i = this.snap.marketplaceInterests.find((x) => x.id === interestId); if (!i) throw new DomainError('Invitation not found.')
+    if (i.personaId !== actorId) throw new DomainError('Only the invited person can answer.')
+    if (i.status !== 'invited') throw new DomainError('That invitation has already been answered.')
+    const r = this.snap.marketplaceRoles.find((x) => x.id === i.roleId)!
+    i.status = accept ? 'expressed' : 'declined'
+    this.notify(r.ownerId, accept ? 'Invitation accepted' : 'Invitation declined', `${this.persona(actorId).fullName} ${accept ? 'accepted' : 'declined'} your invitation to "${r.title}".`, '/marketplace')
+    this.write()
+  }
+
+  /** Writes or re-sequences a path. Completed and in-progress items survive a re-personalisation. */
+  async saveLearningPath(actorId: string, enrollmentId: string | null, plan: { moduleId: string; reason: string }[], reason: string) {
+    await delay(200); this.persona(actorId)
+    if (enrollmentId && !this.snap.enrollments.some((e) => e.id === enrollmentId && e.personaId === actorId)) throw new DomainError('Only the learner can change their own path.')
+    const mine = (p: LearningPlanItem) => enrollmentId ? p.enrollmentId === enrollmentId : p.enrollmentId === null && p.personaId === actorId
+    const rev = Math.max(0, ...this.snap.learningPlanItems.filter(mine).map((p) => p.revision ?? 1)) + 1
+    this.snap.learningPlanItems = this.snap.learningPlanItems.filter((p) => !mine(p) || ['completed', 'in_progress'].includes(p.status))
+    const kept = this.snap.learningPlanItems.filter(mine)
+    let i = kept.length, added = 0
+    for (const item of plan) {
+      if (!this.snap.learningModules.some((m) => m.id === item.moduleId)) continue
+      if (kept.some((p) => p.moduleId === item.moduleId)) continue
+      i += 1; added += 1
+      this.snap.learningPlanItems.push({ id: uid('lp'), enrollmentId, personaId: actorId, moduleId: item.moduleId, sequence: i, status: 'planned', reason: item.reason, revision: rev })
+    }
+    this.notify(actorId, rev === 1 ? 'Your learning path is ready' : 'Your learning path was re-personalised', `${reason || 'Updated from your latest progress.'} ${added} module(s) ahead of you.`, '/learning')
+    this.event({ recordType: 'persona', recordId: actorId, actorId, action: 'personalise_path', fromStatus: `revision ${Math.max(rev - 1, 0)}`, toStatus: `revision ${rev}`, note: reason || 'Learning path personalised.' })
+    this.write()
+    return added
   }
 
   async submitBaselineAssessment(actorId: string, responses: AssessmentResponses) {

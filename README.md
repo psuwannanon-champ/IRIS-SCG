@@ -58,6 +58,8 @@ Everything the deck sells is executable in the platform, not just displayed. `do
 - **Org-wide baseline**: an employee with no cohort seat can run the same AI diagnostic and mint AI-inferred passport levels, so skills count from day one. The program office tracks population coverage on the Assessments page. The personal learning path still belongs to a cohort.
 - **Engine inputs**: every personalisation prompt receives the inputs the deck names: role and level, role KPIs, verified passport skills with their tier, live impact contracts and concepts, career aspiration and BU context.
 - **Peer pods and clinics** are visible on the learner's journey, with named pod peers, the pod coach, and the next clinic's topics and briefing state.
+- **Personal path for everyone, re-personalised as you go**: the baseline builds a self-paced path without a cohort seat, and Re-personalise rewrites what is still ahead from completed modules, labs, sprint evidence, coach questions and practice scores. Completed and started modules are kept and each plan carries a revision.
+- **Marketplace in both directions**: a posting owner searches the whole workforce ranked by verified-skill match and invites a person, who accepts or declines. Talent is allocated, not only self-selected.
 - Still open: **% promotions citing verified skills**. It needs promotion events from the HR core, which the demo dataset does not contain.
 
 ## Hosting

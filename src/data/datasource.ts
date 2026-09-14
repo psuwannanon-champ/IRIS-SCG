@@ -98,6 +98,10 @@ export interface DataSource {
   markInterestPlaced(actorId: string, interestId: string): Promise<void>
   packageCaseAsModule(actorId: string, contractId: string, input: { title: string; skillCode: string; durationMin: number; body: { whatChanged: string; howToRepeat: string[]; provenResult: string } }): Promise<string>
   decidePolicyItem(actorId: string, itemId: string, status: PolicyStatus, effectiveFrom: string | null, resolutionRef: string, note: string): Promise<void>
+  /** Writes or re-sequences a learning path. enrollmentId null = the org-wide personal path. */
+  inviteToRole(actorId: string, roleId: string, personaId: string, note: string): Promise<void>
+  respondToInvite(actorId: string, interestId: string, accept: boolean): Promise<void>
+  saveLearningPath(actorId: string, enrollmentId: string | null, plan: { moduleId: string; reason: string }[], reason: string): Promise<number>
   submitBaselineAssessment(actorId: string, responses: AssessmentResponses): Promise<string>
   completeBaselineDiagnostic(actorId: string, result: DiagnosticResult): Promise<void>
   submitGatePack(actorId: string, gateId: string, summary: string, evidence: GateEvidence | null, businessCase: GateBusinessCase | null, attachments: GateAttachment[]): Promise<void>

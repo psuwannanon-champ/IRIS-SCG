@@ -22,6 +22,9 @@ export function MarketplacePage() {
   const interest = useAction((ds, roleId: string) => ds.expressInterest(actor!.id, roleId), 'Interest recorded. The posting owner has been notified.')
   const decide = useAction((ds, interestId: string, s: 'shortlisted' | 'declined') => ds.updateInterest(actor!.id, interestId, s), 'Candidate updated and notified.')
   const place = useAction((ds, interestId: string) => ds.markInterestPlaced(actor!.id, interestId), 'Placement recorded. Internal mobility updates on the dashboard.')
+  const invite = useAction((ds, roleId: string, personaId: string, note: string) => ds.inviteToRole(actor!.id, roleId, personaId, note), 'Invitation sent. They decide whether to take it up.')
+  const respond = useAction((ds, interestId: string, accept: boolean) => ds.respondToInvite(actor!.id, interestId, accept), 'Answer sent to the posting owner.')
+  const [finding, setFinding] = useState(false)
   const [newOpen, setNewOpen] = useState(false)
   const [np, setNp] = useState<{ title: string; kind: 'role' | 'project' | 'gig'; description: string; openUntil: string; reqs: { skillId: string; minLevel: number }[] }>({ title: '', kind: 'role', description: '', openUntil: '', reqs: [] })
   const createRole = useAction((ds) => ds.createMarketplaceRole(actor!.id, { title: np.title, buId: actor!.buId, kind: np.kind, description: np.description, openUntil: np.openUntil, requirements: np.reqs }), 'Posting published.')
@@ -80,8 +83,42 @@ export function MarketplacePage() {
             </div>
             {my && <Notice tone="info" icon="info-circle">You expressed interest on {fmtDate(my.createdAt)}. Status: {my.status}.</Notice>}
             {open.ownerId === actor.id && (() => { const cands = snap.marketplaceInterests.filter((i) => i.roleId === open.id); return (
-              <div><div className="mb-1 text-[13px] font-medium">Candidates ({cands.length})</div>{cands.length === 0 ? <p className="text-[13px] text-(--color-muted)">No interest yet.</p> : <ul className="divide-y divide-(--color-border) rounded-md border border-(--color-border)">{cands.map((i) => { const mm = matchRole(snap, open, i.personaId); return <li key={i.id} className="flex flex-wrap items-center justify-between gap-2 px-3 py-2 text-[13px]"><div><Link to="/passport" search={{ persona: i.personaId } as never} className="font-medium">{personaName(snap, i.personaId)}</Link> <span className="text-(--color-muted)">· meets {mm.meets} of {mm.total} · {fmtDate(i.createdAt)}</span></div><div className="flex items-center gap-1"><Pill tone={i.status === 'shortlisted' ? 'success' : i.status === 'declined' ? 'error' : 'info'}>{i.status}</Pill>{i.status === 'expressed' && <><Button size="sm" variant="primary" onClick={() => decide.mutate([i.id, 'shortlisted'])}>Shortlist</Button><Button size="sm" variant="danger" onClick={() => decide.mutate([i.id, 'declined'])}>Decline</Button></>}{i.status === 'shortlisted' && <Button size="sm" variant="primary" busy={place.isPending} onClick={() => place.mutate([i.id])}>Record placement</Button>}</div></li> })}</ul>}</div>) })()}
-            {actor.role !== 'learner' && <Notice tone="neutral" icon="info-circle">Expressing interest is available to employees in the learner persona. Posting owners see interest in their <Link to="/notifications">updates</Link>.</Notice>}
+              <div><div className="mb-1 text-[13px] font-medium">Candidates ({cands.length})</div>{cands.length === 0 ? <p className="text-[13px] text-(--color-muted)">No interest yet.</p> : <ul className="divide-y divide-(--color-border) rounded-md border border-(--color-border)">{cands.map((i) => { const mm = matchRole(snap, open, i.personaId); return <li key={i.id} className="flex flex-wrap items-center justify-between gap-2 px-3 py-2 text-[13px]"><div><Link to="/passport" search={{ persona: i.personaId } as never} className="font-medium">{personaName(snap, i.personaId)}</Link> <span className="text-(--color-muted)">· meets {mm.meets} of {mm.total} · {fmtDate(i.createdAt)}</span></div><div className="flex items-center gap-1"><Pill tone={i.status === 'shortlisted' || i.status === 'placed' ? 'success' : i.status === 'declined' ? 'error' : i.status === 'invited' ? 'warning' : 'info'}>{i.status === 'invited' ? 'invited · awaiting their answer' : i.status}</Pill>{i.status === 'expressed' && <><Button size="sm" variant="primary" onClick={() => decide.mutate([i.id, 'shortlisted'])}>Shortlist</Button><Button size="sm" variant="danger" onClick={() => decide.mutate([i.id, 'declined'])}>Decline</Button></>}{i.status === 'shortlisted' && <Button size="sm" variant="primary" busy={place.isPending} onClick={() => place.mutate([i.id])}>Record placement</Button>}</div></li> })}</ul>}</div>) })()}
+            {(open.ownerId === actor.id || actor.role === 'program_office') && (() => {
+              // Deck p4 / p12: the marketplace allocates key talent by verified skills, so the owner
+              // searches the workforce rather than waiting for people to volunteer.
+              const already = new Set(snap.marketplaceInterests.filter((i) => i.roleId === open.id).map((i) => i.personaId))
+              const matches = snap.personas
+                .filter((p) => p.role === 'learner' && p.employmentStatus !== 'left' && !already.has(p.id))
+                .map((p) => ({ p, m: matchRole(snap, open, p.id) }))
+                .filter((x) => x.m.meets > 0)
+                .sort((a, b) => b.m.percent - a.m.percent || b.m.meets - a.m.meets)
+              return (
+                <div>
+                  <div className="mb-1 flex flex-wrap items-center justify-between gap-2">
+                    <div className="text-[13px] font-medium">Find people by verified skill</div>
+                    <Button size="sm" variant="secondary" icon="search-md" onClick={() => setFinding((v) => !v)}>{finding ? 'Hide matches' : `Search the workforce (${matches.length})`}</Button>
+                  </div>
+                  {finding && (matches.length === 0
+                    ? <p className="text-[13px] text-(--color-muted)">Nobody outside this posting holds a verified level on these requirements yet. Baselining more of the workforce widens the pool.</p>
+                    : <ul className="divide-y divide-(--color-border) rounded-md border border-(--color-border)">
+                        {matches.slice(0, 8).map(({ p, m }) => (
+                          <li key={p.id} className="flex flex-wrap items-center justify-between gap-2 px-3 py-2 text-[13px]">
+                            <div className="min-w-0"><Link to="/passport" search={{ persona: p.id } as never} className="font-medium">{p.fullName}</Link> <span className="text-(--color-muted)">· {p.jobTitle} · {snap.businessUnits.find((b) => b.id === p.buId)?.code}</span></div>
+                            <div className="flex items-center gap-1"><Pill tone={m.percent >= 67 ? 'success' : 'info'}>meets {m.meets} of {m.total}</Pill><Button size="sm" variant="primary" busy={invite.isPending} onClick={() => invite.mutate([open.id, p.id, `You meet ${m.meets} of ${m.total} requirements on verified skills.`])}>Invite</Button></div>
+                          </li>
+                        ))}
+                      </ul>)}
+                  {finding && matches.length > 8 && <p className="mt-1 text-[12px] text-(--color-muted)">Showing the 8 strongest of {matches.length} matches. The percentage counts verified requirements only; it is directional, not a decision.</p>}
+                </div>
+              )
+            })()}
+            {(() => {
+              const mine = snap.marketplaceInterests.find((i) => i.roleId === open.id && i.personaId === actor.id && i.status === 'invited')
+              if (!mine) return null
+              return <Notice tone="accent" icon="mail-01"><strong>You were invited to this posting</strong> by {personaName(snap, mine.invitedBy ?? null)}, on your verified skills. <span className="mt-2 flex gap-1"><Button size="sm" variant="primary" busy={respond.isPending} onClick={() => respond.mutate([mine.id, true])}>Accept the invitation</Button><Button size="sm" variant="ghost" onClick={() => respond.mutate([mine.id, false])}>Not now</Button></span></Notice>
+            })()}
+            {actor.role !== 'learner' && <Notice tone="neutral" icon="info-circle">Expressing interest is available to employees in the learner persona. Posting owners search the workforce by verified skill and invite matches, and see interest in their <Link to="/notifications">updates</Link>.</Notice>}
           </div>
         </Dialog>) })()}
     </>
