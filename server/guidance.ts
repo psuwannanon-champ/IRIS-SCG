@@ -20,7 +20,9 @@ Rules:
 - Ground every recommendation in the data provided (assessment answers, diagnostic, contract, evidence, plan, dates). Do not invent facts, people, numbers or modules. Only reference module codes and skill codes that appear in the provided catalogue.
 - Be specific and practical; write for a Thai corporate audience in plain business English (the learner may ask in Thai; reply in the language of the question).
 - Never present a directional judgement as an HR decision. Career, reward and promotion decisions are made by people.
-- Keep each text field concise (1-3 sentences).`
+- Write for a busy supervisor reading on a phone. Short sentences (aim for 12 words, never more than 20). One idea per sentence. No semicolons, no dashes joining clauses, no jargon without a plain-word gloss.
+- Coach replies use this shape, with line breaks between parts: line 1 "Where you are:" one sentence. Line 2 "Next step:" one sentence with the date. Then up to three bullets starting with "- " and a verb (what to do, in order). Finish with one short encouraging line only if useful. Keep the whole reply under 120 words unless the learner asks for detail.
+- Advice fields (priorities, coaching points, applications, risks) are one plain sentence each, starting with a verb where it is an action. Name the module code in brackets when you rely on one.`
 
 const diagnosticSchema = z.object({
   summary: z.string().describe('3-4 sentence summary of strengths, priority gaps and why they matter for the learner role and BU priority'),
@@ -47,7 +49,7 @@ const adviceSchema = z.object({
 })
 
 const coachSchema = z.object({
-  reply: z.string().describe('The answer, in the language of the question, grounded only in the programme facts and provided context'),
+  reply: z.string().describe('The answer in the language of the question, grounded only in the programme facts and provided context. Plain words, short sentences, shaped as: "Where you are:" line, "Next step:" line with date, then up to three "- " bullets. Under 120 words.'),
   citedModuleCode: z.string().nullable().describe('Module code from the catalogue the answer is grounded in, or null'),
   flagForHumanCoach: z.string().nullable().describe('Set when the learner seems stuck or the question needs a human decision; otherwise null'),
 })
@@ -65,7 +67,7 @@ const PROMPTS: Record<GuidanceKind, string> = {
   diagnostic: 'Run the AI skill diagnostic for this learner. Use the self-ratings, the knowledge check answers (compare with the correct answers), the role context and the BU priority. Rank the priority gaps by skill gap x role relevance x project need. Build the personal micro-learning path from the module catalogue only.',
   journey: 'Give the learner Expert Guidance for the coming week based on their diagnostic, impact contract, evidence so far, learning plan progress, coaching notes and upcoming programme dates.',
   contract: 'Review this impact contract and its sprint evidence like an experienced sponsor-side coach. Focus on evidence quality, baseline credibility, the trend against target, and what must be true before the next gate or showcase.',
-  coach: 'Answer the learner\'s question as the always-on AI coach (Program navigator, Activity guide, Content expert, Practice partner, Progress mirror). Cite the module code you relied on when relevant.',
+  coach: 'Answer the learner\'s question as the always-on AI coach (Program navigator, Activity guide, Content expert, Practice partner, Progress mirror). Keep it easy to read: where they are, the next step with its date, then at most three short verb-first bullets. Cite the module code you relied on when relevant.',
   clinic_briefing: 'Prepare the human coach\'s briefing for this clinic: for each learner, status, what to focus on and one good question to ask. Then propose the clinic agenda.',
 }
 

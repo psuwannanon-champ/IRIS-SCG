@@ -1,7 +1,7 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import type { Snapshot, DataSource, ContractAction, ContractActionPayload, BriefAction, BriefActionPayload, EvidenceInput } from '@/data/datasource'
 import { DomainError } from '@/data/datasource'
-import type { ChallengeBriefInput, ImpactContractInput, GateDecision, AssessmentResponses, DiagnosticResult, GuidanceKind, GapDecision, MarketplaceRoleInput } from '@/domain/types'
+import type { ChallengeBriefInput, ImpactContractInput, GateDecision, AssessmentResponses, DiagnosticResult, GuidanceKind, GapDecision, MarketplaceRoleInput, IntegrationSystem } from '@/domain/types'
 import { simulatedCoachReply } from '@/data/local'
 
 const TABLES: Record<keyof Snapshot, string> = {
@@ -10,7 +10,7 @@ const TABLES: Record<keyof Snapshot, string> = {
   impactContracts: 'impact_contracts', sprintEvidence: 'sprint_evidence', challengeThemes: 'challenge_themes', challengeBriefs: 'challenge_briefs', teams: 'teams',
   concepts: 'concepts', gateReviews: 'gate_reviews', coachingClinics: 'coaching_clinics', coachingNotes: 'coaching_notes', coachScorecards: 'coach_scorecards',
   passportEntries: 'passport_entries', ledgerEntries: 'ledger_entries', marketplaceRoles: 'marketplace_roles', marketplaceInterests: 'marketplace_interests',
-  notifications: 'notifications', coachMessages: 'coach_messages', recordEvents: 'record_events', assessments: 'assessments', guidanceNotes: 'guidance_notes', capabilityGaps: 'capability_gaps', labAttendance: 'lab_attendance',
+  notifications: 'notifications', coachMessages: 'coach_messages', recordEvents: 'record_events', assessments: 'assessments', guidanceNotes: 'guidance_notes', capabilityGaps: 'capability_gaps', labAttendance: 'lab_attendance', integrationRuns: 'integration_runs',
 }
 
 export const toSnake = (s: string) => s.replace(/[A-Z]/g, (m) => `_${m.toLowerCase()}`)
@@ -142,6 +142,9 @@ export class SupabaseDataSource implements DataSource {
   updateCoachScorecard(actorId: string, coachId: string, cohortId: string, freq: number, quality: number, rating: number, certified: boolean, until: string | null) { return this.rpc('update_coach_scorecard', { p_actor: actorId, p_coach: coachId, p_cohort: cohortId, p_freq: freq, p_quality: quality, p_rating: rating, p_certified: certified, p_until: until }) }
   createMarketplaceRole(actorId: string, input: MarketplaceRoleInput) { return this.rpc<string>('create_marketplace_role', { p_actor: actorId, p_input: deepSnake(input) }) }
   updateInterest(actorId: string, interestId: string, status: 'shortlisted' | 'declined' | 'expressed') { return this.rpc('update_interest', { p_actor: actorId, p_interest: interestId, p_status: status }) }
+  recordIntegrationRun(actorId: string, run: { system: IntegrationSystem; direction: 'outbound' | 'inbound'; status: 'succeeded' | 'failed'; records: number; summary: string; payload: Record<string, unknown>[] }) {
+    return this.rpc<string>('record_integration_run', { p_actor: actorId, p_system: run.system, p_direction: run.direction, p_status: run.status, p_records: run.records, p_summary: run.summary, p_payload: run.payload })
+  }
   resetDemo() {
     return this.rpc('reset_demo', {})
   }

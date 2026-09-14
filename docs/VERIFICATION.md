@@ -80,6 +80,16 @@ Date: 14 September 2026 · Environment: local Vite dev server, macOS, Chromium (
 | Sponsor records program outcome (impact rating, top 10%, fast-track) | Saved; learner notified; triggers appear on dashboard |
 | Expert Guidance flag from coach chat | Coaching note with AI flag created for the coach |
 
+## Dashboard, integrations, content (added 14 Sep 2026)
+
+| Test | Result |
+| --- | --- |
+| Performance dashboard as manager Somsak | Health 73%, rank 2 of 4 manager teams, 6 of 10 measures ahead; 11 comparison rows; no overflow |
+| Company view leaderboard | Ranked; viewer's row highlighted; office can switch unit kind (BU leaderboard: SCGC, CBM, CAFI) |
+| Integrations: HR core sync and payroll export runs | Runs logged with payloads (9 badges; 5 employees in merit export); passport shows "last synced" |
+| Chart palette validator | `#C8102E` + `#3B7DDD` pass all six checks (light mode) |
+| Expert Guidance reply format | "Where you are / Next step / three bullets" under 120 words, module cited |
+
 ## Not verified / remaining limitations
 
 - Only the evidence-logging path was exercised against the real Supabase project; the other transitions were validated in PGlite with the same SQL.

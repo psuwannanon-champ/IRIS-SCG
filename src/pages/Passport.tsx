@@ -6,6 +6,7 @@ import type { Enrollment } from '@/domain/types'
 import { useActor } from '@/app/actor'
 import { bestEntry } from '@/domain/selectors'
 import { ROLE_LADDERS, nextLevel } from '@/data/strategy-content'
+import { lastSuccess } from '@/features/integrations/connectors'
 import { PageHeader, Section, LoadingBlock, ErrorBlock, EmptyState, Pill, Notice, DL } from '@/components/ui'
 import { TIER_LABEL, ROLE_LABEL } from '@/domain/types'
 import { tierTone } from '@/domain/status'
@@ -84,7 +85,7 @@ export function PassportPage() {
               <p className="mt-2 text-[12px] text-(--color-faint)">Meets requirement needs an outcome-verified badge at or above the required level. Missing evidence is not a failure; close it through ABC / BCD or verification at work.</p>
             </Section>) })()}
           <Section title="Where this passport is used" icon="link-external-01">
-            <ul className="space-y-1 text-[13px]"><li><Link to="/marketplace">Talent marketplace</Link>: roles, projects and gigs matched on verified skills.</li><li>Promotion cases cite passport evidence (policy pack, People Committee).</li><li>Sync to the HR core talent profile: proposed integration, not connected in this prototype.</li></ul>
+            {(() => { const hr = lastSuccess(snap, 'hr_core'); const unsynced = verified.filter((r) => !hr || r.best.mintedAt > hr.finishedAt).length; return <ul className="space-y-1 text-[13px]"><li><Link to="/marketplace">Talent marketplace</Link>: roles, projects and gigs matched on verified skills.</li><li>Promotion cases cite passport evidence (policy pack, People Committee).</li><li>HR core talent profile: {hr ? <>last synced {fmtDate(hr.finishedAt)}{unsynced ? ` · ${unsynced} badge${unsynced === 1 ? '' : 's'} waiting for the next sync` : ' · up to date'}</> : 'not synced yet'} <span className="text-(--color-faint)">(simulated connector)</span>.</li></ul> })()}
           </Section>
         </div>
       </div>

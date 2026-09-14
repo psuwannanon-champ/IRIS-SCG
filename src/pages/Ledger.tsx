@@ -8,6 +8,7 @@ import { ledgerTone } from '@/domain/status'
 import { PageHeader, Section, LoadingBlock, ErrorBlock, EmptyState, Pagination, paginate, Pill, Button, Dialog, Field, Notice, Stat, DL } from '@/components/ui'
 import { Money, History } from '@/components/records'
 import { fmtDate, fmtThb } from '@/lib/format'
+import { lastSuccess } from '@/features/integrations/connectors'
 
 export function LedgerPage() {
   const { snap, actor, status, error, refetch } = useActor()
@@ -30,7 +31,7 @@ export function LedgerPage() {
   const setFilter = (s: string) => nav({ to: '/ledger', search: { status: s, page: 1 } as never })
   return (
     <>
-      <PageHeader title="Impact ledger" description="Sponsor-validated project value per learner and concept, tracked 6–12 months after the program and sample-audited annually. Entries waiting for your validation are listed first." />
+      <PageHeader title="Impact ledger" description="Sponsor-validated project value per learner and concept, tracked 6–12 months after the program and sample-audited annually. Entries waiting for your validation are listed first." state={(() => { const fin = lastSuccess(snap, 'finance_actuals'); const pay = lastSuccess(snap, 'payroll_rewards'); return <span className="flex flex-wrap gap-1"><Pill tone={fin ? 'success' : 'neutral'} icon="bank">P&amp;L actuals {fin ? fmtDate(fin.finishedAt) : 'not imported'}</Pill><Pill tone={pay ? 'success' : 'neutral'} icon="coins-hand">Rewards export {pay ? fmtDate(pay.finishedAt) : 'not run'}</Pill></span> })()} />
       <div className="grid gap-3 sm:grid-cols-3" data-tour="ledger-stats">
         <Stat label="Validated impact" value={fmtThb(validated, true)} hint="Validated and audited entries in your scope" onClick={() => setFilter('validated')} tone="primary" />
         <Stat label="Pending validation" value={fmtThb(pending, true)} hint="Claimed at showcase, not yet confirmed" onClick={() => setFilter('pending_validation')} />

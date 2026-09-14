@@ -1,5 +1,5 @@
 import type { FixtureBundle } from '@/data/fixtures'
-import type { ChallengeBriefInput, ImpactContractInput, GateDecision, AssessmentResponses, DiagnosticResult, GuidanceKind, GapDecision, MarketplaceRoleInput } from '@/domain/types'
+import type { ChallengeBriefInput, ImpactContractInput, GateDecision, AssessmentResponses, DiagnosticResult, GuidanceKind, GapDecision, MarketplaceRoleInput, IntegrationSystem } from '@/domain/types'
 
 export type Snapshot = FixtureBundle
 
@@ -86,6 +86,7 @@ export interface DataSource {
   updateCoachScorecard(actorId: string, coachId: string, cohortId: string, freq: number, quality: number, rating: number, certified: boolean, until: string | null): Promise<void>
   createMarketplaceRole(actorId: string, input: MarketplaceRoleInput): Promise<string>
   updateInterest(actorId: string, interestId: string, status: 'shortlisted' | 'declined' | 'expressed'): Promise<void>
+  recordIntegrationRun(actorId: string, run: { system: IntegrationSystem; direction: 'outbound' | 'inbound'; status: 'succeeded' | 'failed'; records: number; summary: string; payload: Record<string, unknown>[] }): Promise<string>
 
   resetDemo(): Promise<void>
 }

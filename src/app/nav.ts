@@ -40,11 +40,13 @@ export const NAV_GROUPS: NavGroup[] = [
   {
     label: 'Governance',
     items: [
+      { key: 'performance', label: 'Performance dashboard', to: '/performance', icon: 'speedometer-03', roles: ['line_manager', 'bu_sponsor', 'coach', 'committee', 'program_office'] },
       { key: 'ledger', label: 'Impact ledger', to: '/ledger', icon: 'coins-stacked-01', roles: ['learner', 'line_manager', 'bu_sponsor', 'committee', 'program_office'], badgeKeys: ['ledger'] },
       { key: 'governance', label: 'Impact dashboard', to: '/governance', icon: 'bar-chart-square-02', roles: ['bu_sponsor', 'committee', 'program_office'] },
       { key: 'strategy', label: 'Strategy roadmap', to: '/strategy', icon: 'compass-03', roles: ['bu_sponsor', 'committee', 'program_office'] },
       { key: 'agenda', label: 'Capability agenda', to: '/agenda', icon: 'target-02', roles: ['bu_sponsor', 'committee', 'program_office'] },
       { key: 'taxonomy', label: 'Skills taxonomy', to: '/taxonomy', icon: 'layers-three-01', roles: ['program_office', 'committee', 'coach'] },
+      { key: 'integrations', label: 'Integrations', to: '/integrations', icon: 'data', roles: ['program_office', 'committee'] },
     ],
   },
   {

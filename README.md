@@ -37,6 +37,12 @@ Regenerate the seed after editing fixtures: `pnpm seed:sql`.
 - **Expert Guidance**: Claude (`claude-opus-5`, structured JSON output) turns the assessment into a gap map, priority ranking and personal micro-learning path; gives weekly guidance on the journey; reviews impact-contract evidence; briefs coaches before clinics; and powers the always-on coach chat in Thai and English. Results are saved as guidance notes.
 - The Anthropic key lives **only on the server**: `ANTHROPIC_API_KEY` in `.env` (read by the Vite dev middleware at `/api/guidance`) and as a sensitive Vercel environment variable (read by the serverless function `api/guidance.ts`). The browser never sees it. If the service is unavailable the coach chat falls back to a labelled scripted answer and the assessment offers a simulated result.
 
+## Performance dashboard, integrations and module content
+
+- **Performance dashboard** (`/performance`, all roles except learners): twelve measures across readiness, execution, impact and skills rolled into a program health score. Team view compares the viewer's unit (manager team, BU, coach group; committee and program office pick any unit) with the company; Company view ranks all units with the viewer highlighted. Chart colours (team red `#C8102E`, company blue `#3B7DDD`) pass the colour-vision and contrast validator; a table toggle is provided.
+- **Integrations** (`/integrations`): simulated connectors for HR core talent-profile sync, payroll and rewards merit-cycle export, email and LINE notifications, finance P&L actuals import and the Start the Dot hand-off. Each run builds its payload from live records and is logged with the payload; nothing leaves the platform. Passport and ledger pages show the last sync.
+- **Module content**: `src/data/module-content.json` is generated once by `scripts/gen-module-content.ts` with Claude (summary, objectives, key points, SCG example, practice task, common mistakes, quick check, coach question) and committed; the learning plan viewer requires the reflection and a passed quick check before a module can be marked complete.
+
 ## Hosting
 
 - GitHub: https://github.com/psuwannanon-champ/IRIS-SCG (branch `main`)

@@ -1,7 +1,7 @@
 // FICTIONAL DEMO DATA for the SCG Capability Suite prototype.
 // Names, numbers and outcomes are invented for walkthrough purposes.
 import type {
-  Assessment, GuidanceNote, CapabilityGap, LabAttendance,
+  Assessment, GuidanceNote, CapabilityGap, LabAttendance, IntegrationRun,
   BusinessUnit, Persona, SkillDomain, Skill, Cohort, Enrollment, Diagnostic, DiagnosticItem,
   LearningModule, LearningPlanItem, ImpactContract, SprintEvidence, RecordEvent, ChallengeTheme,
   ChallengeBrief, Team, Concept, GateReview, CoachingClinic, CoachingNote, CoachScorecard,
@@ -577,6 +577,12 @@ export const labAttendance: LabAttendance[] = [
   { id: 'la-pim-1', enrollmentId: 'enr-pim', labDay: 1, attendedAt: d('2026-08-31'), reflection: null },
 ]
 
+export const integrationRuns: IntegrationRun[] = [
+  { id: 'ir-1', system: 'hr_core', direction: 'outbound', status: 'succeeded', records: 4, summary: 'Talent profile sync: 4 outcome-verified badges pushed for 2 people.', payload: [{ person: 'Arisa Chaiyaporn', badge: 'ABC-A0-COMM-02-L3' }, { person: 'Arisa Chaiyaporn', badge: 'ABC-A0-COMM-01-L3' }, { person: 'Arisa Chaiyaporn', badge: 'ABC-A0-CHG-01-L3' }, { person: 'Wichai Kongkaew', badge: 'BCD-2025-BB-01-L4' }], triggeredBy: 'per-supattra', startedAt: d('2026-08-01'), finishedAt: d('2026-08-01') },
+  { id: 'ir-2', system: 'finance_actuals', direction: 'inbound', status: 'succeeded', records: 2, summary: 'P&L actuals matched against 2 validated ledger entries; no variance above 10%.', payload: [{ entry: 'Packaging category switch (CBAM exposure)', validatedThb: 2400000, actualThb: 2310000, variance: '-3.8%' }, { entry: 'Solar rooftop leasing via dealers (Gate 3)', validatedThb: 120000000, actualThb: 118500000, variance: '-1.3%' }], triggeredBy: 'per-supattra', startedAt: d('2026-09-01'), finishedAt: d('2026-09-01') },
+  { id: 'ir-3', system: 'notifications', direction: 'outbound', status: 'failed', records: 0, summary: 'LINE Official Account delivery failed: token expired. Email fallback delivered 6 of 6.', payload: [{ channel: 'LINE', delivered: 0, failed: 6 }, { channel: 'Email', delivered: 6, failed: 0 }], triggeredBy: 'per-supattra', startedAt: d('2026-09-08'), finishedAt: d('2026-09-08') },
+]
+
 export const assessments: Assessment[] = []
 export const guidanceNotes: GuidanceNote[] = []
 
@@ -584,6 +590,6 @@ export const fixtureBundle = {
   businessUnits, personas, skillDomains, skills, learningModules, cohorts, enrollments, diagnostics, diagnosticItems,
   learningPlanItems, impactContracts, sprintEvidence, challengeThemes, challengeBriefs, teams, concepts, gateReviews,
   coachingClinics, coachingNotes, coachScorecards, passportEntries, ledgerEntries, marketplaceRoles, marketplaceInterests,
-  notifications, coachMessages, recordEvents, assessments, guidanceNotes, capabilityGaps, labAttendance,
+  notifications, coachMessages, recordEvents, assessments, guidanceNotes, capabilityGaps, labAttendance, integrationRuns,
 }
 export type FixtureBundle = typeof fixtureBundle

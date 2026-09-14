@@ -31,7 +31,7 @@ export function Pill({ tone = 'neutral', children, icon, title }: { tone?: Tone;
 /* ---------- Layout ---------- */
 export function PageHeader({ title, state, description, actions, kicker }: { title: string; kicker?: string; state?: ReactNode; description?: ReactNode; actions?: ReactNode }) {
   return (
-    <header className="mb-4 flex flex-wrap items-start justify-between gap-3">
+    <header className="mb-4 flex flex-wrap items-start justify-between gap-3" data-tour="page-header">
       <div className="min-w-0">
         {kicker && <div className="text-xs font-medium uppercase tracking-wide text-(--color-faint)">{kicker}</div>}
         <div className="flex flex-wrap items-center gap-2">

@@ -4,7 +4,7 @@ import { fixtureBundle } from '@/data/fixtures'
 import type { Snapshot, DataSource, ContractAction, ContractActionPayload, BriefAction, BriefActionPayload, EvidenceInput } from '@/data/datasource'
 import { DomainError } from '@/data/datasource'
 import { CONTRACT_TRANSITIONS, BRIEF_TRANSITIONS, contractRelation, briefRelation, GATE_DECISIONS_BY_GATE } from '@/data/rules'
-import type { ChallengeBriefInput, ImpactContractInput, GateDecision, PassportEntry, Notification, RecordEvent, AssessmentResponses, DiagnosticResult, GuidanceKind, GapDecision, MarketplaceRoleInput } from '@/domain/types'
+import type { ChallengeBriefInput, ImpactContractInput, GateDecision, PassportEntry, Notification, RecordEvent, AssessmentResponses, DiagnosticResult, GuidanceKind, GapDecision, MarketplaceRoleInput, IntegrationSystem } from '@/domain/types'
 
 const STORAGE_KEY = 'scg-capability-suite.local-snapshot.v1'
 
@@ -661,6 +661,15 @@ export class LocalDataSource implements DataSource {
     i.status = status
     this.notify(i.personaId, status === 'shortlisted' ? 'You were shortlisted' : 'Update on your marketplace interest', `"${r.title}": ${status}. Decision based on verified passport skills; the owner will contact you.`, '/marketplace')
     this.write()
+  }
+
+  async recordIntegrationRun(actorId: string, run: { system: IntegrationSystem; direction: 'outbound' | 'inbound'; status: 'succeeded' | 'failed'; records: number; summary: string; payload: Record<string, unknown>[] }) {
+    await delay(400)
+    const a = this.persona(actorId)
+    if (a.role !== 'program_office') throw new DomainError('Only the program office runs integrations.')
+    const id = uid('ir')
+    this.snap.integrationRuns.push({ id, ...run, triggeredBy: actorId, startedAt: nowIso(), finishedAt: nowIso() })
+    this.write(); return id
   }
 
   async resetDemo() {

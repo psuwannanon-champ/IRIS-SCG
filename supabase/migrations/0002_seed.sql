@@ -432,11 +432,16 @@ begin
     ('la-tanawat-4', 'enr-tanawat', 4, '2026-08-13T09:00:00+07:00', null),
     ('la-pim-1', 'enr-pim', 1, '2026-08-31T09:00:00+07:00', null);
 
+  insert into public.integration_runs (id, system, direction, status, records, summary, payload, triggered_by, started_at, finished_at) values
+    ('ir-1', 'hr_core', 'outbound', 'succeeded', 4, 'Talent profile sync: 4 outcome-verified badges pushed for 2 people.', '[object Object],[object Object],[object Object],[object Object]', 'per-supattra', '2026-08-01T09:00:00+07:00', '2026-08-01T09:00:00+07:00'),
+    ('ir-2', 'finance_actuals', 'inbound', 'succeeded', 2, 'P&L actuals matched against 2 validated ledger entries; no variance above 10%.', '[object Object],[object Object]', 'per-supattra', '2026-09-01T09:00:00+07:00', '2026-09-01T09:00:00+07:00'),
+    ('ir-3', 'notifications', 'outbound', 'failed', 0, 'LINE Official Account delivery failed: token expired. Email fallback delivered 6 of 6.', '[object Object],[object Object]', 'per-supattra', '2026-09-08T09:00:00+07:00', '2026-09-08T09:00:00+07:00');
+
 end $seed$;
 
 create or replace function public.reset_demo() returns void language plpgsql security definer set search_path = public as $$
 begin
-  truncate table public.business_units, public.personas, public.skill_domains, public.skills, public.learning_modules, public.cohorts, public.enrollments, public.diagnostics, public.diagnostic_items, public.learning_plan_items, public.impact_contracts, public.sprint_evidence, public.challenge_themes, public.challenge_briefs, public.teams, public.concepts, public.gate_reviews, public.coaching_clinics, public.coaching_notes, public.coach_scorecards, public.passport_entries, public.ledger_entries, public.marketplace_roles, public.marketplace_interests, public.notifications, public.coach_messages, public.record_events, public.capability_gaps, public.lab_attendance, public.assessments, public.guidance_notes restart identity cascade;
+  truncate table public.business_units, public.personas, public.skill_domains, public.skills, public.learning_modules, public.cohorts, public.enrollments, public.diagnostics, public.diagnostic_items, public.learning_plan_items, public.impact_contracts, public.sprint_evidence, public.challenge_themes, public.challenge_briefs, public.teams, public.concepts, public.gate_reviews, public.coaching_clinics, public.coaching_notes, public.coach_scorecards, public.passport_entries, public.ledger_entries, public.marketplace_roles, public.marketplace_interests, public.notifications, public.coach_messages, public.record_events, public.capability_gaps, public.lab_attendance, public.integration_runs, public.assessments, public.guidance_notes restart identity cascade;
   perform public.seed_demo();
 end $$;
 

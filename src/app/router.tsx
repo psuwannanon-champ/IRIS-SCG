@@ -25,6 +25,8 @@ import { StrategyPage } from '@/pages/Strategy'
 import { AgendaPage } from '@/pages/Agenda'
 import { LabsPage } from '@/pages/Labs'
 import { SuccessCasesPage } from '@/pages/SuccessCases'
+import { IntegrationsPage } from '@/pages/Integrations'
+import { PerformancePage } from '@/pages/Performance'
 import { TourPage, TourOverlay } from '@/features/tour/Tour'
 import { NAV_GROUPS } from '@/app/nav'
 
@@ -55,6 +57,8 @@ const routes = [
   r('/assessments', guarded('assessments', AssessmentsPage), { validateSearch: listSearch }),
   r('/labs', guarded('labs', LabsPage)),
   r('/success-cases', SuccessCasesPage),
+  r('/integrations', guarded('integrations', IntegrationsPage)),
+  r('/performance', guarded('performance', PerformancePage), { validateSearch: (s: Record<string, unknown>) => ({ view: (s.view as string) ?? 'team', unit: (s.unit as string) ?? '', kind: (s.kind as string) ?? '' }) }),
   r('/team', guarded('team', TeamPage)),
   r('/contracts', ContractsPage, { validateSearch: listSearch }),
   r('/contracts/new', ContractNewPage),

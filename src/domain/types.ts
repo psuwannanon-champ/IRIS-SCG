@@ -595,3 +595,18 @@ export interface CapabilityGap {
 /* ---------- Labs ---------- */
 export interface LabAttendance { id: string; enrollmentId: string; labDay: number; attendedAt: string; reflection: string | null }
 export interface MarketplaceRoleInput { title: string; buId: string; kind: 'role' | 'project' | 'gig'; description: string; openUntil: string; requirements: { skillId: string; minLevel: number }[] }
+
+/* ---------- Integrations (simulated connectors) ---------- */
+export type IntegrationSystem = 'hr_core' | 'payroll_rewards' | 'notifications' | 'finance_actuals' | 'start_the_dot'
+export interface IntegrationRun {
+  id: string
+  system: IntegrationSystem
+  direction: 'outbound' | 'inbound'
+  status: 'succeeded' | 'failed'
+  records: number
+  summary: string
+  payload: Record<string, unknown>[]
+  triggeredBy: string | null
+  startedAt: string
+  finishedAt: string
+}

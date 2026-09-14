@@ -74,6 +74,8 @@ Server-side enforcement in the prototype: every write is a Postgres function tha
 | /success-cases | Validated improvements and funded concepts | all |
 | /ai-coach | Expert Guidance chat (TH/EN, Claude) | learner, coach |
 | /strategy | Strategy roadmap (sub-plans, components, enablers, live KPIs) | sponsor, committee, office |
+| /performance | Performance dashboard, team and company views | all except learner |
+| /integrations | Simulated connectors and run log | office, committee |
 | /agenda | Capability agenda (value-to-skills cascade, build/buy/borrow/bot) | sponsor, committee, office |
 | /notifications | Updates history | all |
 
@@ -111,6 +113,9 @@ Server-side enforcement in the prototype: every write is a Postgres function tha
 | R28 | p8–9 steps 1–5 | BU heads set themes; teams form around briefs; frame → build → validate stages | Set BU theme; Form team (creates concept and Gates 1–2); advance stage by the team | Implemented |
 | R29 | p5 02, p5 03 | Assessment waves; cohort calendar and playbook; coach certification | Assessments overview with reminders; New cohort from playbook; Enrol learner; coach scorecard recording | Implemented |
 | R30 | p12 | Marketplace allocates key talent by verified skills | Owner postings with skill requirements; shortlist / decline with notification | Implemented |
+| R31 | p5 01 action 3, p5 05 | Capability OKRs on leader scorecards; quarterly review; dashboard tracks uplift, ledger, mobility | Performance dashboard: team vs company on twelve measures, health score, rank, leaderboard | Implemented |
+| R32 | p5 04, p12 | Integrated with HR core; rewards linked to impact; notifications; P&L actuals; Start the Dot | Integrations page with five simulated connectors, run log and payloads; sync indicators on passport and ledger | Simulated |
+| R33 | p6, p10 | Modular micro-learning aligned to SCG business, split by BU variant | Authored module content per module (Claude-generated at build time) with quick check | Implemented (content illustrative) |
 
 ## 6. Integration register
 
