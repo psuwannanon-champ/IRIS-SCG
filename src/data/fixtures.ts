@@ -1,7 +1,7 @@
 // FICTIONAL DEMO DATA for the SCG Capability Suite prototype.
 // Names, numbers and outcomes are invented for walkthrough purposes.
 import type {
-  Assessment, GuidanceNote, CapabilityGap,
+  Assessment, GuidanceNote, CapabilityGap, LabAttendance,
   BusinessUnit, Persona, SkillDomain, Skill, Cohort, Enrollment, Diagnostic, DiagnosticItem,
   LearningModule, LearningPlanItem, ImpactContract, SprintEvidence, RecordEvent, ChallengeTheme,
   ChallengeBrief, Team, Concept, GateReview, CoachingClinic, CoachingNote, CoachScorecard,
@@ -566,6 +566,17 @@ export const capabilityGaps: CapabilityGap[] = [
   G('gap-scgc-1', 'bu-scgc', 'Clean energy ventures', 'Incubation lead', 'sk-bizbuild', 'Business building from concept to Gate 3', 3, 6, 100_000_000, 'build', true),
 ]
 
+export const labAttendance: LabAttendance[] = [
+  { id: 'la-nara-1', enrollmentId: 'enr-nara', labDay: 1, attendedAt: d('2026-08-10'), reflection: 'Mapped sales, credit and logistics around the dealer promise.' },
+  { id: 'la-nara-2', enrollmentId: 'enr-nara', labDay: 2, attendedAt: d('2026-08-11'), reflection: null },
+  { id: 'la-nara-3', enrollmentId: 'enr-nara', labDay: 3, attendedAt: d('2026-08-12'), reflection: 'Built the share-of-wallet baseline chart from the CRM export.' },
+  { id: 'la-nara-4', enrollmentId: 'enr-nara', labDay: 4, attendedAt: d('2026-08-13'), reflection: 'Agreed the impact contract with Kittipong and Prasert.' },
+  { id: 'la-tanawat-1', enrollmentId: 'enr-tanawat', labDay: 1, attendedAt: d('2026-08-10'), reflection: null },
+  { id: 'la-tanawat-3', enrollmentId: 'enr-tanawat', labDay: 3, attendedAt: d('2026-08-12'), reflection: 'Downtime log analytics baseline.' },
+  { id: 'la-tanawat-4', enrollmentId: 'enr-tanawat', labDay: 4, attendedAt: d('2026-08-13'), reflection: null },
+  { id: 'la-pim-1', enrollmentId: 'enr-pim', labDay: 1, attendedAt: d('2026-08-31'), reflection: null },
+]
+
 export const assessments: Assessment[] = []
 export const guidanceNotes: GuidanceNote[] = []
 
@@ -573,6 +584,6 @@ export const fixtureBundle = {
   businessUnits, personas, skillDomains, skills, learningModules, cohorts, enrollments, diagnostics, diagnosticItems,
   learningPlanItems, impactContracts, sprintEvidence, challengeThemes, challengeBriefs, teams, concepts, gateReviews,
   coachingClinics, coachingNotes, coachScorecards, passportEntries, ledgerEntries, marketplaceRoles, marketplaceInterests,
-  notifications, coachMessages, recordEvents, assessments, guidanceNotes, capabilityGaps,
+  notifications, coachMessages, recordEvents, assessments, guidanceNotes, capabilityGaps, labAttendance,
 }
 export type FixtureBundle = typeof fixtureBundle

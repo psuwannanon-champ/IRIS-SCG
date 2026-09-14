@@ -62,6 +62,8 @@ export function ConceptDetailPage() {
   const [value, setValue] = useState('')
   const [err, setErr] = useState<string | null>(null)
   const submit = useAction((ds, gateId: string, s: string) => ds.submitGateEvidence(actor!.id, gateId, s), 'Evidence pack submitted. The committee has been notified.')
+  const [advance, setAdvance] = useState<string | null>(null)
+  const advanceStage = useAction((ds, n: string) => ds.advanceConceptStage(actor!.id, id, n), 'Concept moved to the next stage.')
   const decide = useAction((ds, gateId: string, d: GateDecision, n: string, v: number | null) => ds.decideGate(actor!.id, gateId, d, n, v), 'Gate decision recorded.')
   if (status === 'loading') return <LoadingBlock />
   if (status === 'error' || !snap || !actor) return <ErrorBlock message={error ?? ''} onRetry={refetch} />
@@ -94,6 +96,13 @@ export function ConceptDetailPage() {
               { label: 'Scale route', value: c.scaleRoute ? (c.scaleRoute === 'start_the_dot' ? 'SCG Start the Dot' : 'Internal high-impact initiative') : 'Not decided' }, { label: 'Last updated', value: fmtDate(c.updatedAt) },
             ]} /></div>
           </Section>
+          {isMember && ['frame', 'build', 'pivot'].includes(c.stage) && (
+            <Section title={c.stage === 'frame' ? 'Stage 1 · Frame the challenge' : c.stage === 'build' ? 'Stage 2 · Concept studio sprint' : 'Pivot · re-validate'} icon="route" description={c.stage === 'frame' ? 'Immersion camp and problem framing with the sponsor. When the team has a shared hypothesis, move to Stage 2.' : c.stage === 'build' ? 'AI-intensified sprint on the live concept; align direction with SCG management, then move to field validation.' : 'Re-validate the pivoted hypothesis with customers before the next gate.'}>
+              {advance === null ? <Button variant="primary" icon="arrow-right" onClick={() => setAdvance('')}>{c.stage === 'frame' ? 'Move to Stage 2 · Build' : 'Move to Stage 3 · Validate'}</Button> : (
+                <div className="space-y-2"><Field label="What did the team complete in this stage?" required>{(fid) => <textarea id={fid} className="field-input" value={advance} onChange={(e) => setAdvance(e.target.value)} data-autofocus />}</Field><div className="flex gap-2"><Button variant="ghost" onClick={() => setAdvance(null)}>Cancel</Button><Button variant="primary" busy={advanceStage.isPending} disabled={!advance.trim()} onClick={async () => { await advanceStage.mutateAsync([advance]); setAdvance(null) }}>Confirm</Button></div></div>
+              )}
+            </Section>
+          )}
           <Section title="Gate reviews" icon="flag-05" description="Each gate needs an evidence pack from the team before the committee decides." id="gates">
             <ol className="space-y-3">
               {gates.map((g) => (

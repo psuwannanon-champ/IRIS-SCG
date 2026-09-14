@@ -591,3 +591,7 @@ export interface CapabilityGap {
   decidedById: string | null
   decidedAt: string | null
 }
+
+/* ---------- Labs ---------- */
+export interface LabAttendance { id: string; enrollmentId: string; labDay: number; attendedAt: string; reflection: string | null }
+export interface MarketplaceRoleInput { title: string; buId: string; kind: 'role' | 'project' | 'gig'; description: string; openUntil: string; requirements: { skillId: string; minLevel: number }[] }

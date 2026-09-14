@@ -8,7 +8,7 @@ const TABLES: [keyof typeof fixtureBundle, string][] = [
   ['impactContracts', 'impact_contracts'], ['sprintEvidence', 'sprint_evidence'], ['challengeThemes', 'challenge_themes'], ['challengeBriefs', 'challenge_briefs'], ['teams', 'teams'],
   ['concepts', 'concepts'], ['gateReviews', 'gate_reviews'], ['coachingClinics', 'coaching_clinics'], ['coachingNotes', 'coaching_notes'], ['coachScorecards', 'coach_scorecards'],
   ['passportEntries', 'passport_entries'], ['ledgerEntries', 'ledger_entries'], ['marketplaceRoles', 'marketplace_roles'], ['marketplaceInterests', 'marketplace_interests'],
-  ['notifications', 'notifications'], ['coachMessages', 'coach_messages'], ['recordEvents', 'record_events'], ['capabilityGaps', 'capability_gaps'],
+  ['notifications', 'notifications'], ['coachMessages', 'coach_messages'], ['recordEvents', 'record_events'], ['capabilityGaps', 'capability_gaps'], ['labAttendance', 'lab_attendance'],
 ]
 const JSON_COLS = new Set(['key_dates', 'requirements', 'level_descriptors'])
 const snake = (s: string) => s.replace(/[A-Z]/g, (m) => `_${m.toLowerCase()}`)

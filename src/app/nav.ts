@@ -18,7 +18,9 @@ export const NAV_GROUPS: NavGroup[] = [
     items: [
       { key: 'journey', label: 'My journey', to: '/journey', icon: 'route', roles: ['learner'] },
       { key: 'assessment', label: 'Assessment', to: '/assessment', icon: 'clipboard-check', roles: ['learner'], badgeKeys: ['journey'] },
+      { key: 'assessments', label: 'Assessments', to: '/assessments', icon: 'clipboard-check', roles: ['line_manager', 'bu_sponsor', 'coach', 'committee', 'program_office'] },
       { key: 'learning', label: 'Learning plan', to: '/learning', icon: 'book-open-01', roles: ['learner'], badgeKeys: ['learning'] },
+      { key: 'labs', label: 'Lab days', to: '/labs', icon: 'users-01', roles: ['learner'] },
       { key: 'team', label: 'My team', to: '/team', icon: 'users-01', roles: ['line_manager'] },
       { key: 'contracts', label: 'Impact contracts', to: '/contracts', icon: 'file-check-02', roles: ALL, badgeKeys: ['contracts'] },
       { key: 'briefs', label: 'Challenge briefs', to: '/briefs', icon: 'lightbulb-02', roles: ['bu_sponsor', 'committee', 'program_office'], badgeKeys: ['briefs'] },
@@ -31,6 +33,7 @@ export const NAV_GROUPS: NavGroup[] = [
     label: 'Talent',
     items: [
       { key: 'passport', label: 'Skill passport', to: '/passport', icon: 'award-01', roles: ALL },
+      { key: 'success-cases', label: 'Success cases', to: '/success-cases', icon: 'trophy-01', roles: ALL },
       { key: 'marketplace', label: 'Talent marketplace', to: '/marketplace', icon: 'briefcase-01', roles: ['learner', 'line_manager', 'bu_sponsor', 'program_office'] },
     ],
   },

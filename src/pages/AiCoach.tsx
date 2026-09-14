@@ -17,6 +17,7 @@ export function AiCoachPage() {
   const [notice, setNotice] = useState<string | null>(null)
   const append = useAction((ds, content: string, l: 'th' | 'en', reply: string, moduleId: string | null) => ds.appendCoachExchange(actor!.id, content, l, reply, moduleId))
   const fallback = useAction((ds, content: string, l: 'th' | 'en') => ds.sendCoachMessage(actor!.id, content, l))
+  const raiseFlag = useAction((ds, flag: string) => ds.raiseAiFlag(actor!.id, flag))
   const endRef = useRef<HTMLDivElement>(null)
   const msgs = snap && actor ? snap.coachMessages.filter((m) => m.personaId === actor.id).sort((a, b) => a.createdAt.localeCompare(b.createdAt)) : []
   useEffect(() => { endRef.current?.scrollIntoView({ block: 'end' }) }, [msgs.length, pending])
@@ -29,7 +30,7 @@ export function AiCoachPage() {
       const r = await requestGuidance<CoachOutput>({ kind: 'coach', context: buildCoachContext(snap, actor), question: t, lang })
       const moduleId = r.output.citedModuleCode ? snap.learningModules.find((m) => m.code === r.output.citedModuleCode)?.id ?? null : null
       await append.mutateAsync([t, lang, r.output.reply, moduleId])
-      if (r.output.flagForHumanCoach) setNotice(`Flagged for your human coach: ${r.output.flagForHumanCoach}`)
+      if (r.output.flagForHumanCoach) { await raiseFlag.mutateAsync([r.output.flagForHumanCoach]); setNotice(`Flagged for your human coach: ${r.output.flagForHumanCoach}`) }
     } catch (e) {
       if (e instanceof GuidanceUnavailable) { setNotice(`${e.message} A scripted answer was used instead.`); await fallback.mutateAsync([t, lang]) }
       else setNotice((e as Error).message)

@@ -1,5 +1,5 @@
 import type { FixtureBundle } from '@/data/fixtures'
-import type { ChallengeBriefInput, ImpactContractInput, GateDecision, AssessmentResponses, DiagnosticResult, GuidanceKind, GapDecision } from '@/domain/types'
+import type { ChallengeBriefInput, ImpactContractInput, GateDecision, AssessmentResponses, DiagnosticResult, GuidanceKind, GapDecision, MarketplaceRoleInput } from '@/domain/types'
 
 export type Snapshot = FixtureBundle
 
@@ -73,6 +73,19 @@ export interface DataSource {
   saveGuidance(actorId: string, personaId: string, kind: GuidanceKind, contextId: string | null, content: unknown, model: string): Promise<string>
 
   setGapDecision(actorId: string, gapId: string, decision: GapDecision, funded: boolean): Promise<void>
+  remindAssessment(actorId: string, enrollmentId: string): Promise<void>
+
+  checkInLab(actorId: string, enrollmentId: string, labDay: number, reflection: string): Promise<void>
+  raiseAiFlag(actorId: string, flag: string): Promise<void>
+  setProgramOutcome(actorId: string, enrollmentId: string, rating: string | null, topDecile: boolean, fastTrack: boolean): Promise<void>
+  saveTheme(actorId: string, buId: string, title: string, description: string, year: number): Promise<string>
+  createCohort(actorId: string, input: { program: 'ABC' | 'BCD'; code: string; name: string; buId: string | null; startDate: string; seats: number; pipelineTargetThb: number | null; coachId: string | null }): Promise<string>
+  enrollLearner(actorId: string, cohortId: string, personaId: string, sponsorId: string | null, coachId: string | null): Promise<string>
+  formTeam(actorId: string, briefId: string, name: string, memberEnrollmentIds: string[], coachId: string | null): Promise<string>
+  advanceConceptStage(actorId: string, conceptId: string, note: string): Promise<void>
+  updateCoachScorecard(actorId: string, coachId: string, cohortId: string, freq: number, quality: number, rating: number, certified: boolean, until: string | null): Promise<void>
+  createMarketplaceRole(actorId: string, input: MarketplaceRoleInput): Promise<string>
+  updateInterest(actorId: string, interestId: string, status: 'shortlisted' | 'declined' | 'expressed'): Promise<void>
 
   resetDemo(): Promise<void>
 }

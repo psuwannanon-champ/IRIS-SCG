@@ -17,6 +17,9 @@ import type { BriefAction, BriefActionPayload } from '@/data/datasource'
 
 export function BriefsPage() {
   const { snap, actor, status, error, refetch } = useActor()
+  const [themeOpen, setThemeOpen] = useState(false)
+  const [theme, setTheme] = useState({ title: '', description: '' })
+  const saveTheme = useAction((ds) => ds.saveTheme(actor!.id, actor!.buId, theme.title, theme.description, 2027), 'Theme set for the 2027 intake.')
   const search = useSearch({ strict: false }) as { status?: string; page?: number }
   const nav = useNavigate()
   if (status === 'loading') return <LoadingBlock />
@@ -30,7 +33,12 @@ export function BriefsPage() {
   return (
     <>
       <PageHeader title="Challenge briefs" description="Sponsor-owned P&L challenges for BCD cohorts: growth, cost, service or productivity. The Capability Investment Committee curates the portfolio; approved briefs are assigned to a cohort. Briefs needing your action are listed first."
-        actions={actor.role === 'bu_sponsor' && <Link to="/briefs/new" className="btn btn-primary" data-tour="new-brief"><Icon name="plus" size={16} />New challenge brief</Link>} />
+        actions={actor.role === 'bu_sponsor' && <><Button icon="flag-01" onClick={() => setThemeOpen(true)}>Set BU theme</Button><Link to="/briefs/new" className="btn btn-primary" data-tour="new-brief"><Icon name="plus" size={16} />New challenge brief</Link></>} />
+      {actor.role === 'bu_sponsor' && (() => { const mine = snap.challengeThemes.filter((t) => t.buId === actor.buId); return mine.length ? <div className="mb-3 flex flex-wrap items-center gap-1.5 text-[13px]"><span className="text-(--color-muted)">BU themes:</span>{mine.map((t) => <Pill key={t.id} tone="accent" title={t.description}>{t.title} · {t.year}</Pill>)}</div> : null })()}
+      <Dialog open={themeOpen} onClose={() => setThemeOpen(false)} title="Set a BU theme" subtitle="BU heads set themes (for example waste reduction, clean energy); sponsors submit briefs under them."
+        footer={<><Button variant="ghost" onClick={() => setThemeOpen(false)}>Cancel</Button><Button variant="primary" busy={saveTheme.isPending} disabled={!theme.title.trim()} onClick={async () => { await saveTheme.mutateAsync([]); setThemeOpen(false); setTheme({ title: '', description: '' }) }}>Save theme</Button></>}>
+        <div className="space-y-3"><Field label="Theme" required>{(fid) => <input id={fid} className="field-input" value={theme.title} onChange={(e) => setTheme({ ...theme, title: e.target.value })} data-autofocus />}</Field><Field label="Description">{(fid) => <textarea id={fid} className="field-input" value={theme.description} onChange={(e) => setTheme({ ...theme, description: e.target.value })} />}</Field></div>
+      </Dialog>
       <div className="mb-3 flex flex-wrap items-center gap-2">
         <select aria-label="Status" className="field-input max-w-[220px]" value={search.status ?? ''} onChange={(e) => nav({ to: '/briefs', search: { status: e.target.value, page: 1 } as never })}>
           <option value="">All statuses ({all.length})</option>{(Object.keys(BRIEF_STATUS_LABEL) as BriefStatus[]).map((s) => <option key={s} value={s}>{BRIEF_STATUS_LABEL[s]} ({byStatus(s)})</option>)}

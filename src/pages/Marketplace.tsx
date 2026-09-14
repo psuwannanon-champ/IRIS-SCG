@@ -3,7 +3,7 @@ import { Link } from '@tanstack/react-router'
 import { useActor } from '@/app/actor'
 import { useAction } from '@/app/data'
 import { matchRole, personaName, type MatchState } from '@/domain/selectors'
-import { PageHeader, Section, LoadingBlock, ErrorBlock, EmptyState, Pill, Button, Dialog, Notice, DL, type Tone } from '@/components/ui'
+import { PageHeader, Section, LoadingBlock, ErrorBlock, EmptyState, Pill, Button, Dialog, Notice, DL, Field, type Tone } from '@/components/ui'
 import { fmtDate } from '@/lib/format'
 import { TIER_LABEL } from '@/domain/types'
 import type { MarketplaceRole } from '@/domain/types'
@@ -20,13 +20,26 @@ export function MarketplacePage() {
   const { snap, actor, status, error, refetch } = useActor()
   const [open, setOpen] = useState<MarketplaceRole | null>(null)
   const interest = useAction((ds, roleId: string) => ds.expressInterest(actor!.id, roleId), 'Interest recorded. The posting owner has been notified.')
+  const decide = useAction((ds, interestId: string, s: 'shortlisted' | 'declined') => ds.updateInterest(actor!.id, interestId, s), 'Candidate updated and notified.')
+  const [newOpen, setNewOpen] = useState(false)
+  const [np, setNp] = useState<{ title: string; kind: 'role' | 'project' | 'gig'; description: string; openUntil: string; reqs: { skillId: string; minLevel: number }[] }>({ title: '', kind: 'role', description: '', openUntil: '', reqs: [] })
+  const createRole = useAction((ds) => ds.createMarketplaceRole(actor!.id, { title: np.title, buId: actor!.buId, kind: np.kind, description: np.description, openUntil: np.openUntil, requirements: np.reqs }), 'Posting published.')
   if (status === 'loading') return <LoadingBlock />
   if (status === 'error' || !snap || !actor) return <ErrorBlock message={error ?? ''} onRetry={refetch} />
   const roles = [...snap.marketplaceRoles].sort((a, b) => matchRole(snap, b, actor.id).percent - matchRole(snap, a, actor.id).percent)
   const mine = snap.marketplaceInterests.filter((i) => i.personaId === actor.id)
   return (
     <>
-      <PageHeader title="Talent marketplace" description="Open roles, projects and gigs allocated by verified skills. Each requirement shows your evidence from the passport. The match percentage counts requirements you meet; it is directional, not a decision." />
+      <PageHeader title="Talent marketplace" description="Open roles, projects and gigs allocated by verified skills. Each requirement shows your evidence from the passport. The match percentage counts requirements you meet; it is directional, not a decision." actions={['bu_sponsor', 'line_manager', 'program_office'].includes(actor.role) && <Button variant="primary" icon="plus" onClick={() => setNewOpen(true)}>New posting</Button>} />
+      <Dialog open={newOpen} onClose={() => setNewOpen(false)} title="New marketplace posting" subtitle="Publish role-level skill requirements transparently; interest is matched on verified passport skills." width={720}
+        footer={<><Button variant="ghost" onClick={() => setNewOpen(false)}>Cancel</Button><Button variant="primary" busy={createRole.isPending} disabled={!np.title.trim() || !np.openUntil || np.reqs.length === 0} onClick={async () => { await createRole.mutateAsync([]); setNewOpen(false) }}>Publish posting</Button></>}>
+        <div className="space-y-3">
+          <div className="grid gap-3 sm:grid-cols-2"><Field label="Title" required>{(fid) => <input id={fid} className="field-input" value={np.title} onChange={(e) => setNp({ ...np, title: e.target.value })} data-autofocus />}</Field><Field label="Kind">{(fid) => <select id={fid} className="field-input" value={np.kind} onChange={(e) => setNp({ ...np, kind: e.target.value as 'role' | 'project' | 'gig' })}><option value="role">Role</option><option value="project">Project</option><option value="gig">Gig</option></select>}</Field></div>
+          <Field label="Description">{(fid) => <textarea id={fid} className="field-input" value={np.description} onChange={(e) => setNp({ ...np, description: e.target.value })} />}</Field>
+          <Field label="Open until" required>{(fid) => <input id={fid} type="date" className="field-input max-w-xs" value={np.openUntil} onChange={(e) => setNp({ ...np, openUntil: e.target.value })} />}</Field>
+          <Field label="Skill requirements (verified level)" required hint="Pick the skills and minimum level; candidates see Meets / Needs development / Not assessed.">{() => <ul className="grid gap-1 sm:grid-cols-2">{snap.skills.map((s) => { const r = np.reqs.find((x) => x.skillId === s.id); return <li key={s.id} className="flex items-center justify-between gap-2 rounded-md border border-(--color-border) px-2 py-1 text-[13px]"><label className="flex min-w-0 items-center gap-2"><input type="checkbox" checked={!!r} onChange={() => setNp({ ...np, reqs: r ? np.reqs.filter((x) => x.skillId !== s.id) : [...np.reqs, { skillId: s.id, minLevel: 3 }] })} /><span className="truncate">{s.code} · {s.name}</span></label>{r && <select aria-label="Minimum level" className="field-input h-7 w-16 px-1" value={r.minLevel} onChange={(e) => setNp({ ...np, reqs: np.reqs.map((x) => x.skillId === s.id ? { ...x, minLevel: Number(e.target.value) } : x) })}>{[1, 2, 3, 4].map((l) => <option key={l} value={l}>L{l}</option>)}</select>}</li> })}</ul>}</Field>
+        </div>
+      </Dialog>
       <Section>
         {roles.length === 0 ? <EmptyState icon="briefcase-01" title="No open postings" /> : (
           <ul className="divide-y divide-(--color-border)">
@@ -65,6 +78,8 @@ export function MarketplacePage() {
               <p className="mt-2 text-[12px] text-(--color-faint)">{m.meets} of {m.total} requirements met ({m.percent}%). {m.total - m.assessed > 0 ? `${m.total - m.assessed} not assessed: missing evidence is not treated as failure.` : ''} Missing levels can be closed through ABC / BCD or verified at work.</p>
             </div>
             {my && <Notice tone="info" icon="info-circle">You expressed interest on {fmtDate(my.createdAt)}. Status: {my.status}.</Notice>}
+            {open.ownerId === actor.id && (() => { const cands = snap.marketplaceInterests.filter((i) => i.roleId === open.id); return (
+              <div><div className="mb-1 text-[13px] font-medium">Candidates ({cands.length})</div>{cands.length === 0 ? <p className="text-[13px] text-(--color-muted)">No interest yet.</p> : <ul className="divide-y divide-(--color-border) rounded-md border border-(--color-border)">{cands.map((i) => { const mm = matchRole(snap, open, i.personaId); return <li key={i.id} className="flex flex-wrap items-center justify-between gap-2 px-3 py-2 text-[13px]"><div><Link to="/passport" search={{ persona: i.personaId } as never} className="font-medium">{personaName(snap, i.personaId)}</Link> <span className="text-(--color-muted)">· meets {mm.meets} of {mm.total} · {fmtDate(i.createdAt)}</span></div><div className="flex items-center gap-1"><Pill tone={i.status === 'shortlisted' ? 'success' : i.status === 'declined' ? 'error' : 'info'}>{i.status}</Pill>{i.status === 'expressed' && <><Button size="sm" variant="primary" onClick={() => decide.mutate([i.id, 'shortlisted'])}>Shortlist</Button><Button size="sm" variant="danger" onClick={() => decide.mutate([i.id, 'declined'])}>Decline</Button></>}</div></li> })}</ul>}</div>) })()}
             {actor.role !== 'learner' && <Notice tone="neutral" icon="info-circle">Expressing interest is available to employees in the learner persona. Posting owners see interest in their <Link to="/notifications">updates</Link>.</Notice>}
           </div>
         </Dialog>) })()}

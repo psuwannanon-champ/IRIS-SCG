@@ -1,4 +1,8 @@
 import { Link, useSearch } from '@tanstack/react-router'
+import { useState } from 'react'
+import { useAction } from '@/app/data'
+import { Button, Dialog, Field } from '@/components/ui'
+import type { Enrollment } from '@/domain/types'
 import { useActor } from '@/app/actor'
 import { bestEntry } from '@/domain/selectors'
 import { ROLE_LADDERS, nextLevel } from '@/data/strategy-content'
@@ -10,6 +14,8 @@ import { fmtDate } from '@/lib/format'
 export function PassportPage() {
   const { snap, actor, status, error, refetch } = useActor()
   const search = useSearch({ strict: false }) as { persona?: string }
+  const [outcome, setOutcome] = useState<{ e: Enrollment; rating: string; top: boolean; fast: boolean } | null>(null)
+  const saveOutcome = useAction((ds, eid: string, rating: string | null, top: boolean, fast: boolean) => ds.setProgramOutcome(actor!.id, eid, rating, top, fast), 'Program outcome recorded and the learner notified.')
   if (status === 'loading') return <LoadingBlock />
   if (status === 'error' || !snap || !actor) return <ErrorBlock message={error ?? ''} onRetry={refetch} />
   const targetId = search.persona || actor.id
@@ -55,7 +61,17 @@ export function PassportPage() {
             <DL cols={1} items={[{ label: 'Level', value: subject.level }, { label: 'Function type', value: subject.functionType === 'business' ? 'Business function' : 'Enabling function' }, { label: 'Career aspiration', value: subject.careerAspiration ?? 'Not provided' }, { label: 'Line manager', value: snap.personas.find((p) => p.id === subject.managerId)?.fullName ?? 'Not provided' }]} />
           </Section>
           <Section title="Program outcomes" icon="trophy-01" description="Standing inputs to talent reviews and succession.">
-            {enr.length === 0 ? <p className="text-[13px] text-(--color-muted)">No programs yet.</p> : <ul className="space-y-2 text-[13px]">{enr.map((e) => { const c = snap.cohorts.find((k) => k.id === e.cohortId)!; return <li key={e.id}><div className="font-medium">{c.name}</div><div className="flex flex-wrap gap-1 pt-1">{e.impactRating && <Pill tone="success">Impact rating: {e.impactRating.replace('_', ' ')}</Pill>}{e.topDecile && <Pill tone="primary">Top ~10%</Pill>}{e.fastTrackBcd && <Pill tone="accent">BCD fast-track</Pill>}{!e.impactRating && !e.topDecile && <Pill>{e.status.replace('_', ' ')}</Pill>}</div></li> })}</ul>}
+            {enr.length === 0 ? <p className="text-[13px] text-(--color-muted)">No programs yet.</p> : <ul className="space-y-2 text-[13px]">{enr.map((e) => { const c = snap.cohorts.find((k) => k.id === e.cohortId)!; const may = actor.role === 'program_office' || e.managerId === actor.id || e.sponsorId === actor.id; return <li key={e.id}><div className="flex items-center justify-between gap-2"><div className="font-medium">{c.name}</div>{may && ['showcase', 'graduated'].includes(e.status) && <Button size="sm" onClick={() => setOutcome({ e, rating: e.impactRating ?? '', top: e.topDecile, fast: e.fastTrackBcd })}>Record outcome</Button>}</div><div className="flex flex-wrap gap-1 pt-1">{e.impactRating && <Pill tone="success">Impact rating: {e.impactRating.replace('_', ' ')}</Pill>}{e.topDecile && <Pill tone="primary">Top ~10%</Pill>}{e.fastTrackBcd && <Pill tone="accent">BCD fast-track</Pill>}{!e.impactRating && !e.topDecile && <Pill>{e.status.replace('_', ' ')}</Pill>}</div></li> })}</ul>}
+            {outcome && (
+              <Dialog open onClose={() => setOutcome(null)} title="Record program outcome" subtitle="Week 14 system trigger: impact rating feeds the performance review; top ~10% are fast-tracked to BCD and prioritised for stretch assignments."
+                footer={<><Button variant="ghost" onClick={() => setOutcome(null)}>Cancel</Button><Button variant="primary" busy={saveOutcome.isPending} onClick={async () => { await saveOutcome.mutateAsync([outcome.e.id, outcome.rating || null, outcome.top, outcome.fast]); setOutcome(null) }}>Save outcome</Button></>}>
+                <div className="space-y-3">
+                  <Field label="Impact rating">{(fid) => <select id={fid} className="field-input" value={outcome.rating} onChange={(e) => setOutcome({ ...outcome, rating: e.target.value })}><option value="">Not rated</option><option value="exceptional">Exceptional</option><option value="strong">Strong</option><option value="on_track">On track</option><option value="needs_support">Needs support</option></select>}</Field>
+                  <label className="flex items-center gap-2 text-[13px]"><input type="checkbox" checked={outcome.top} onChange={(e) => setOutcome({ ...outcome, top: e.target.checked })} />Top ~10% of the cohort</label>
+                  <label className="flex items-center gap-2 text-[13px]"><input type="checkbox" checked={outcome.fast} onChange={(e) => setOutcome({ ...outcome, fast: e.target.checked })} />Fast-track to BCD and priority for stretch assignments</label>
+                </div>
+              </Dialog>
+            )}
           </Section>
           {(() => { const ladder = ROLE_LADDERS.find((l) => l.match(subject.jobTitle, subject.functionType)); const lvl = nextLevel(subject.level); const reqs = ladder?.levels[lvl]; return (
             <Section title={`Role requirements · next level ${lvl}`} icon="flag-01" description={ladder ? `Published skill requirements for ${ladder.family} at ${lvl} (proposed configuration, to be confirmed by CHR). Promotion cases cite passport evidence.` : 'No role ladder configured for this job family yet.'} tour="passport-requirements">

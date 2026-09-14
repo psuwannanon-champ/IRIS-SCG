@@ -89,6 +89,14 @@ export const EXPLAINERS: Record<string, PageExplainer> = {
       ],
     }],
   },
+  labs: {
+    title: 'Lab days',
+    functions: [{ id: 'labs', name: 'Applied capability labs', purpose: 'The four in-person lab days (ABC) or three-day immersion camp (BCD): agenda, live SCG case, tools, deliverable, pre-work status, check-in and takeaway.', benefit: 'Class time is 70% practice with real AI tools; learners take the same tools back to work and Lab Day 4 ends with an agreed impact contract.', users: 'Learners; coaches and the program office see attendance on the cohort.', roles: [{ role: 'Learner', does: 'Completes pre-work modules, checks in each day, records the takeaway, creates the impact contract on Day 4.' }, { role: 'Certified coach', does: 'Facilitates in person; reads takeaways before clinic 1.' }], stages: [{ icon: 'data', title: 'Data enters', body: 'Lab agenda from the playbook; pre-work status from the learning plan; attendance and takeaways entered here.' }, { icon: 'arrow-right', title: 'What comes next', body: 'Day 4 hands off to the impact contract and the 90-day sprint.' }] }],
+  },
+  'success-cases': {
+    title: 'Success cases',
+    functions: [{ id: 'cases', name: 'Proof stories', purpose: 'Every sponsor-validated improvement and funded or scaled concept, with the people, badges and THB value behind it.', benefit: 'Makes the career deal visible: passport-cited results, Gate-3 scale-up roles, recognition at showcases.', users: 'Every role.', roles: [{ role: 'All roles', does: 'Browse and open the record behind each case.' }], stages: [{ icon: 'data', title: 'Data enters', body: 'Derived from validated impact contracts and concepts past Gate 2; nothing is entered here.' }] }],
+  },
   team: {
     title: 'My team',
     functions: [{
@@ -300,6 +308,10 @@ export const EXPLAINERS: Record<string, PageExplainer> = {
       ],
       limitations: ['Knowledge questions are illustrative (one per domain). Levels are inferred, not certified; outcome-verified badges come only from validated results.'],
     }],
+  },
+  assessments: {
+    title: 'Assessments',
+    functions: [{ id: 'waves', name: 'Assessment waves and completion', purpose: 'Org-wide AI assessment run in waves by cohort and BU: who is invited, who has completed the diagnostic, their priority gaps, and who needs a reminder.', benefit: 'Baselines the organisation from day one so passports, learning paths and coaching start from evidence.', users: 'Program office, committee, sponsors (own BU), line managers (own reports), coaches (own learners).', roles: [{ role: 'Program office', does: 'Plans waves through cohorts and sends reminders.' }, { role: 'Manager / sponsor / coach', does: 'Sees status for their people and can send a reminder.' }], stages: [{ icon: 'data', title: 'Data enters', body: 'Enrollments define the wave; learners complete the assessment themselves; Expert Guidance produces the gap map.' }, { icon: 'bell-01', title: 'Work happens', body: 'A reminder creates an update for the learner linking to the assessment. It does not complete anything on their behalf.' }, { icon: 'arrow-right', title: 'What comes next', body: 'Completed diagnostics feed passports, learning plans, coaching points and the skill-uplift dashboard.' }] }],
   },
   'ai-coach': {
     title: 'Expert Guidance',

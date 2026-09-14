@@ -422,11 +422,21 @@ begin
     ('gap-scgp-1', 'bu-scgp', 'Recyclable packaging growth', 'B2B2C proposition lead', 'sk-greendesign', 'Green proposition design validated with brands', 2, 6, 60000000, 'buy', false, 'per-supattra', '2026-08-28T09:00:00+07:00'),
     ('gap-scgc-1', 'bu-scgc', 'Clean energy ventures', 'Incubation lead', 'sk-bizbuild', 'Business building from concept to Gate 3', 3, 6, 100000000, 'build', true, 'per-supattra', '2026-08-28T09:00:00+07:00');
 
+  insert into public.lab_attendance (id, enrollment_id, lab_day, attended_at, reflection) values
+    ('la-nara-1', 'enr-nara', 1, '2026-08-10T09:00:00+07:00', 'Mapped sales, credit and logistics around the dealer promise.'),
+    ('la-nara-2', 'enr-nara', 2, '2026-08-11T09:00:00+07:00', null),
+    ('la-nara-3', 'enr-nara', 3, '2026-08-12T09:00:00+07:00', 'Built the share-of-wallet baseline chart from the CRM export.'),
+    ('la-nara-4', 'enr-nara', 4, '2026-08-13T09:00:00+07:00', 'Agreed the impact contract with Kittipong and Prasert.'),
+    ('la-tanawat-1', 'enr-tanawat', 1, '2026-08-10T09:00:00+07:00', null),
+    ('la-tanawat-3', 'enr-tanawat', 3, '2026-08-12T09:00:00+07:00', 'Downtime log analytics baseline.'),
+    ('la-tanawat-4', 'enr-tanawat', 4, '2026-08-13T09:00:00+07:00', null),
+    ('la-pim-1', 'enr-pim', 1, '2026-08-31T09:00:00+07:00', null);
+
 end $seed$;
 
 create or replace function public.reset_demo() returns void language plpgsql security definer set search_path = public as $$
 begin
-  truncate table public.business_units, public.personas, public.skill_domains, public.skills, public.learning_modules, public.cohorts, public.enrollments, public.diagnostics, public.diagnostic_items, public.learning_plan_items, public.impact_contracts, public.sprint_evidence, public.challenge_themes, public.challenge_briefs, public.teams, public.concepts, public.gate_reviews, public.coaching_clinics, public.coaching_notes, public.coach_scorecards, public.passport_entries, public.ledger_entries, public.marketplace_roles, public.marketplace_interests, public.notifications, public.coach_messages, public.record_events, public.capability_gaps, public.assessments, public.guidance_notes restart identity cascade;
+  truncate table public.business_units, public.personas, public.skill_domains, public.skills, public.learning_modules, public.cohorts, public.enrollments, public.diagnostics, public.diagnostic_items, public.learning_plan_items, public.impact_contracts, public.sprint_evidence, public.challenge_themes, public.challenge_briefs, public.teams, public.concepts, public.gate_reviews, public.coaching_clinics, public.coaching_notes, public.coach_scorecards, public.passport_entries, public.ledger_entries, public.marketplace_roles, public.marketplace_interests, public.notifications, public.coach_messages, public.record_events, public.capability_gaps, public.lab_attendance, public.assessments, public.guidance_notes restart identity cascade;
   perform public.seed_demo();
 end $$;
 

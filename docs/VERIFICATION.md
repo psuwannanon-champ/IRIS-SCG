@@ -67,6 +67,19 @@ Date: 14 September 2026 · Environment: local Vite dev server, macOS, Chromium (
 | Capability agenda decision as program office | Bot + funded recorded; row updated |
 | Production `POST /api/guidance` on iris-scg.vercel.app | 400 for unknown kind; Thai coach question answered by `claude-opus-5` (after fixing an ESM import that crashed the first deploy) |
 
+## Journey operations (added 14 Sep 2026)
+
+| Test | Result |
+| --- | --- |
+| Learner lab check-in with takeaway (Nara, Day 1) | Saved; shown on the lab card |
+| Learner opens module, answers check, marks completed | Plan progress increments |
+| Program office creates cohort from playbook | Cohort appears with generated key dates and clinics |
+| Program office enrols learner and forms team on assigned brief | Enrollment invited with pending diagnostic; concept created in Stage 1 with Gate 1 and 2 |
+| Team member advances concept stage | frame → build recorded in history |
+| Sponsor sets BU theme; publishes marketplace posting; shortlists candidate | Recorded and candidate notified |
+| Sponsor records program outcome (impact rating, top 10%, fast-track) | Saved; learner notified; triggers appear on dashboard |
+| Expert Guidance flag from coach chat | Coaching note with AI flag created for the coach |
+
 ## Not verified / remaining limitations
 
 - Only the evidence-logging path was exercised against the real Supabase project; the other transitions were validated in PGlite with the same SQL.

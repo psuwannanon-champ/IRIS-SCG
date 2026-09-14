@@ -69,6 +69,9 @@ Server-side enforcement in the prototype: every write is a Postgres function tha
 | /governance | Impact dashboard | sponsor, committee, office |
 | /taxonomy | Skills taxonomy (read-only) | office, committee, coach |
 | /assessment | AI skill diagnostic questionnaire → Expert Guidance | learner |
+| /assessments | Assessment waves, completion, reminders | manager, sponsor, coach, committee, office |
+| /labs | Lab days: agenda, pre-work, check-in, takeaway | learner |
+| /success-cases | Validated improvements and funded concepts | all |
 | /ai-coach | Expert Guidance chat (TH/EN, Claude) | learner, coach |
 | /strategy | Strategy roadmap (sub-plans, components, enablers, live KPIs) | sponsor, committee, office |
 | /agenda | Capability agenda (value-to-skills cascade, build/buy/borrow/bot) | sponsor, committee, office |
@@ -100,6 +103,14 @@ Server-side enforcement in the prototype: every write is a Postgres function tha
 | R20 | p3, p4, p5, p12 | Strategic plan, five components, applications, enablers timeline | Strategy roadmap page with live KPI values | Implemented |
 | R21 | p5 02, p12 | Role-level skill requirements published; promotion cases cite passport | Role requirements for next level on the passport | Implemented (proposed ladders) |
 | R22 | p5 04, p5 05 | Before / after uplift dashboards; talent review inputs; premiums; fast-track; incubation roles | Impact dashboard: skill uplift and career & rewards triggers | Implemented |
+| R23 | p7 step 2 | Flipped micro-learning: core concepts learned before class through short modules | Learning plan module viewer (objective, key points, how to study, check question) with pre-work per lab day | Implemented (content generated from taxonomy) |
+| R24 | p7 steps 3–6 | Four applied capability labs on live SCG cases with real AI tools; Lab Day 4 agrees the impact contract | Lab days page: agenda, live case, tools, deliverable, pre-work, check-in, takeaway; Day 4 hands off to the contract | Implemented |
+| R25 | p7 step 8, p11 | AI coach flags who needs what and briefs the human coach | Expert Guidance flags persist as coaching notes and notify the coach; clinic briefing | Implemented |
+| R26 | p7 step 10, p5 05 | Success cases logged on the platform, 100% tracked; visible proof stories | Success cases gallery | Implemented |
+| R27 | p7 step 11, p12 | Week-14 trigger: impact rating → review; top ~10% → BCD fast-track | Record program outcome on the passport (manager, sponsor, program office) | Implemented |
+| R28 | p8–9 steps 1–5 | BU heads set themes; teams form around briefs; frame → build → validate stages | Set BU theme; Form team (creates concept and Gates 1–2); advance stage by the team | Implemented |
+| R29 | p5 02, p5 03 | Assessment waves; cohort calendar and playbook; coach certification | Assessments overview with reminders; New cohort from playbook; Enrol learner; coach scorecard recording | Implemented |
+| R30 | p12 | Marketplace allocates key talent by verified skills | Owner postings with skill requirements; shortlist / decline with notification | Implemented |
 
 ## 6. Integration register
 

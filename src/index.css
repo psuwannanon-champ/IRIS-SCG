@@ -55,12 +55,12 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 * { box-sizing: border-box; }
-a { color: var(--color-accent); text-decoration: none; }
-a:hover { color: var(--color-primary); text-decoration: none; }
-a.btn, a.btn:hover, a.row-link, a.row-link:hover, a.pill { color: inherit; }
-a.btn-primary, a.btn-primary:hover { color: #fff; }
-a.btn-danger, a.btn-danger:hover { color: var(--color-error); }
-button, input, select, textarea { font: inherit; color: inherit; }
+/* Base element styles live in the base layer so component and utility classes always win. */
+@layer base {
+  a { color: var(--color-accent); text-decoration: none; }
+  a:hover { color: var(--color-primary); text-decoration: none; }
+  button, input, select, textarea { font: inherit; color: inherit; }
+}
 :focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; border-radius: var(--radius-sm); }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
@@ -72,6 +72,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
   #main .grid > *, #main .flex > * { min-width: 0; }
   .row-link { display: block; border: 1px solid transparent; border-radius: var(--radius-md); transition: background var(--duration-fast) var(--ease-standard); }
   .row-link:hover { background: #F7F8FA; }
+  a.row-link, a.row-link:hover, a.pill, a.pill:hover { color: inherit; }
   .row-link:focus-visible { outline: none; border-color: var(--color-focus); box-shadow: 0 0 0 2px var(--color-surface), 0 0 0 4px var(--color-focus); }
   /* full-perimeter primary→accent hover/selection treatment for bordered interactive surfaces */
   .brand-ring { position: relative; }
@@ -83,13 +84,13 @@ button, input, select, textarea { font: inherit; color: inherit; }
     border: 1px solid transparent; cursor: pointer; transition: background var(--duration-fast) var(--ease-standard), border-color var(--duration-fast) var(--ease-standard); }
   .btn:disabled { opacity: 0.55; cursor: not-allowed; }
   .btn-primary { background: var(--color-primary); color: #fff; }
-  .btn-primary:hover:not(:disabled) { background: var(--color-primary-strong); }
+  .btn-primary:hover:not(:disabled) { background: var(--color-primary-strong); color: #fff; }
   .btn-secondary { background: var(--color-surface); color: var(--color-text); border-color: var(--color-border-strong); }
-  .btn-secondary:hover:not(:disabled) { background: #F2F4F7; }
+  .btn-secondary:hover:not(:disabled) { background: #F2F4F7; color: var(--color-text); }
   .btn-ghost { background: transparent; color: var(--color-text); }
-  .btn-ghost:hover:not(:disabled) { background: #EEF0F3; }
+  .btn-ghost:hover:not(:disabled) { background: #EEF0F3; color: var(--color-text); }
   .btn-danger { background: var(--color-surface); color: var(--color-error); border-color: var(--color-border-strong); }
-  .btn-danger:hover:not(:disabled) { background: var(--color-error-soft); }
+  .btn-danger:hover:not(:disabled) { background: var(--color-error-soft); color: var(--color-error); }
   .btn-sm { height: 30px; padding: 0 10px; font-size: 13px; }
   .field-input { width: 100%; height: 36px; padding: 0 10px; border: 1px solid var(--color-border-strong); border-radius: var(--radius-md); background: var(--color-surface); }
   .field-input:focus { outline: 2px solid var(--color-focus); outline-offset: 0; border-color: transparent; }

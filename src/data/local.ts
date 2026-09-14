@@ -4,7 +4,7 @@ import { fixtureBundle } from '@/data/fixtures'
 import type { Snapshot, DataSource, ContractAction, ContractActionPayload, BriefAction, BriefActionPayload, EvidenceInput } from '@/data/datasource'
 import { DomainError } from '@/data/datasource'
 import { CONTRACT_TRANSITIONS, BRIEF_TRANSITIONS, contractRelation, briefRelation, GATE_DECISIONS_BY_GATE } from '@/data/rules'
-import type { ChallengeBriefInput, ImpactContractInput, GateDecision, PassportEntry, Notification, RecordEvent, AssessmentResponses, DiagnosticResult, GuidanceKind, GapDecision } from '@/domain/types'
+import type { ChallengeBriefInput, ImpactContractInput, GateDecision, PassportEntry, Notification, RecordEvent, AssessmentResponses, DiagnosticResult, GuidanceKind, GapDecision, MarketplaceRoleInput } from '@/domain/types'
 
 const STORAGE_KEY = 'scg-capability-suite.local-snapshot.v1'
 
@@ -512,6 +512,154 @@ export class LocalDataSource implements DataSource {
     const g = this.snap.capabilityGaps.find((x) => x.id === gapId)
     if (!g) throw new DomainError('Gap not found.')
     g.decision = decision; g.funded = funded; g.decidedById = actorId; g.decidedAt = nowIso()
+    this.write()
+  }
+
+  async remindAssessment(actorId: string, enrollmentId: string) {
+    await delay(150)
+    const actor = this.persona(actorId)
+    if (!['program_office', 'committee', 'bu_sponsor', 'line_manager', 'coach'].includes(actor.role)) throw new DomainError('Only program staff, sponsors, managers or coaches send assessment reminders.')
+    const e = this.snap.enrollments.find((x) => x.id === enrollmentId)
+    if (!e) throw new DomainError('Enrollment not found.')
+    if (this.snap.diagnostics.some((d) => d.enrollmentId === e.id && d.status === 'completed')) throw new DomainError('This learner has already completed the assessment.')
+    const c = this.snap.cohorts.find((x) => x.id === e.cohortId)!
+    this.notify(e.personaId, 'Reminder: complete your AI skill diagnostic', `${actor.fullName} asks you to complete the assessment for ${c.name} so your personal path is ready before the labs.`, '/assessment')
+    this.write()
+  }
+
+  async checkInLab(actorId: string, enrollmentId: string, labDay: number, reflection: string) {
+    await delay(120)
+    const e = this.snap.enrollments.find((x) => x.id === enrollmentId)
+    if (!e || e.personaId !== actorId) throw new DomainError('Only the learner checks in to their own lab day.')
+    const ex = this.snap.labAttendance.find((l) => l.enrollmentId === enrollmentId && l.labDay === labDay)
+    if (ex) ex.reflection = reflection || ex.reflection
+    else this.snap.labAttendance.push({ id: uid('la'), enrollmentId, labDay, attendedAt: nowIso(), reflection: reflection || null })
+    if (['invited', 'diagnosed'].includes(e.status)) e.status = 'in_labs'
+    this.write()
+  }
+  async raiseAiFlag(actorId: string, flag: string) {
+    const l = this.persona(actorId)
+    const e = this.snap.enrollments.find((x) => x.personaId === actorId && !['graduated', 'withdrawn'].includes(x.status) && x.coachId)
+    if (!e) return
+    this.snap.coachingNotes.push({ id: uid('cn'), enrollmentId: e.id, coachId: e.coachId!, clinicId: null, note: 'Flag raised by Expert Guidance during the coach chat.', aiFlag: flag, createdAt: nowIso() })
+    this.notify(e.coachId!, `Expert Guidance flagged ${l.fullName}`, flag, '/coaching')
+    this.write()
+  }
+  async setProgramOutcome(actorId: string, enrollmentId: string, rating: string | null, topDecile: boolean, fastTrack: boolean) {
+    await delay(150)
+    const a = this.persona(actorId)
+    const e = this.snap.enrollments.find((x) => x.id === enrollmentId)
+    if (!e) throw new DomainError('Enrollment not found.')
+    if (!(a.role === 'program_office' || e.managerId === actorId || e.sponsorId === actorId)) throw new DomainError('Only the line manager, sponsor or program office records program outcomes.')
+    e.impactRating = (rating as typeof e.impactRating) ?? null; e.topDecile = topDecile; e.fastTrackBcd = fastTrack
+    this.notify(e.personaId, 'Program outcome recorded', `Impact rating: ${rating ?? 'not set'}${topDecile ? ' · top ~10%' : ''}${fastTrack ? ' · BCD fast-track' : ''}. This feeds your performance review and talent profile.`, '/passport')
+    this.write()
+  }
+  async saveTheme(actorId: string, buId: string, title: string, description: string, year: number) {
+    await delay(120)
+    const a = this.persona(actorId)
+    if (!['bu_sponsor', 'program_office'].includes(a.role)) throw new DomainError('Only BU sponsors or the program office set themes.')
+    if (!title.trim()) throw new DomainError('Give the theme a title.')
+    const id = uid('th')
+    this.snap.challengeThemes.push({ id, buId, title, description, setById: actorId, year })
+    this.write(); return id
+  }
+  async createCohort(actorId: string, i: { program: 'ABC' | 'BCD'; code: string; name: string; buId: string | null; startDate: string; seats: number; pipelineTargetThb: number | null; coachId: string | null }) {
+    await delay(200)
+    const a = this.persona(actorId)
+    if (a.role !== 'program_office') throw new DomainError('Only the program office creates cohorts.')
+    if (!i.code.trim() || !i.name.trim()) throw new DomainError('Code and name are required.')
+    const add = (n: number) => { const dt = new Date(i.startDate); dt.setDate(dt.getDate() + n); return dt.toISOString().slice(0, 10) }
+    const keyDates = i.program === 'ABC'
+      ? [['AI skill diagnostic', 0], ['Flipped micro-learning', 0], ['Applied capability labs (4 days)', 14], ['Impact sprint starts', 21], ['Coaching clinic 1', 49], ['Mid-sprint gate', 63], ['Coaching clinic 2', 84], ['Impact showcase', 105]]
+      : [['Challenge sourcing', 0], ['Onboard, diagnose & team up', 28], ['Immersion camp (3 days)', 35], ['Concept studio sprint', 42], ['Field validation', 63], ['Gate 1 · Proof of concept', 84], ['Commercial build', 91], ['Prototype & stress-test', 119], ['Gate 2 · CEO investment pitch', 140]]
+    const id = uid('coh')
+    this.snap.cohorts.push({ id, program: i.program, code: i.code, name: i.name, buId: i.buId, status: 'planned', startDate: i.startDate, endDate: add(i.program === 'ABC' ? 105 : 140), keyDates: keyDates.map(([label, n]) => ({ label: label as string, date: add(n as number) })), pipelineTargetThb: i.pipelineTargetThb, seats: i.seats })
+    if (i.program === 'ABC' && i.coachId) {
+      this.snap.coachingClinics.push({ id: uid('cl'), cohortId: id, clinicNo: 1, scheduledAt: `${add(49)}T09:00:00+07:00`, coachId: i.coachId, topics: 'Baselines and weekly evidence', briefingReady: false })
+      this.snap.coachingClinics.push({ id: uid('cl'), cohortId: id, clinicNo: 2, scheduledAt: `${add(84)}T09:00:00+07:00`, coachId: i.coachId, topics: 'Showcase preparation and sustaining change', briefingReady: false })
+    }
+    this.write(); return id
+  }
+  async enrollLearner(actorId: string, cohortId: string, personaId: string, sponsorId: string | null, coachId: string | null) {
+    await delay(150)
+    const a = this.persona(actorId)
+    if (a.role !== 'program_office') throw new DomainError('Only the program office enrols learners.')
+    const l = this.persona(personaId)
+    const c = this.snap.cohorts.find((x) => x.id === cohortId)
+    if (!c) throw new DomainError('Cohort not found.')
+    if (this.snap.enrollments.some((e) => e.cohortId === cohortId && e.personaId === personaId)) throw new DomainError('This person is already enrolled in the cohort.')
+    if (this.snap.enrollments.filter((e) => e.cohortId === cohortId).length >= c.seats) throw new DomainError('The cohort is full.')
+    const id = uid('enr')
+    this.snap.enrollments.push({ id, cohortId, personaId, status: 'invited', teamId: null, coachId, sponsorId, managerId: l.managerId, impactRating: null, topDecile: false, fastTrackBcd: false })
+    this.snap.diagnostics.push({ id: uid('dx'), enrollmentId: id, status: 'pending', completedAt: null, summary: null })
+    this.notify(personaId, `You are invited to ${c.name}`, 'Complete your AI skill diagnostic to build your personal path before the labs.', '/assessment')
+    this.write(); return id
+  }
+  async formTeam(actorId: string, briefId: string, name: string, memberEnrollmentIds: string[], coachId: string | null) {
+    await delay(200)
+    const a = this.persona(actorId)
+    if (a.role !== 'program_office') throw new DomainError('Only the program office forms teams.')
+    const b = this.snap.challengeBriefs.find((x) => x.id === briefId)
+    if (!b || b.status !== 'assigned' || !b.cohortId) throw new DomainError('The brief must be assigned to a cohort first.')
+    if (this.snap.concepts.some((c) => c.briefId === b.id)) throw new DomainError('A team already works on this brief.')
+    if (!memberEnrollmentIds.length) throw new DomainError('Choose at least one team member.')
+    const c = this.snap.cohorts.find((x) => x.id === b.cohortId)!
+    const teamId = uid('team'), conceptId = uid('cp')
+    this.snap.teams.push({ id: teamId, cohortId: c.id, name, briefId: b.id, coachId })
+    this.snap.concepts.push({ id: conceptId, teamId, briefId: b.id, cohortId: c.id, title: b.title, summary: `Concept framing in progress: ${b.problemStatement}`, stage: 'frame', pipelineValueThb: b.targetValueThb, validatedValueThb: null, scaleRoute: null, createdAt: nowIso(), updatedAt: nowIso() })
+    const g1 = c.keyDates.find((k) => /^Gate 1/i.test(k.label))?.date ?? c.startDate, g2 = c.keyDates.find((k) => /^Gate 2/i.test(k.label))?.date ?? c.endDate
+    this.snap.gateReviews.push({ id: uid('gr'), conceptId, gateNo: 1, scheduledDate: g1, evidenceSummary: null, submittedAt: null, decision: 'pending', decidedById: null, decidedAt: null, note: null, validatedValueThb: null })
+    this.snap.gateReviews.push({ id: uid('gr'), conceptId, gateNo: 2, scheduledDate: g2, evidenceSummary: null, submittedAt: null, decision: 'pending', decidedById: null, decidedAt: null, note: null, validatedValueThb: null })
+    for (const m of memberEnrollmentIds) {
+      const e = this.snap.enrollments.find((x) => x.id === m && x.cohortId === c.id && !x.teamId)
+      if (!e) throw new DomainError('Every member must be enrolled in the cohort and not already in a team.')
+      e.teamId = teamId; e.sponsorId = e.sponsorId ?? b.sponsorId; e.coachId = coachId ?? e.coachId
+      this.notify(e.personaId, `You joined ${name}`, `Your team works on "${b.title}". Stage 1: frame the challenge.`, `/concepts/${conceptId}`)
+    }
+    this.notify(b.sponsorId, 'Team formed for your brief', `${name} now works on "${b.title}".`, `/concepts/${conceptId}`)
+    this.event({ recordType: 'concept', recordId: conceptId, actorId, action: 'form_team', fromStatus: null, toStatus: 'frame', note: `${name} formed with ${memberEnrollmentIds.length} members.` })
+    this.write(); return conceptId
+  }
+  async advanceConceptStage(actorId: string, conceptId: string, note: string) {
+    await delay(150)
+    const cp = this.snap.concepts.find((c) => c.id === conceptId)
+    if (!cp) throw new DomainError('Concept not found.')
+    if (!this.snap.enrollments.some((e) => e.personaId === actorId && e.teamId === cp.teamId)) throw new DomainError('Only a team member advances the concept.')
+    if (!note.trim()) throw new DomainError('Describe what the team completed in this stage.')
+    const next = cp.stage === 'frame' ? 'build' : cp.stage === 'build' || cp.stage === 'pivot' ? 'validate' : null
+    if (!next) throw new DomainError('This stage moves on through a gate review, not manually.')
+    const from = cp.stage; cp.stage = next; cp.updatedAt = nowIso()
+    this.event({ recordType: 'concept', recordId: cp.id, actorId, action: 'advance_stage', fromStatus: from, toStatus: next, note })
+    this.write()
+  }
+  async updateCoachScorecard(actorId: string, coachId: string, cohortId: string, freq: number, quality: number, rating: number, certified: boolean, until: string | null) {
+    await delay(150)
+    const a = this.persona(actorId)
+    if (a.role !== 'program_office') throw new DomainError('Only the program office maintains coach scorecards.')
+    const ex = this.snap.coachScorecards.find((s) => s.coachId === coachId && s.cohortId === cohortId)
+    if (ex) Object.assign(ex, { feedbackFrequency: freq, feedbackQuality: quality, learnerRating: rating, certified, certifiedUntil: until })
+    else this.snap.coachScorecards.push({ id: uid('cs'), coachId, cohortId, feedbackFrequency: freq, feedbackQuality: quality, learnerRating: rating, certified, certifiedUntil: until })
+    this.notify(coachId, 'Coach scorecard updated', `Quality ${quality}/5 · learner rating ${rating}/5 · ${certified ? `certified until ${until ?? ''}` : 'not certified'}`, '/coaching')
+    this.write()
+  }
+  async createMarketplaceRole(actorId: string, input: MarketplaceRoleInput) {
+    await delay(150)
+    const a = this.persona(actorId)
+    if (!['bu_sponsor', 'line_manager', 'program_office'].includes(a.role)) throw new DomainError('Only sponsors, managers or the program office publish postings.')
+    if (!input.title.trim()) throw new DomainError('Give the posting a title.')
+    const id = uid('mr')
+    this.snap.marketplaceRoles.push({ id, title: input.title, buId: input.buId || a.buId, kind: input.kind, description: input.description, openUntil: input.openUntil, ownerId: actorId, requirements: input.requirements })
+    this.write(); return id
+  }
+  async updateInterest(actorId: string, interestId: string, status: 'shortlisted' | 'declined' | 'expressed') {
+    await delay(120)
+    const i = this.snap.marketplaceInterests.find((x) => x.id === interestId)
+    if (!i) throw new DomainError('Interest not found.')
+    const r = this.snap.marketplaceRoles.find((x) => x.id === i.roleId)!
+    if (r.ownerId !== actorId) throw new DomainError('Only the posting owner shortlists or declines.')
+    i.status = status
+    this.notify(i.personaId, status === 'shortlisted' ? 'You were shortlisted' : 'Update on your marketplace interest', `"${r.title}": ${status}. Decision based on verified passport skills; the owner will contact you.`, '/marketplace')
     this.write()
   }
 

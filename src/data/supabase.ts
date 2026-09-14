@@ -1,7 +1,7 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import type { Snapshot, DataSource, ContractAction, ContractActionPayload, BriefAction, BriefActionPayload, EvidenceInput } from '@/data/datasource'
 import { DomainError } from '@/data/datasource'
-import type { ChallengeBriefInput, ImpactContractInput, GateDecision, AssessmentResponses, DiagnosticResult, GuidanceKind, GapDecision } from '@/domain/types'
+import type { ChallengeBriefInput, ImpactContractInput, GateDecision, AssessmentResponses, DiagnosticResult, GuidanceKind, GapDecision, MarketplaceRoleInput } from '@/domain/types'
 import { simulatedCoachReply } from '@/data/local'
 
 const TABLES: Record<keyof Snapshot, string> = {
@@ -10,7 +10,7 @@ const TABLES: Record<keyof Snapshot, string> = {
   impactContracts: 'impact_contracts', sprintEvidence: 'sprint_evidence', challengeThemes: 'challenge_themes', challengeBriefs: 'challenge_briefs', teams: 'teams',
   concepts: 'concepts', gateReviews: 'gate_reviews', coachingClinics: 'coaching_clinics', coachingNotes: 'coaching_notes', coachScorecards: 'coach_scorecards',
   passportEntries: 'passport_entries', ledgerEntries: 'ledger_entries', marketplaceRoles: 'marketplace_roles', marketplaceInterests: 'marketplace_interests',
-  notifications: 'notifications', coachMessages: 'coach_messages', recordEvents: 'record_events', assessments: 'assessments', guidanceNotes: 'guidance_notes', capabilityGaps: 'capability_gaps',
+  notifications: 'notifications', coachMessages: 'coach_messages', recordEvents: 'record_events', assessments: 'assessments', guidanceNotes: 'guidance_notes', capabilityGaps: 'capability_gaps', labAttendance: 'lab_attendance',
 }
 
 export const toSnake = (s: string) => s.replace(/[A-Z]/g, (m) => `_${m.toLowerCase()}`)
@@ -128,6 +128,20 @@ export class SupabaseDataSource implements DataSource {
   setGapDecision(actorId: string, gapId: string, decision: GapDecision, funded: boolean) {
     return this.rpc('set_gap_decision', { p_actor: actorId, p_gap: gapId, p_decision: decision, p_funded: funded })
   }
+  remindAssessment(actorId: string, enrollmentId: string) {
+    return this.rpc('remind_assessment', { p_actor: actorId, p_enrollment: enrollmentId })
+  }
+  checkInLab(actorId: string, enrollmentId: string, labDay: number, reflection: string) { return this.rpc('check_in_lab', { p_actor: actorId, p_enrollment: enrollmentId, p_lab_day: labDay, p_reflection: reflection }) }
+  raiseAiFlag(actorId: string, flag: string) { return this.rpc('raise_ai_flag', { p_actor: actorId, p_flag: flag }) }
+  setProgramOutcome(actorId: string, enrollmentId: string, rating: string | null, topDecile: boolean, fastTrack: boolean) { return this.rpc('set_program_outcome', { p_actor: actorId, p_enrollment: enrollmentId, p_rating: rating, p_top_decile: topDecile, p_fast_track: fastTrack }) }
+  saveTheme(actorId: string, buId: string, title: string, description: string, year: number) { return this.rpc<string>('save_theme', { p_actor: actorId, p_bu: buId, p_title: title, p_description: description, p_year: year }) }
+  createCohort(actorId: string, i: { program: 'ABC' | 'BCD'; code: string; name: string; buId: string | null; startDate: string; seats: number; pipelineTargetThb: number | null; coachId: string | null }) { return this.rpc<string>('create_cohort', { p_actor: actorId, p_program: i.program, p_code: i.code, p_name: i.name, p_bu: i.buId, p_start: i.startDate, p_seats: i.seats, p_pipeline: i.pipelineTargetThb, p_coach: i.coachId }) }
+  enrollLearner(actorId: string, cohortId: string, personaId: string, sponsorId: string | null, coachId: string | null) { return this.rpc<string>('enroll_learner', { p_actor: actorId, p_cohort: cohortId, p_persona: personaId, p_sponsor: sponsorId, p_coach: coachId }) }
+  formTeam(actorId: string, briefId: string, name: string, memberEnrollmentIds: string[], coachId: string | null) { return this.rpc<string>('form_team', { p_actor: actorId, p_brief: briefId, p_name: name, p_members: memberEnrollmentIds, p_coach: coachId }) }
+  advanceConceptStage(actorId: string, conceptId: string, note: string) { return this.rpc('advance_concept_stage', { p_actor: actorId, p_concept: conceptId, p_note: note }) }
+  updateCoachScorecard(actorId: string, coachId: string, cohortId: string, freq: number, quality: number, rating: number, certified: boolean, until: string | null) { return this.rpc('update_coach_scorecard', { p_actor: actorId, p_coach: coachId, p_cohort: cohortId, p_freq: freq, p_quality: quality, p_rating: rating, p_certified: certified, p_until: until }) }
+  createMarketplaceRole(actorId: string, input: MarketplaceRoleInput) { return this.rpc<string>('create_marketplace_role', { p_actor: actorId, p_input: deepSnake(input) }) }
+  updateInterest(actorId: string, interestId: string, status: 'shortlisted' | 'declined' | 'expressed') { return this.rpc('update_interest', { p_actor: actorId, p_interest: interestId, p_status: status }) }
   resetDemo() {
     return this.rpc('reset_demo', {})
   }

@@ -20,8 +20,11 @@ import { GovernancePage } from '@/pages/Governance'
 import { TaxonomyPage } from '@/pages/Taxonomy'
 import { AiCoachPage } from '@/pages/AiCoach'
 import { AssessmentPage } from '@/pages/Assessment'
+import { AssessmentsPage } from '@/pages/Assessments'
 import { StrategyPage } from '@/pages/Strategy'
 import { AgendaPage } from '@/pages/Agenda'
+import { LabsPage } from '@/pages/Labs'
+import { SuccessCasesPage } from '@/pages/SuccessCases'
 import { TourPage, TourOverlay } from '@/features/tour/Tour'
 import { NAV_GROUPS } from '@/app/nav'
 
@@ -49,6 +52,9 @@ const routes = [
   r('/journey', guarded('journey', JourneyPage)),
   r('/learning', guarded('learning', LearningPage)),
   r('/assessment', guarded('assessment', AssessmentPage)),
+  r('/assessments', guarded('assessments', AssessmentsPage), { validateSearch: listSearch }),
+  r('/labs', guarded('labs', LabsPage)),
+  r('/success-cases', SuccessCasesPage),
   r('/team', guarded('team', TeamPage)),
   r('/contracts', ContractsPage, { validateSearch: listSearch }),
   r('/contracts/new', ContractNewPage),
