@@ -5,7 +5,7 @@ import { useAction } from '@/app/data'
 import { visibleLedger, personaName } from '@/domain/selectors'
 import { LEDGER_STATUS_LABEL, OBJECTIVE_LABEL, type LedgerEntry, type LedgerStatus } from '@/domain/types'
 import { ledgerTone } from '@/domain/status'
-import { PageHeader, Section, LoadingBlock, ErrorBlock, EmptyState, Pagination, usePagination, Pill, Button, Dialog, Field, Notice, Stat, DL } from '@/components/ui'
+import { PageHeader, Section, LoadingBlock, ErrorBlock, EmptyState, Pagination, paginate, Pill, Button, Dialog, Field, Notice, Stat, DL } from '@/components/ui'
 import { Money, History } from '@/components/records'
 import { fmtDate, fmtThb } from '@/lib/format'
 
@@ -24,14 +24,14 @@ export function LedgerPage() {
   const filtered = all.filter((l) => !search.status || l.status === search.status)
   const actionable = (l: LedgerEntry) => (l.status === 'pending_validation' && l.sponsorId === actor.id) || (l.status === 'validated' && actor.role === 'program_office')
   const sorted = [...filtered].sort((a, b) => Number(actionable(b)) - Number(actionable(a)) || b.createdAt.localeCompare(a.createdAt))
-  const pg = usePagination(sorted, 10, search.page ?? 1, (p) => nav({ to: '/ledger', search: { status: search.status ?? '', page: p } as never }))
+  const pg = paginate(sorted, 10, search.page ?? 1, (p) => nav({ to: '/ledger', search: { status: search.status ?? '', page: p } as never }))
   const validated = all.filter((l) => ['validated', 'audited'].includes(l.status)).reduce((a, l) => a + (l.validatedValueThb ?? 0), 0)
   const pending = all.filter((l) => l.status === 'pending_validation').reduce((a, l) => a + l.claimedValueThb, 0)
   const setFilter = (s: string) => nav({ to: '/ledger', search: { status: s, page: 1 } as never })
   return (
     <>
       <PageHeader title="Impact ledger" description="Sponsor-validated project value per learner and concept, tracked 6–12 months after the program and sample-audited annually. Entries waiting for your validation are listed first." />
-      <div className="grid gap-3 sm:grid-cols-3">
+      <div className="grid gap-3 sm:grid-cols-3" data-tour="ledger-stats">
         <Stat label="Validated impact" value={fmtThb(validated, true)} hint="Validated and audited entries in your scope" onClick={() => setFilter('validated')} tone="primary" />
         <Stat label="Pending validation" value={fmtThb(pending, true)} hint="Claimed at showcase, not yet confirmed" onClick={() => setFilter('pending_validation')} />
         <Stat label="Entries" value={all.length} hint={`${all.filter((l) => l.status === 'audited').length} audited`} onClick={() => setFilter('')} />

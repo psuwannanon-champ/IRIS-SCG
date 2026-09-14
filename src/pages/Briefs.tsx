@@ -9,7 +9,7 @@ import { visibleBriefs, personaName } from '@/domain/selectors'
 import { availableBriefActions } from '@/data/rules'
 import { BRIEF_STATUS_LABEL, CHALLENGE_TYPE_LABEL, type BriefStatus, type ChallengeBrief, type ChallengeType } from '@/domain/types'
 import { briefTone, briefResponsible } from '@/domain/status'
-import { PageHeader, Section, LoadingBlock, ErrorBlock, EmptyState, Pagination, usePagination, Pill, Button, Dialog, Field, DL, Notice } from '@/components/ui'
+import { PageHeader, Section, LoadingBlock, ErrorBlock, EmptyState, Pagination, paginate, Pill, Button, Dialog, Field, DL, Notice } from '@/components/ui'
 import { History, Money } from '@/components/records'
 import { fmtDate, fmtThb, orNotProvided } from '@/lib/format'
 import { Icon } from '@/icons/Icon'
@@ -25,7 +25,7 @@ export function BriefsPage() {
   const filtered = all.filter((b) => !search.status || b.status === search.status)
   const rank = (b: ChallengeBrief) => (availableBriefActions(b, actor).length ? 0 : 1)
   const sorted = [...filtered].sort((a, b) => rank(a) - rank(b) || b.updatedAt.localeCompare(a.updatedAt))
-  const pg = usePagination(sorted, 10, search.page ?? 1, (p) => nav({ to: '/briefs', search: { status: search.status ?? '', page: p } as never }))
+  const pg = paginate(sorted, 10, search.page ?? 1, (p) => nav({ to: '/briefs', search: { status: search.status ?? '', page: p } as never }))
   const byStatus = (s: BriefStatus) => all.filter((b) => b.status === s).length
   return (
     <>

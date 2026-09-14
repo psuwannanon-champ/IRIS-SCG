@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link } from '@tanstack/react-router'
 import { useActor } from '@/app/actor'
 import { useAction } from '@/app/data'
-import { PageHeader, Section, LoadingBlock, ErrorBlock, EmptyState, Pagination, usePagination, Button } from '@/components/ui'
+import { PageHeader, Section, LoadingBlock, ErrorBlock, EmptyState, Pagination, paginate, Button } from '@/components/ui'
 import { fmtDate } from '@/lib/format'
 
 export function NotificationsPage() {
@@ -13,7 +13,7 @@ export function NotificationsPage() {
   if (status === 'error' || !snap || !actor) return <ErrorBlock message={error ?? ''} onRetry={refetch} />
   const items = snap.notifications.filter((n) => n.personaId === actor.id).sort((a, b) => b.createdAt.localeCompare(a.createdAt))
   const unread = items.filter((n) => !n.readAt)
-  const pg = usePagination(items, 10, page, setPage)
+  const pg = paginate(items, 10, page, setPage)
   return (
     <>
       <PageHeader title="Updates" description={`${unread.length} unread. Updates tell you what other roles did on records connected to you. Reading an update does not complete a task; your actions are under My tasks.`}

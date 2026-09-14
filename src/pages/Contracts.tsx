@@ -9,7 +9,7 @@ import { visibleContracts, personaName, currentSprintWeek } from '@/domain/selec
 import { availableContractActions } from '@/data/rules'
 import { CONTRACT_STATUS_LABEL, OBJECTIVE_LABEL, type ContractStatus, type ImpactContract, type ObjectiveType } from '@/domain/types'
 import { contractTone, contractResponsible } from '@/domain/status'
-import { PageHeader, Section, LoadingBlock, ErrorBlock, EmptyState, Pagination, usePagination, Pill, Button, Dialog, Field, DL, Notice } from '@/components/ui'
+import { PageHeader, Section, LoadingBlock, ErrorBlock, EmptyState, Pagination, paginate, Pill, Button, Dialog, Field, DL, Notice } from '@/components/ui'
 import { History, Money } from '@/components/records'
 import { fmtDate, fmtNum, fmtThb, orNotProvided } from '@/lib/format'
 import { Icon } from '@/icons/Icon'
@@ -29,7 +29,7 @@ export function ContractsPage() {
   const rank = (c: ImpactContract) => (availableContractActions(c, actor.id).length ? 0 : 1)
   const sorted = [...filtered].sort((a, b) => rank(a) - rank(b) || b.updatedAt.localeCompare(a.updatedAt))
   const setSearch = (patch: Record<string, unknown>) => nav({ to: '/contracts', search: { status: search.status ?? '', page: 1, q, ...patch } as never })
-  const pg = usePagination(sorted, 10, search.page ?? 1, (p) => setSearch({ page: p }))
+  const pg = paginate(sorted, 10, search.page ?? 1, (p) => setSearch({ page: p }))
   const myEnrollment = snap.enrollments.find((e) => e.personaId === actor.id && snap.cohorts.find((c) => c.id === e.cohortId)?.program === 'ABC' && !['graduated', 'withdrawn'].includes(e.status))
   const canCreate = actor.role === 'learner' && myEnrollment && !all.some((c) => c.enrollmentId === myEnrollment.id && !['withdrawn', 'reset', 'validated'].includes(c.status))
   return (
@@ -194,7 +194,7 @@ export function ContractDetailPage() {
           </Section>
 
           <Section title={`Sprint evidence · week ${Math.min(Math.max(week, 0), 12)} of 12`} icon="activity" description="Weekly micro-applications of the new skills, tracked continuously. Latest first."
-            actions={canLog && <Button size="sm" variant="primary" icon="plus" onClick={() => setDialog('evidence')} data-tour="log-evidence">Log evidence</Button>} id="contract-evidence">
+            actions={canLog && <Button size="sm" variant="primary" icon="plus" onClick={() => setDialog('evidence')} data-tour="log-evidence">Log evidence</Button>} tour="contract-evidence">
             {evidence.length === 0 ? <EmptyState icon="activity" title="No evidence logged yet" body={c.status === 'active' ? 'Log what you applied this week and the current measured value.' : 'Evidence is logged once the sprint is active.'} /> : (
               <ol className="divide-y divide-(--color-border)">
                 {[...evidence].reverse().map((e) => (

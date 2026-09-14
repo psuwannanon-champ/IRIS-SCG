@@ -6,7 +6,7 @@ import { visibleConcepts, personaName } from '@/domain/selectors'
 import { GATE_DECISIONS_BY_GATE } from '@/data/rules'
 import { CONCEPT_STAGE_LABEL, GATE_DECISION_LABEL, CHALLENGE_TYPE_LABEL, type Concept, type GateDecision, type GateReview } from '@/domain/types'
 import { stageTone, gateTone } from '@/domain/status'
-import { PageHeader, Section, LoadingBlock, ErrorBlock, EmptyState, Pagination, usePagination, Pill, Button, Dialog, Field, DL, Notice, Avatar } from '@/components/ui'
+import { PageHeader, Section, LoadingBlock, ErrorBlock, EmptyState, Pagination, paginate, Pill, Button, Dialog, Field, DL, Notice, Avatar } from '@/components/ui'
 import { History, Money } from '@/components/records'
 import { fmtDate, fmtThb } from '@/lib/format'
 
@@ -21,7 +21,7 @@ export function ConceptsPage() {
   const filtered = all.filter((c) => !filter || (filter === 'live' ? !['stopped', 'scaled'].includes(c.stage) : filter === 'scaled' ? c.stage === 'scaled' : c.stage === 'stopped'))
   const needs = (c: Concept) => snap.gateReviews.some((g) => g.conceptId === c.id && g.decision === 'pending' && ((actor.role === 'committee' && g.submittedAt) || (!g.submittedAt && snap.enrollments.some((e) => e.personaId === actor.id && e.teamId === c.teamId)))) ? 0 : 1
   const sorted = [...filtered].sort((a, b) => needs(a) - needs(b) || b.updatedAt.localeCompare(a.updatedAt))
-  const pg = usePagination(sorted, 10, search.page ?? 1, (p) => nav({ to: '/concepts', search: { program: filter, page: p } as never }))
+  const pg = paginate(sorted, 10, search.page ?? 1, (p) => nav({ to: '/concepts', search: { program: filter, page: p } as never }))
   const pipeline = all.filter((c) => !['stopped', 'scaled'].includes(c.stage)).reduce((a, c) => a + (c.pipelineValueThb ?? 0), 0)
   return (
     <>

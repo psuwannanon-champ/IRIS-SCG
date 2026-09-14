@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { useNavigate, useSearch } from '@tanstack/react-router'
+import { useLocation, useNavigate, useSearch } from '@tanstack/react-router'
 import { createPortal } from 'react-dom'
 import { TOUR_STEPS } from '@/features/tour/steps'
 import { useSession } from '@/app/session'
@@ -16,6 +16,7 @@ export function TourPage() {
   useEffect(() => {
     const s = TOUR_STEPS[Math.min(Math.max(step, 0), TOUR_STEPS.length - 1)]
     sessionStorage.setItem(STORAGE, String(step))
+    window.dispatchEvent(new Event('tour-change'))
     if (s.personaId) signIn(s.personaId); else signOut()
     nav({ to: s.path, replace: true })
   }, [step, nav, signIn, signOut])
@@ -29,11 +30,13 @@ export function TourOverlay() {
   const [rect, setRect] = useState<DOMRect | null>(null)
   const [listOpen, setListOpen] = useState(false)
   const cardRef = useRef<HTMLDivElement>(null)
-  useEffect(() => {
+  const loc = useLocation()
+  useLayoutEffect(() => {
     const onStorage = () => { const v = sessionStorage.getItem(STORAGE); setIdx(v == null ? null : Number(v)) }
     window.addEventListener('tour-change', onStorage)
     return () => window.removeEventListener('tour-change', onStorage)
   }, [])
+  useEffect(() => { const v = sessionStorage.getItem(STORAGE); setIdx(v == null ? null : Number(v)) }, [loc.pathname])
   const step = idx == null ? null : TOUR_STEPS[idx]
   useLayoutEffect(() => {
     if (!step) return
@@ -47,6 +50,8 @@ export function TourOverlay() {
     raf = requestAnimationFrame(loop)
     return () => { clearTimeout(t); cancelAnimationFrame(raf) }
   }, [step])
+  function go(n: number) { if (n < 0 || n >= TOUR_STEPS.length) return; setListOpen(false); sessionStorage.setItem(STORAGE, String(n)); window.dispatchEvent(new Event('tour-change')); nav({ to: '/tour', search: { step: n } }) }
+  function exit() { sessionStorage.removeItem(STORAGE); setIdx(null); window.dispatchEvent(new Event('tour-change')); nav({ to: '/login' }) }
   useEffect(() => {
     if (!step) return
     const onKey = (e: KeyboardEvent) => { if (e.key === 'ArrowRight') go(idx! + 1); if (e.key === 'ArrowLeft') go(idx! - 1); if (e.key === 'Escape') exit() }
@@ -55,8 +60,6 @@ export function TourOverlay() {
     return () => document.removeEventListener('keydown', onKey)
   })
   if (!step || idx == null) return null
-  const go = (n: number) => { if (n < 0 || n >= TOUR_STEPS.length) return; setListOpen(false); sessionStorage.setItem(STORAGE, String(n)); window.dispatchEvent(new Event('tour-change')); nav({ to: '/tour', search: { step: n } }) }
-  const exit = () => { sessionStorage.removeItem(STORAGE); setIdx(null); window.dispatchEvent(new Event('tour-change')); nav({ to: '/login' }) }
   const pad = 8
   const vw = window.innerWidth, vh = window.innerHeight
   const cardW = Math.min(420, vw - 32)

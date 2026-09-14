@@ -44,9 +44,9 @@ export function PageHeader({ title, state, description, actions, kicker }: { tit
     </header>
   )
 }
-export function Section({ title, description, children, actions, icon, className = '', id }: { title?: string; description?: ReactNode; children: ReactNode; actions?: ReactNode; icon?: string; className?: string; id?: string }) {
+export function Section({ title, description, children, actions, icon, className = '', id, tour }: { title?: string; description?: ReactNode; children: ReactNode; actions?: ReactNode; icon?: string; className?: string; id?: string; tour?: string }) {
   return (
-    <section id={id} className={`surface p-4 ${className}`}>
+    <section id={id} data-tour={tour} className={`surface p-4 ${className}`}>
       {(title || actions) && (
         <div className="mb-3 flex flex-wrap items-start justify-between gap-2">
           <div className="flex min-w-0 items-start gap-2">
@@ -120,7 +120,7 @@ export function Notice({ tone = 'info', children, icon }: { tone?: Tone; childre
 }
 
 /* ---------- Pagination (10 per page default) ---------- */
-export function usePagination<T>(items: T[], pageSize = 10, page: number, setPage: (p: number) => void) {
+export function paginate<T>(items: T[], pageSize = 10, page: number, setPage: (p: number) => void) {
   const total = items.length
   const pages = Math.max(1, Math.ceil(total / pageSize))
   const safePage = Math.min(Math.max(1, page), pages)

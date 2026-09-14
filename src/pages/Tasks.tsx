@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { useNavigate, useSearch } from '@tanstack/react-router'
 import { useActor } from '@/app/actor'
 import { selectTasks, taskNavKey } from '@/domain/selectors'
-import { PageHeader, Section, LoadingBlock, ErrorBlock, EmptyState, Pagination, usePagination, Button } from '@/components/ui'
+import { PageHeader, Section, LoadingBlock, ErrorBlock, EmptyState, Pagination, paginate, Button } from '@/components/ui'
 import { TaskRow, TaskHeader } from '@/components/records'
 
 const GROUPS: [string, string][] = [['', 'All'], ['contracts', 'Impact contracts'], ['briefs', 'Challenge briefs'], ['concepts', 'Concepts & gates'], ['ledger', 'Impact ledger'], ['journey', 'Journey'], ['learning', 'Learning plan'], ['coaching', 'Coaching']]
@@ -15,7 +15,7 @@ export function TasksPage() {
   const all = useMemo(() => (snap && actor ? selectTasks(snap, actor) : []), [snap, actor])
   const group = search.group ?? ''
   const filtered = group ? all.filter((t) => taskNavKey(t) === group) : all
-  const pg = usePagination(filtered, 10, page, (p) => { setPage(p); nav({ to: '/tasks', search: { group, page: p } as never }) })
+  const pg = paginate(filtered, 10, page, (p) => { setPage(p); nav({ to: '/tasks', search: { group, page: p } as never }) })
   if (status === 'loading') return <LoadingBlock />
   if (status === 'error' || !snap || !actor) return <ErrorBlock message={error ?? ''} onRetry={refetch} />
   const counts = Object.fromEntries(GROUPS.map(([k]) => [k, k ? all.filter((t) => taskNavKey(t) === k).length : all.length]))
