@@ -22,19 +22,20 @@ The app targets Supabase (`VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY` i
 - **Connected to Supabase** (green badge): reads and writes go to the project; writes run through role-checked Postgres functions.
 - **Local demo fixtures** (amber badge): the schema is not installed or unreachable, so the same scenario runs from `src/data/fixtures.ts` persisted in the browser. Add `?backend=local` to force this mode.
 
-### Install the schema (one time)
+### Schema status
 
-The Supabase project `bczqgxqlvgbauvtkvdnu` is not linked to the Supabase connector used during development, so the SQL was not applied automatically. Either:
+Both migrations were applied to project `bczqgxqlvgbauvtkvdnu` (IRIS-SCG) on 14 Sep 2026 and verified through the app. To re-apply or reset:
 
-1. **SQL editor:** paste and run `supabase/migrations/0001_schema.sql`, then `supabase/migrations/0002_seed.sql`.
-2. **CLI with the database password:**
-   ```bash
-   npx supabase db push --db-url "postgresql://postgres:<DB_PASSWORD>@db.bczqgxqlvgbauvtkvdnu.supabase.co:5432/postgres"
-   ```
-
-Reload the app; the badge turns green. `select public.reset_demo();` restores the demo scenario at any time (the UI has no reset button on purpose).
+- Reset the demo scenario (keeps schema): run `select public.reset_demo();` in the SQL editor.
+- Re-apply from scratch: `DB_URL="postgresql://postgres.bczqgxqlvgbauvtkvdnu:<DB_PASSWORD>@aws-0-ap-southeast-1.pooler.supabase.com:5432/postgres" npx tsx scripts/apply-sql.ts supabase/migrations/0001_schema.sql supabase/migrations/0002_seed.sql` (the direct `db.<ref>` host is IPv6-only; use the session pooler). Never commit the password.
 
 Regenerate the seed after editing fixtures: `pnpm seed:sql`.
+
+## Hosting
+
+- GitHub: https://github.com/psuwannanon-champ/IRIS-SCG (branch `main`)
+- Vercel project `iris-scg` (team psuwannanon), connected to the GitHub repo: every push to `main` deploys production. Environment variables `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` are set for production and preview.
+- `vercel.json` sets the Vite build and the SPA rewrite so direct links such as `/contracts/ic-nara` load.
 
 ## Stack
 

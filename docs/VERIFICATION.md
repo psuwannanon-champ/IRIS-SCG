@@ -44,9 +44,20 @@ Date: 14 September 2026 · Environment: local Vite dev server, macOS, Chromium (
 7. Governance BU table truncated names at 1280 and overflowed at 390. Fixed with responsive columns.
 8. `usePagination` was a plain function named like a hook and called after early returns. Renamed to `paginate`.
 
+## Supabase mode (added after schema install, 14 Sep 2026)
+
+| Test | Result |
+| --- | --- |
+| Apply `0001_schema.sql` + `0002_seed.sql` via session pooler | Pass · 22 personas, 8 contracts, 24 events |
+| Anonymous REST read of `personas` with publishable key | Pass |
+| Direct `PATCH impact_contracts` with publishable key | Blocked by RLS (0 rows changed) |
+| RPC `transition_impact_contract` with wrong actor | Rejected: "You are not the responsible person for this action." · status unchanged |
+| App header badge | "Connected to Supabase" |
+| Log week-5 evidence as Nara through the UI | Row present in `sprint_evidence`; manager notification "Nara Wongsuwan logged week 5 evidence" created by the function |
+
 ## Not verified / remaining limitations
 
-- Supabase mode was not exercised end to end against the real project: the schema could not be installed from this session. The SQL was validated in PGlite only.
+- Only the evidence-logging path was exercised against the real Supabase project; the other transitions were validated in PGlite with the same SQL.
 - No automated accessibility audit; keyboard focus trap, Escape and restoration were exercised manually on dialogs and panels only.
 - Long-title and large-count stress cases were covered by fixtures (60-character titles, THB 120M) but not exhaustively.
 - Thai UI text is limited to the AI coach demo; the typeface renders Thai tone marks correctly there.
