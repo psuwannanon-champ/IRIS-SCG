@@ -36,12 +36,15 @@ export function GovernancePage() {
       </div>
       <div className="mt-4 grid gap-4 xl:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
         <Section title="By business unit" icon="building-07" description="Validated ledger value, learners and share of enrolled critical-role holders with a verified skill.">
-          <div className="table-grid grid-cols-[minmax(0,1.6fr)_96px_72px_80px_84px] px-1 pb-1 text-[11px] font-semibold uppercase tracking-wide text-(--color-faint)"><div>BU</div><div>Validated</div><div>Learners</div><div>Graduates</div><div>Skill-ready</div></div>
+          <div className="table-grid hidden grid-cols-[minmax(0,1.6fr)_96px_72px_80px_84px] px-1 pb-1 text-[11px] font-semibold uppercase tracking-wide text-(--color-faint) md:grid"><div>BU</div><div>Validated</div><div>Learners</div><div>Graduates</div><div>Skill-ready</div></div>
           <ul className="divide-y divide-(--color-border)">
             {byBu.map((r) => (
-              <li key={r.b.id} className="table-grid grid-cols-[minmax(0,1.6fr)_96px_72px_80px_84px] px-1 py-2 text-[13px]">
-                <div className="min-w-0"><div className="truncate font-medium">{r.b.code} · {r.b.name}</div><div className="flex gap-1 pt-0.5"><Pill tone={r.b.strategyOnboarded ? 'success' : 'neutral'}>Strategy {r.b.strategyOnboarded ? 'yes' : 'no'}</Pill><Pill tone={r.b.platformOnboarded ? 'success' : 'neutral'}>Platform {r.b.platformOnboarded ? 'yes' : 'no'}</Pill></div></div>
-                <div>{fmtThb(r.ledger, true)}</div><div>{r.learners}</div><div>{r.graduates}</div><div>{r.criticalN ? `${r.readyPct}%` : '—'}</div>
+              <li key={r.b.id} className="table-grid grid-cols-1 px-1 py-2 text-[13px] md:grid-cols-[minmax(0,1.6fr)_96px_72px_80px_84px]">
+                <div className="min-w-0"><div className="truncate font-medium">{r.b.code} · {r.b.name}</div><div className="flex flex-wrap gap-1 pt-0.5"><Pill tone={r.b.strategyOnboarded ? 'success' : 'neutral'}>Strategy {r.b.strategyOnboarded ? 'yes' : 'no'}</Pill><Pill tone={r.b.platformOnboarded ? 'success' : 'neutral'}>Platform {r.b.platformOnboarded ? 'yes' : 'no'}</Pill></div></div>
+                <div><span className="text-(--color-muted) md:hidden">Validated </span>{fmtThb(r.ledger, true)}</div>
+                <div><span className="text-(--color-muted) md:hidden">Learners </span>{r.learners}</div>
+                <div><span className="text-(--color-muted) md:hidden">Graduates </span>{r.graduates}</div>
+                <div><span className="text-(--color-muted) md:hidden">Skill-ready </span>{r.criticalN ? `${r.readyPct}%` : '—'}</div>
               </li>
             ))}
           </ul>
